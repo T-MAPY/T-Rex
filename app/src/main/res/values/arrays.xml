@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="strategyListOptions">
+        <item>High accuracy (GPS)</item>
+        <item>Mid accuracy (WiFi, BTS)</item>
+        <item>Low accuracy (IP, BTS)</item>
+        <item>When available</item>
+    </string-array>
+    <string-array name="strategyListValues">
+        <item>PRIORITY_HIGH_ACCURACY</item>
+        <item>PRIORITY_BALANCED_POWER_ACCURACY</item>
+        <item>PRIORITY_LOW_POWER</item>
+        <item>PRIORITY_NO_POWER</item>
+    </string-array>
+</resources>

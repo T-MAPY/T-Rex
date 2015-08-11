@@ -1,4 +1,4 @@
-package cz.tmapy.android.t_rex;
+package cz.tmapy.android.trex;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

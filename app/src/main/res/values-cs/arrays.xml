@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="strategyListOptions">
+        <item>Vysoká přesnost (GPS)</item>
+        <item>Střední přesnost (WiFi, BTS)</item>
+        <item>Nízká přesnost (IP, BTS)</item>
+        <item>Pouze od jiných aplikací</item>
+    </string-array>
+</resources>
