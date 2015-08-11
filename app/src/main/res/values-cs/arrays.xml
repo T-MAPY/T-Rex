@@ -6,4 +6,10 @@
         <item>Nízká přesnost (IP, BTS)</item>
         <item>Pouze od jiných aplikací</item>
     </string-array>
+    <string-array name="strategyListValues">
+        <item>PRIORITY_HIGH_ACCURACY</item>
+        <item>PRIORITY_BALANCED_POWER_ACCURACY</item>
+        <item>PRIORITY_LOW_POWER</item>
+        <item>PRIORITY_NO_POWER</item>
+    </string-array>
 </resources>
