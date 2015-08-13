@@ -25,8 +25,6 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-import org.apache.http.HttpException;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
@@ -131,7 +129,7 @@ public class BackgroundLocationService extends Service implements
 
             startForeground(NOTIFICATION, mBuilder.build()); //spuštění služby s vyšší prioritou na popředí - http://developer.android.com/reference/android/app/Service.html
 
-            if (Constants.INFO) Log.i(TAG, "Localization Started");
+            if (Constants.LOG_ENHANCED) Log.i(TAG, "Localization Started");
             Toast.makeText(this, R.string.localiz_started, Toast.LENGTH_SHORT).show();
         }
 
@@ -153,7 +151,7 @@ public class BackgroundLocationService extends Service implements
         }
         // Display the connection status
         Toast.makeText(this, R.string.localiz_stopped, Toast.LENGTH_SHORT).show();
-        if (Constants.INFO) Log.i(TAG, "Localization Stopped");
+        if (Constants.LOG_ENHANCED) Log.i(TAG, "Localization Stopped");
         super.onDestroy();
     }
 
@@ -191,7 +189,7 @@ public class BackgroundLocationService extends Service implements
     @Override
     public void onConnectionSuspended(int i) {
         Toast.makeText(this, "Location Services suspended: " + i, Toast.LENGTH_LONG).show();
-        Log.e(TAG, "Location Services suspended: " + i);
+        if (Constants.LOG_BASIC) Log.e(TAG, "Location Services suspended: " + i);
     }
 
     /*
@@ -201,7 +199,7 @@ public class BackgroundLocationService extends Service implements
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Toast.makeText(this, "Connection to Location Services fails: " + connectionResult.getErrorCode(), Toast.LENGTH_LONG).show();
-        Log.e(TAG, "Connection to Location Services fails: " + connectionResult.getErrorCode());
+        if (Constants.LOG_BASIC) Log.e(TAG, "Connection to Location Services fails: " + connectionResult.getErrorCode());
     }
 
     /**
@@ -238,8 +236,7 @@ public class BackgroundLocationService extends Service implements
 
             } catch (Exception e) {
                 Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                Log.e(TAG, "Error during location parsing:", e);
-                e.printStackTrace();
+                if (Constants.LOG_BASIC) Log.e(TAG, "Error during location parsing:", e);
             }
         }
     }
@@ -264,14 +261,14 @@ public class BackgroundLocationService extends Service implements
                 mLastSendedLocation = location;
                 new NetworkTask().execute(mTargetServerURL, mDeviceIdentifier, lastUpdateTime, lat, lon, alt, speed, bearing);
 
-                if (Constants.INFO) Log.i(TAG, "Position sent to server " + lat + ", " + lon);
+                if (Constants.LOG_ENHANCED) Log.i(TAG, "Position sent to server " + lat + ", " + lon);
             } else {
                 Toast.makeText(this, "Cannot connect to server: '" + mTargetServerURL + "'", Toast.LENGTH_LONG).show();
-                Log.e(TAG, "Cannot connect to server: '" + mTargetServerURL + "'");
+                if (Constants.LOG_BASIC) Log.e(TAG, "Cannot connect to server: '" + mTargetServerURL + "'");
             }
         }   else {
                 Toast.makeText(this, "Missing target server URL", Toast.LENGTH_LONG).show();
-                Log.e(TAG, "Missing target server URL");
+                if (Constants.LOG_BASIC) Log.e(TAG, "Missing target server URL");
             }
     }
 
@@ -343,8 +340,7 @@ public class BackgroundLocationService extends Service implements
                     response = "HTTP response: " + responseCode;
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Network connection:", e);
-                e.printStackTrace();
+                if (Constants.LOG_BASIC) Log.e(TAG, "Network connection:", e);
                 response = e.getLocalizedMessage();
             }
             return response;

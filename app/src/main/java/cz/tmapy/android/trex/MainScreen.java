@@ -121,7 +121,7 @@ public class MainScreen extends ActionBarActivity {
                     if (null == service) {
                         // something really wrong here
                         Toast.makeText(this, R.string.localiz_could_not_start, Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "Could not start localization service " + comp.toString());
+                        if (Constants.LOG_BASIC) Log.e(TAG, "Could not start localization service " + comp.toString());
                         return false;
                     } else
                         return true;
@@ -133,12 +133,12 @@ public class MainScreen extends ActionBarActivity {
             } else
             {
                 Toast.makeText(this, "Set device identifier", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Device identifier is not setted");
+                if (Constants.LOG_BASIC) Log.e(TAG, "Device identifier is not setted");
             }
         } else
         {
             Toast.makeText(this, "Set target server URL", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "Target server URL is not setted");
+            if (Constants.LOG_BASIC) Log.e(TAG, "Target server URL is not setted");
         }
         return false;
     }

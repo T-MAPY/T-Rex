@@ -7,8 +7,8 @@ public final class Constants {
 
     //http://stackoverflow.com/questions/2018263/how-do-i-enable-disable-log-levels-in-android
     private static int LOGLEVEL = 3;
-    public static boolean INFO = LOGLEVEL > 1;
-    public static boolean DEBUG = LOGLEVEL > 2;
+    public static boolean LOG_BASIC = LOGLEVEL > 1;
+    public static boolean LOG_ENHANCED = LOGLEVEL > 2;
 
     // Intent extras key for determinig localization is running
     public static final String EXTRAS_LOCALIZATION_IS_RUNNING = "biz.svoboda.trex.LOCALIZATION_IS_RUNNING";
