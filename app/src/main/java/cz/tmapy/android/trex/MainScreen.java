@@ -24,6 +24,8 @@ import android.widget.ToggleButton;
 
 import java.text.SimpleDateFormat;
 
+import cz.tmapy.android.trex.exceptions.CustomExceptionHandler;
+
 public class MainScreen extends ActionBarActivity {
 
     private static final String TAG = "MainScreen";
@@ -38,6 +40,11 @@ public class MainScreen extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
+
+        if(!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
+            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(
+                    "/sdcard/t-rex/logs/", "http://trex.svobodovi.cz/uploadException.php"));
+        }
 
         final ToggleButton toggle = (ToggleButton) findViewById(R.id.toggle_start);
 
