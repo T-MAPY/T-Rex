@@ -24,6 +24,8 @@ import android.widget.ToggleButton;
 
 import java.text.SimpleDateFormat;
 
+import cz.tmapy.android.trex.update.Updater;
+
 public class MainScreen extends ActionBarActivity {
 
     private static final String TAG = "MainScreen";
@@ -65,6 +67,7 @@ public class MainScreen extends ActionBarActivity {
         // Registers the mPositionReceiver and its intent filters
         LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
 
+        new Updater(getApplicationContext()).execute();
         //ACRA.getErrorReporter().putCustomData("myKey", "myValue");
         //ACRA.getErrorReporter().handleException(new Exception("Test exception"));
     }
@@ -97,6 +100,7 @@ public class MainScreen extends ActionBarActivity {
      * Start localizing and sending
      */
     public Boolean startSending(){
+
         //Check screen on/off settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mDeviceId = sharedPref.getString("pref_id","");
@@ -143,6 +147,7 @@ public class MainScreen extends ActionBarActivity {
             Toast.makeText(this, "Set target server URL", Toast.LENGTH_SHORT).show();
             if (Constants.LOG_BASIC) Log.e(TAG, "Target server URL is not setted");
         }
+
         return false;
     }
 
