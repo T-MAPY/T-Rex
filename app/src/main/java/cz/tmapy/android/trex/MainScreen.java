@@ -22,9 +22,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import java.text.SimpleDateFormat;
+import org.acra.ACRA;
 
-import cz.tmapy.android.trex.exceptions.CustomExceptionHandler;
+import java.text.SimpleDateFormat;
 
 public class MainScreen extends ActionBarActivity {
 
@@ -40,11 +40,6 @@ public class MainScreen extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
-
-        if(!(Thread.getDefaultUncaughtExceptionHandler() instanceof CustomExceptionHandler)) {
-            Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler(
-                    "/sdcard/t-rex/logs/", "http://trex.svobodovi.cz/uploadException.php"));
-        }
 
         final ToggleButton toggle = (ToggleButton) findViewById(R.id.toggle_start);
 
@@ -71,6 +66,9 @@ public class MainScreen extends ActionBarActivity {
         NewPositionReceiver mPositionReceiver = new NewPositionReceiver();
         // Registers the mPositionReceiver and its intent filters
         LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
+
+        //ACRA.getErrorReporter().putCustomData("myKey", "myValue");
+        //ACRA.getErrorReporter().handleException(new Exception("Test exception"));
     }
 
     @Override
@@ -100,7 +98,10 @@ public class MainScreen extends ActionBarActivity {
     /**
      * Start localizing and sending
      */
-    public Boolean startSending() {
+    public Boolean startSending(){
+        ACRA.getErrorReporter().putCustomData("myKey", "myValue");
+        ACRA.getErrorReporter().handleException(new Exception("Test exception"));
+
         //Check screen on/off settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mDeviceId = sharedPref.getString("pref_id","");

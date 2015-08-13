@@ -38,4 +38,6 @@
     <string name="localiz_stopped">Localization stopped</string>
     <string name="notif_title">T-Rex localization is running</string>
     <string name="notif_text">Touch to show application</string>
+    <string name="crash_dialog_title">T-Rex unexpected error</string>
+    <string name="crash_toast_text">Please send us generated report by e-mail</string>
 </resources>

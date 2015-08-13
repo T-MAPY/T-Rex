@@ -38,4 +38,6 @@
     <string name="localiz_stopped">Lokalizace zastavena</string>
     <string name="notif_title">T-Rex lokalizace spuštěna</string>
     <string name="notif_text">Dotykem zobrazíte ovládání</string>
+    <string name="crash_toast_text">Prosím odešlete nám pomocí e-mailu vygenerovaný report.</string>
+    <string name="crash_dialog_title">Neočekávaný pád aplikace T-Rex</string>
 </resources>
