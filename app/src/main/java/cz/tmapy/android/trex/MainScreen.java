@@ -22,8 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import org.acra.ACRA;
-
 import java.text.SimpleDateFormat;
 
 public class MainScreen extends ActionBarActivity {
@@ -99,9 +97,6 @@ public class MainScreen extends ActionBarActivity {
      * Start localizing and sending
      */
     public Boolean startSending(){
-        ACRA.getErrorReporter().putCustomData("myKey", "myValue");
-        ACRA.getErrorReporter().handleException(new Exception("Test exception"));
-
         //Check screen on/off settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mDeviceId = sharedPref.getString("pref_id","");
