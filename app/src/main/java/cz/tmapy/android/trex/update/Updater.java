@@ -78,8 +78,7 @@ public class Updater extends AsyncTask<Void, Void, String> {
                 PackageInfo pInfo = mActivity.getPackageManager().getPackageInfo(mActivity.getPackageName(), 0);
                 int versionCode = pInfo.versionCode;
 
-                //if (serverVersionCode > versionCode)
-                if (true)
+                if (serverVersionCode > versionCode)
                 {
                     new AlertDialog.Builder(mActivity)
                             .setTitle(R.string.new_version_title)
