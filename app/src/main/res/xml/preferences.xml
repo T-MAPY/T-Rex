@@ -42,5 +42,10 @@
             android:title="@string/pref_keep_screen_on"
             android:summary="@string/pref_keep_screen_on_summ"
             android:defaultValue="false"/>
+        <CheckBoxPreference
+            android:key="pref_check4update"
+            android:title="@string/pref_check4update"
+            android:summary="@string/pref_check4update_summ"
+            android:defaultValue="true"/>
     </PreferenceCategory>
 </PreferenceScreen>

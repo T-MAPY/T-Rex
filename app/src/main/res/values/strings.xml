@@ -41,4 +41,6 @@
     <string name="crash_dialog_title">T-Rex unexpected error</string>
     <string name="crash_toast_text">Please send us generated report by e-mail</string>
     <string name="new_version_available">New version available! Please visit http://distrib.tmapy.cz/pub/distrib/t-rex/</string>
+    <string name="pref_check4update">Check for update</string>
+    <string name="pref_check4update_summ">Check for application update on start up</string>
 </resources>

@@ -67,7 +67,14 @@ public class MainScreen extends ActionBarActivity {
         // Registers the mPositionReceiver and its intent filters
         LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
 
-        new Updater(getApplicationContext()).execute();
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        mDeviceId = sharedPref.getString("pref_id","");
+        mTargetServerURL = sharedPref.getString("pref_targetUrl", "");
+        mKeepScreenOn = sharedPref.getBoolean("pref_screen_on", false);
+
+        if (sharedPref.getBoolean("pref_check4update", true))
+            new Updater(getApplicationContext()).execute();
+
         //ACRA.getErrorReporter().putCustomData("myKey", "myValue");
         //ACRA.getErrorReporter().handleException(new Exception("Test exception"));
     }
@@ -101,10 +108,6 @@ public class MainScreen extends ActionBarActivity {
      */
     public Boolean startSending(){
 
-        //Check screen on/off settings
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        mDeviceId = sharedPref.getString("pref_id","");
-        mTargetServerURL =sharedPref.getString("pref_targetUrl", "");
         if (!mTargetServerURL.isEmpty())
         {
             if (!mDeviceId.isEmpty())
@@ -117,7 +120,6 @@ public class MainScreen extends ActionBarActivity {
                             "TRexWakelockTag");
                     mWakeLock.acquire();
 
-                    mKeepScreenOn = sharedPref.getBoolean("pref_screen_on", false);
                     if (mKeepScreenOn)
                         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 

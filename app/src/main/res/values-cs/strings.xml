@@ -41,4 +41,6 @@
     <string name="crash_toast_text">Prosím odešlete nám pomocí e-mailu vygenerovaný report.</string>
     <string name="crash_dialog_title">Neočekávaný pád aplikace T-Rex</string>
     <string name="new_version_available">K dispozici je nová verze! Prosím navštivte http://distrib.tmapy.cz/pub/distrib/t-rex</string>
+    <string name="pref_check4update">Kontrolovat aktualizace</string>
+    <string name="pref_check4update_summ">Při startu aplikace zkontrolovat aktualizace</string>
 </resources>
