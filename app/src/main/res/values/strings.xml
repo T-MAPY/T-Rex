@@ -40,7 +40,9 @@
     <string name="notif_text">Touch to show application</string>
     <string name="crash_dialog_title">T-Rex unexpected error</string>
     <string name="crash_toast_text">Please send us generated report by e-mail</string>
-    <string name="new_version_available">New version available! Please visit http://distrib.tmapy.cz/pub/distrib/t-rex/</string>
     <string name="pref_check4update">Check for update</string>
     <string name="pref_check4update_summ">Check for application update on start up</string>
+    <string name="app_up_to_date">Your application is up-to-date</string>
+    <string name="new_version_title">New version available</string>
+    <string name="new_version_message">Do you want to open the application download pate?</string>
 </resources>

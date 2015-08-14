@@ -199,7 +199,8 @@ public class BackgroundLocationService extends Service implements
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Toast.makeText(this, "Connection to Location Services fails: " + connectionResult.getErrorCode(), Toast.LENGTH_LONG).show();
-        if (Constants.LOG_BASIC) Log.e(TAG, "Connection to Location Services fails: " + connectionResult.getErrorCode());
+        if (Constants.LOG_BASIC)
+            Log.e(TAG, "Connection to Location Services fails: " + connectionResult.getErrorCode());
     }
 
     /**
@@ -247,8 +248,7 @@ public class BackgroundLocationService extends Service implements
      * @param location
      */
     private void SendPosition(Location location) {
-        if (mTargetServerURL != null && !mTargetServerURL.isEmpty())
-        {
+        if (mTargetServerURL != null && !mTargetServerURL.isEmpty()) {
             if (isNetworkOnline()) {
 
                 String lastUpdateTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(location.getTime());//2014-06-28T15:07:59
@@ -261,15 +261,17 @@ public class BackgroundLocationService extends Service implements
                 mLastSendedLocation = location;
                 new NetworkTask().execute(mTargetServerURL, mDeviceIdentifier, lastUpdateTime, lat, lon, alt, speed, bearing);
 
-                if (Constants.LOG_ENHANCED) Log.i(TAG, "Position sent to server " + lat + ", " + lon);
+                if (Constants.LOG_ENHANCED)
+                    Log.i(TAG, "Position sent to server " + lat + ", " + lon);
             } else {
                 Toast.makeText(this, "Cannot connect to server: '" + mTargetServerURL + "'", Toast.LENGTH_LONG).show();
-                if (Constants.LOG_BASIC) Log.e(TAG, "Cannot connect to server: '" + mTargetServerURL + "'");
+                if (Constants.LOG_BASIC)
+                    Log.e(TAG, "Cannot connect to server: '" + mTargetServerURL + "'");
             }
-        }   else {
-                Toast.makeText(this, "Missing target server URL", Toast.LENGTH_LONG).show();
-                if (Constants.LOG_BASIC) Log.e(TAG, "Missing target server URL");
-            }
+        } else {
+            Toast.makeText(this, "Missing target server URL", Toast.LENGTH_LONG).show();
+            if (Constants.LOG_BASIC) Log.e(TAG, "Missing target server URL");
+        }
     }
 
     /**

@@ -68,12 +68,12 @@ public class MainScreen extends ActionBarActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        mDeviceId = sharedPref.getString("pref_id","");
+        mDeviceId = sharedPref.getString("pref_id", "");
         mTargetServerURL = sharedPref.getString("pref_targetUrl", "");
         mKeepScreenOn = sharedPref.getBoolean("pref_screen_on", false);
 
         if (sharedPref.getBoolean("pref_check4update", true))
-            new Updater(getApplicationContext()).execute();
+            new Updater(this).execute();
 
         //ACRA.getErrorReporter().putCustomData("myKey", "myValue");
         //ACRA.getErrorReporter().handleException(new Exception("Test exception"));
@@ -106,14 +106,11 @@ public class MainScreen extends ActionBarActivity {
     /**
      * Start localizing and sending
      */
-    public Boolean startSending(){
+    public Boolean startSending() {
 
-        if (!mTargetServerURL.isEmpty())
-        {
-            if (!mDeviceId.isEmpty())
-            {
-                if (!isServiceRunning(BackgroundLocationService.class))
-                {
+        if (!mTargetServerURL.isEmpty()) {
+            if (!mDeviceId.isEmpty()) {
+                if (!isServiceRunning(BackgroundLocationService.class)) {
                     //Keep CPU on
                     PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
                     mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -130,22 +127,19 @@ public class MainScreen extends ActionBarActivity {
                     if (null == service) {
                         // something really wrong here
                         Toast.makeText(this, R.string.localiz_could_not_start, Toast.LENGTH_SHORT).show();
-                        if (Constants.LOG_BASIC) Log.e(TAG, "Could not start localization service " + comp.toString());
+                        if (Constants.LOG_BASIC)
+                            Log.e(TAG, "Could not start localization service " + comp.toString());
                         return false;
                     } else
                         return true;
-                }
-                else
-                {
+                } else {
                     Toast.makeText(this, R.string.localiz_run, Toast.LENGTH_SHORT).show();
                 }
-            } else
-            {
+            } else {
                 Toast.makeText(this, "Set device identifier", Toast.LENGTH_SHORT).show();
                 if (Constants.LOG_BASIC) Log.e(TAG, "Device identifier is not setted");
             }
-        } else
-        {
+        } else {
             Toast.makeText(this, "Set target server URL", Toast.LENGTH_SHORT).show();
             if (Constants.LOG_BASIC) Log.e(TAG, "Target server URL is not setted");
         }
@@ -188,14 +182,14 @@ public class MainScreen extends ActionBarActivity {
                 mWakeLock.release();
                 mWakeLock = null;
             }
-        }
-        else
+        } else
             Toast.makeText(this, R.string.localiz_not_run, Toast.LENGTH_SHORT).show();
     }
 
     /**
      * Check service is running
      * http://stackoverflow.com/questions/600207/how-to-check-if-a-service-is-running-on-android
+     *
      * @param serviceClass
      * @return
      */
@@ -213,29 +207,29 @@ public class MainScreen extends ActionBarActivity {
      * This class uses the BroadcastReceiver framework to detect and handle new postition messages from
      * the service
      */
-    private class NewPositionReceiver extends BroadcastReceiver
-    {
+    private class NewPositionReceiver extends BroadcastReceiver {
         // prevents instantiation by other packages.
-        private NewPositionReceiver(){}
+        private NewPositionReceiver() {
+        }
 
         /**
          * This method is called by the system when a broadcast Intent is matched by this class'
          * intent filters
+         *
          * @param context
          * @param intent
          */
         @Override
         public void onReceive(Context context, Intent intent) {
-            Location location = (Location)intent.getExtras().get(Constants.EXTRAS_POSITION_DATA);
+            Location location = (Location) intent.getExtras().get(Constants.EXTRAS_POSITION_DATA);
             String serverResponse = intent.getStringExtra(Constants.EXTRAS_SERVER_RESPONSE);
             if (location != null || serverResponse != null) {
-                UpdateGUI(location,serverResponse);
+                UpdateGUI(location, serverResponse);
             }
         }
     }
 
-    private void UpdateGUI(Location location, String serverResponse)
-    {
+    private void UpdateGUI(Location location, String serverResponse) {
         if (location != null) {
             //2014-06-28T15:07:59
             String mLastUpdateTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(location.getTime());
@@ -263,8 +257,7 @@ public class MainScreen extends ActionBarActivity {
             speedBearing.setText(bearing);
         }
 
-        if (serverResponse != null)
-        {
+        if (serverResponse != null) {
             TextView httpRespText = (TextView) findViewById(R.id.text_http_response);
             httpRespText.setText(serverResponse);
         }

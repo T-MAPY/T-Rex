@@ -17,13 +17,13 @@ import org.acra.annotation.ReportsCrashes;
         resDialogText = R.string.crash_toast_text,
         resDialogIcon = android.R.drawable.ic_dialog_alert,
         customReportContent = {
-        ReportField.APP_VERSION_CODE,
-        ReportField.APP_VERSION_NAME,
-        ReportField.ANDROID_VERSION,
-        ReportField.PHONE_MODEL,
-        ReportField.CUSTOM_DATA,
-        ReportField.STACK_TRACE,
-        ReportField.LOGCAT }
+                ReportField.APP_VERSION_CODE,
+                ReportField.APP_VERSION_NAME,
+                ReportField.ANDROID_VERSION,
+                ReportField.PHONE_MODEL,
+                ReportField.CUSTOM_DATA,
+                ReportField.STACK_TRACE,
+                ReportField.LOGCAT}
 )
 public class TRexApplication extends Application {
     @Override
