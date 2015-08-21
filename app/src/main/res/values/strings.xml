@@ -44,4 +44,6 @@
     <string name="app_up_to_date">Your application is up-to-date</string>
     <string name="new_version_title">New version available</string>
     <string name="new_version_message">Do you want to open the application download pate?</string>
+    <string name="set_target_url">Set target server URL</string>
+    <string name="set_device_id">Set device identifier</string>
 </resources>

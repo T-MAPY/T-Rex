@@ -171,11 +171,11 @@ public class MainScreen extends ActionBarActivity implements SharedPreferences.O
                     Toast.makeText(this, R.string.localiz_run, Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(this, "Set device identifier", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.set_device_id, Toast.LENGTH_LONG).show();
                 if (Const.LOG_BASIC) Log.e(TAG, "Device identifier is not setted");
             }
         } else {
-            Toast.makeText(this, "Set target server URL", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.set_target_url, Toast.LENGTH_LONG).show();
             if (Const.LOG_BASIC) Log.e(TAG, "Target server URL is not setted");
         }
 
