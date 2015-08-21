@@ -63,7 +63,7 @@ public class BackgroundLocationService extends Service implements
     private String mDeviceIdentifier;
     private String mServerResponse;
     private String mListPrefs;
-    private Integer mFrequency = 30;
+    private Integer mFrequency = 20;
     private Integer mMinDistance = 100;
     private Integer mMaxInterval = 600;
 
