@@ -4,8 +4,7 @@
         <EditTextPreference android:key="pref_targetUrl"
             android:title="@string/pref_targetUrl"
             android:inputType="textUri"
-            android:summary="@string/pref_targetUrl_summ"
-            android:defaultValue="@string/pref_targetUrl_def_value"/>
+            android:summary="@string/pref_targetUrl_summ" />
     </PreferenceCategory>
     <PreferenceCategory android:key="pref_location_category" android:title="@string/pref_location_category">
         <ListPreference

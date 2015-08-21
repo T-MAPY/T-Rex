@@ -8,7 +8,6 @@
     <string name="pref_targetUrl_summ">Insert URL of target server</string>
     <string name="pref_id">Device identifier</string>
     <string name="pref_id_summ">Insert user defined identifier (max 10 chars)</string>
-    <string name="pref_targetUrl_def_value">http://trex.tmapy.cz/track.php</string>
     <string name="button_stop_sending">Stop</string>
     <string name="textview_date">Date:</string>
     <string name="textview_lat">Latitude:</string>
