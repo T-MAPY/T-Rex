@@ -36,8 +36,8 @@ public class MainScreen extends ActionBarActivity implements SharedPreferences.O
     private String mDeviceId;
     private Boolean mKeepScreenOn = false;
 
-
     //members for state saving
+    private Boolean mLocalizationIsRunning = false;
     private String mLastLocationTime;
     private String mLastLocationLat;
     private String mLastLocationLon;
@@ -46,32 +46,33 @@ public class MainScreen extends ActionBarActivity implements SharedPreferences.O
     private String mLastLocationBearing;
     private String mLastServerResponse;
 
-    private final String STATE_LAST_LOCATION_TIME = "lastLocationTime";
-    private final String STATE_LAST_LOCATION_LAT = "lastLocationLast";
-    private final String STATE_LAST_LOCATION_LON = "lastLocationLon";
-    private final String STATE_LAST_LOCATION_ALT = "lastLocationAlt";
-    private final String STATE_LAST_LOCATION_SPEED = "lastLocationSpeed";
-    private final String STATE_LAST_LOCATION_BEARING = "lastLocationBearing";
-    private final String STATE_LAST_SERVER_RESPONSE = "lastServerResponse";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
 
         final ToggleButton toggle = (ToggleButton) findViewById(R.id.toggle_start);
-
-        //sets toggle state before listener is attached
-        toggle.setChecked(getIntent().getBooleanExtra(Const.EXTRAS_LOCALIZATION_IS_RUNNING, false));
-
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    if (!startSending()) //cancel toggle switch when service' start is not successful
-                        toggle.setChecked(false);
+                if (isChecked)  {
+                    if (!mLocalizationIsRunning)
+                    {
+                        Boolean startSuccess  = startSending();
+                        if (!startSuccess) //cancel toggle switch when service' start is not successful
+                            toggle.setChecked(false);
+                    }
                 } else stopSending();
             }
         });
+
+        //get intent info from service (if any)
+        Boolean locIsRunning = getIntent().getBooleanExtra(Const.STATE_LOCALIZATION_IS_RUNNING, false);
+        //pokud bylo v předaném intentu, že lokalizace již běží
+        if (locIsRunning)
+        {
+            mLocalizationIsRunning = locIsRunning; //nastav, že lokalizace již běží
+            toggle.setChecked(true); //nastav tlačítko na True
+        }
 
         //Registrace broadcastreceiveru komunikaci se sluzbou (musi byt tady, aby fungoval i po nove inicializaci aplikace z notifikace
         // The filter's action is BROADCAST_ACTION
@@ -160,9 +161,13 @@ public class MainScreen extends ActionBarActivity implements SharedPreferences.O
                         Toast.makeText(this, R.string.localiz_could_not_start, Toast.LENGTH_SHORT).show();
                         if (Const.LOG_BASIC)
                             Log.e(TAG, "Could not start localization service " + comp.toString());
+                        mLocalizationIsRunning = false;
                         return false;
                     } else
+                    {
+                        mLocalizationIsRunning = true;
                         return true;
+                    }
                 } else {
                     Toast.makeText(this, R.string.localiz_run, Toast.LENGTH_SHORT).show();
                 }
@@ -174,7 +179,7 @@ public class MainScreen extends ActionBarActivity implements SharedPreferences.O
             Toast.makeText(this, R.string.set_target_url, Toast.LENGTH_LONG).show();
             if (Const.LOG_BASIC) Log.e(TAG, "Target server URL is not setted");
         }
-
+        mLocalizationIsRunning = false;
         return false;
     }
 
@@ -185,6 +190,7 @@ public class MainScreen extends ActionBarActivity implements SharedPreferences.O
         if (isServiceRunning(BackgroundLocationService.class)) {
             ComponentName comp = new ComponentName(getApplicationContext().getPackageName(), BackgroundLocationService.class.getName());
             getApplicationContext().stopService(new Intent().setComponent(comp));
+            mLocalizationIsRunning = false;
 
             TextView dateText = (TextView) findViewById(R.id.text_position_date);
             dateText.setText(null);
@@ -294,28 +300,30 @@ public class MainScreen extends ActionBarActivity implements SharedPreferences.O
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         // Save the user's current state
-        savedInstanceState.putString(STATE_LAST_LOCATION_TIME, mLastLocationTime);
-        savedInstanceState.putString(STATE_LAST_LOCATION_LAT, mLastLocationLat);
-        savedInstanceState.putString(STATE_LAST_LOCATION_LON, mLastLocationLon);
-        savedInstanceState.putString(STATE_LAST_LOCATION_ALT, mLastLocationAlt);
-        savedInstanceState.putString(STATE_LAST_LOCATION_SPEED, mLastLocationSpeed);
-        savedInstanceState.putString(STATE_LAST_LOCATION_BEARING, mLastLocationBearing);
-        savedInstanceState.putString(STATE_LAST_SERVER_RESPONSE, mLastServerResponse);
+        savedInstanceState.putBoolean(Const.STATE_LOCALIZATION_IS_RUNNING, mLocalizationIsRunning);
+        savedInstanceState.putString(Const.STATE_LAST_LOCATION_TIME, mLastLocationTime);
+        savedInstanceState.putString(Const.STATE_LAST_LOCATION_LAT, mLastLocationLat);
+        savedInstanceState.putString(Const.STATE_LAST_LOCATION_LON, mLastLocationLon);
+        savedInstanceState.putString(Const.STATE_LAST_LOCATION_ALT, mLastLocationAlt);
+        savedInstanceState.putString(Const.STATE_LAST_LOCATION_SPEED, mLastLocationSpeed);
+        savedInstanceState.putString(Const.STATE_LAST_LOCATION_BEARING, mLastLocationBearing);
+        savedInstanceState.putString(Const.STATE_LAST_SERVER_RESPONSE, mLastServerResponse);
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
         // Restore state members from saved instance
-        mLastLocationTime = savedInstanceState.getString(STATE_LAST_LOCATION_TIME);
-        mLastLocationLat = savedInstanceState.getString(STATE_LAST_LOCATION_LAT);
-        mLastLocationLon = savedInstanceState.getString(STATE_LAST_LOCATION_LON);
-        mLastLocationAlt = savedInstanceState.getString(STATE_LAST_LOCATION_ALT);
-        mLastLocationSpeed = savedInstanceState.getString(STATE_LAST_LOCATION_SPEED);
-        mLastLocationBearing = savedInstanceState.getString(STATE_LAST_LOCATION_BEARING);
-        mLastServerResponse = savedInstanceState.getString(STATE_LAST_SERVER_RESPONSE);
-
+        mLocalizationIsRunning = savedInstanceState.getBoolean(Const.STATE_LOCALIZATION_IS_RUNNING);
+        mLastLocationTime = savedInstanceState.getString(Const.STATE_LAST_LOCATION_TIME);
+        mLastLocationLat = savedInstanceState.getString(Const.STATE_LAST_LOCATION_LAT);
+        mLastLocationLon = savedInstanceState.getString(Const.STATE_LAST_LOCATION_LON);
+        mLastLocationAlt = savedInstanceState.getString(Const.STATE_LAST_LOCATION_ALT);
+        mLastLocationSpeed = savedInstanceState.getString(Const.STATE_LAST_LOCATION_SPEED);
+        mLastLocationBearing = savedInstanceState.getString(Const.STATE_LAST_LOCATION_BEARING);
+        mLastServerResponse = savedInstanceState.getString(Const.STATE_LAST_SERVER_RESPONSE);
         UpdateGUI();
+
+        super.onRestoreInstanceState(savedInstanceState); //restore after set mLocalizationIsRunning (because of button state)
     }
 }
 

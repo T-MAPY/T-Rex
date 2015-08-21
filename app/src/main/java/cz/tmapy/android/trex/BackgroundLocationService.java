@@ -112,7 +112,7 @@ public class BackgroundLocationService extends Service implements
 
             // Creates an explicit intent for an Activity in your app
             Intent resultIntent = new Intent(this, MainScreen.class);
-            resultIntent.putExtra(Const.EXTRAS_LOCALIZATION_IS_RUNNING, true);
+            resultIntent.putExtra(Const.STATE_LOCALIZATION_IS_RUNNING, true);
             // The stack builder object will contain an artificial back stack for the started Activity.
             // This ensures that navigating backward from the Activity leads out of
             // your application to the Home screen.
@@ -279,6 +279,7 @@ public class BackgroundLocationService extends Service implements
      */
     private void SendBroadcast() {
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
+        localIntent.putExtra(Const.STATE_LOCALIZATION_IS_RUNNING, true);
         localIntent.putExtra(Const.EXTRAS_POSITION_DATA, mLastSendedLocation);
         localIntent.putExtra(Const.EXTRAS_SERVER_RESPONSE, mServerResponse);
 
