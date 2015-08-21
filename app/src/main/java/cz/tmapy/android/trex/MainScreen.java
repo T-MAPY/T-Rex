@@ -36,6 +36,23 @@ public class MainScreen extends ActionBarActivity {
 
     private PowerManager.WakeLock mWakeLock;
 
+    //members for state saving
+    private String mLastLocationTime;
+    private String mLastLocationLat;
+    private String mLastLocationLon;
+    private String mLastLocationAlt;
+    private String mLastLocationSpeed;
+    private String mLastLocationBearing;
+    private String mLastServerResponse;
+
+    private final String STATE_LAST_LOCATION_TIME = "lastLocationTime";
+    private final String STATE_LAST_LOCATION_LAT = "lastLocationLast";
+    private final String STATE_LAST_LOCATION_LON = "lastLocationLon";
+    private final String STATE_LAST_LOCATION_ALT = "lastLocationAlt";
+    private final String STATE_LAST_LOCATION_SPEED = "lastLocationSpeed";
+    private final String STATE_LAST_LOCATION_BEARING = "lastLocationBearing";
+    private final String STATE_LAST_SERVER_RESPONSE = "lastServerResponse";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +89,8 @@ public class MainScreen extends ActionBarActivity {
         mTargetServerURL = sharedPref.getString("pref_targetUrl", "");
         mKeepScreenOn = sharedPref.getBoolean("pref_screen_on", false);
 
-        if (sharedPref.getBoolean("pref_check4update", true))
+        //if this is not orientation change (saved bundle doesn't exists) check for update
+        if (savedInstanceState == null && sharedPref.getBoolean("pref_check4update", true))
             new Updater(this).execute();
 
         //ACRA.getErrorReporter().putCustomData("myKey", "myValue");
@@ -221,46 +239,70 @@ public class MainScreen extends ActionBarActivity {
          */
         @Override
         public void onReceive(Context context, Intent intent) {
-            Location location = (Location) intent.getExtras().get(Constants.EXTRAS_POSITION_DATA);
-            String serverResponse = intent.getStringExtra(Constants.EXTRAS_SERVER_RESPONSE);
-            if (location != null || serverResponse != null) {
-                UpdateGUI(location, serverResponse);
+            Location lastLocation = (Location) intent.getExtras().get(Constants.EXTRAS_POSITION_DATA);
+            mLastServerResponse = intent.getStringExtra(Constants.EXTRAS_SERVER_RESPONSE);
+            if (lastLocation != null || mLastServerResponse != null) {
+                //2014-06-28T15:07:59
+                mLastLocationTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(lastLocation.getTime());
+                mLastLocationLat = Double.toString(lastLocation.getLatitude());
+                mLastLocationLon = Double.toString(lastLocation.getLongitude());
+                mLastLocationAlt = String.valueOf(lastLocation.getAltitude());
+                mLastLocationSpeed = String.valueOf(lastLocation.getSpeed());
+                mLastLocationBearing = String.valueOf(lastLocation.getBearing());
+                UpdateGUI();
             }
         }
     }
 
-    private void UpdateGUI(Location location, String serverResponse) {
-        if (location != null) {
-            //2014-06-28T15:07:59
-            String mLastUpdateTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(location.getTime());
-            String lat = Double.toString(location.getLatitude());
-            String lon = Double.toString(location.getLongitude());
-            String alt = String.valueOf(location.getAltitude());
-            String speed = String.valueOf(location.getSpeed());
-            String bearing = String.valueOf(location.getBearing());
-            TextView dateText = (TextView) findViewById(R.id.text_position_date);
-            dateText.setText(mLastUpdateTime);
+    private void UpdateGUI() {
+        TextView dateText = (TextView) findViewById(R.id.text_position_date);
+        dateText.setText(mLastLocationTime);
 
-            TextView latText = (TextView) findViewById(R.id.text_position_lat);
-            latText.setText(lat);
+        TextView latText = (TextView) findViewById(R.id.text_position_lat);
+        latText.setText(mLastLocationLat);
 
-            TextView lonText = (TextView) findViewById(R.id.text_position_lon);
-            lonText.setText(lon);
+        TextView lonText = (TextView) findViewById(R.id.text_position_lon);
+        lonText.setText(mLastLocationLon);
 
-            TextView altText = (TextView) findViewById(R.id.text_position_alt);
-            altText.setText(alt);
+        TextView altText = (TextView) findViewById(R.id.text_position_alt);
+        altText.setText(mLastLocationAlt);
 
-            TextView speedText = (TextView) findViewById(R.id.text_position_speed);
-            speedText.setText(speed);
+        TextView speedText = (TextView) findViewById(R.id.text_position_speed);
+        speedText.setText(mLastLocationSpeed);
 
-            TextView speedBearing = (TextView) findViewById(R.id.text_position_bearing);
-            speedBearing.setText(bearing);
-        }
+        TextView speedBearing = (TextView) findViewById(R.id.text_position_bearing);
+        speedBearing.setText(mLastLocationBearing);
 
-        if (serverResponse != null) {
-            TextView httpRespText = (TextView) findViewById(R.id.text_http_response);
-            httpRespText.setText(serverResponse);
-        }
+        TextView httpRespText = (TextView) findViewById(R.id.text_http_response);
+        httpRespText.setText(mLastServerResponse);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        // Save the user's current state
+        savedInstanceState.putString(STATE_LAST_LOCATION_TIME, mLastLocationTime);
+        savedInstanceState.putString(STATE_LAST_LOCATION_LAT, mLastLocationLat);
+        savedInstanceState.putString(STATE_LAST_LOCATION_LON, mLastLocationLon);
+        savedInstanceState.putString(STATE_LAST_LOCATION_ALT, mLastLocationAlt);
+        savedInstanceState.putString(STATE_LAST_LOCATION_SPEED, mLastLocationSpeed);
+        savedInstanceState.putString(STATE_LAST_LOCATION_BEARING, mLastLocationBearing);
+        savedInstanceState.putString(STATE_LAST_SERVER_RESPONSE, mLastServerResponse);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // Restore state members from saved instance
+        mLastLocationTime = savedInstanceState.getString(STATE_LAST_LOCATION_TIME);
+        mLastLocationLat = savedInstanceState.getString(STATE_LAST_LOCATION_LAT);
+        mLastLocationLon = savedInstanceState.getString(STATE_LAST_LOCATION_LON);
+        mLastLocationAlt = savedInstanceState.getString(STATE_LAST_LOCATION_ALT);
+        mLastLocationSpeed = savedInstanceState.getString(STATE_LAST_LOCATION_SPEED);
+        mLastLocationBearing = savedInstanceState.getString(STATE_LAST_LOCATION_BEARING);
+        mLastServerResponse = savedInstanceState.getString(STATE_LAST_SERVER_RESPONSE);
+
+        UpdateGUI();
     }
 }
 
