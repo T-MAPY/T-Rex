@@ -26,15 +26,16 @@ import java.text.SimpleDateFormat;
 
 import cz.tmapy.android.trex.update.Updater;
 
-public class MainScreen extends ActionBarActivity {
+public class MainScreen extends ActionBarActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "MainScreen";
+
+    private PowerManager.WakeLock mWakeLock;
 
     private String mTargetServerURL;
     private String mDeviceId;
     private Boolean mKeepScreenOn = false;
 
-    private PowerManager.WakeLock mWakeLock;
 
     //members for state saving
     private String mLastLocationTime;
@@ -61,7 +62,7 @@ public class MainScreen extends ActionBarActivity {
         final ToggleButton toggle = (ToggleButton) findViewById(R.id.toggle_start);
 
         //sets toggle state before listener is attached
-        toggle.setChecked(getIntent().getBooleanExtra(Constants.EXTRAS_LOCALIZATION_IS_RUNNING, false));
+        toggle.setChecked(getIntent().getBooleanExtra(Const.EXTRAS_LOCALIZATION_IS_RUNNING, false));
 
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -78,16 +79,17 @@ public class MainScreen extends ActionBarActivity {
 
         //Registrace broadcastreceiveru komunikaci se sluzbou (musi byt tady, aby fungoval i po nove inicializaci aplikace z notifikace
         // The filter's action is BROADCAST_ACTION
-        IntentFilter mIntentFilter = new IntentFilter(Constants.LOCATION_BROADCAST);
+        IntentFilter mIntentFilter = new IntentFilter(Const.LOCATION_BROADCAST);
         // Instantiates a new mPositionReceiver
         NewPositionReceiver mPositionReceiver = new NewPositionReceiver();
         // Registers the mPositionReceiver and its intent filters
         LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        mDeviceId = sharedPref.getString("pref_id", "");
-        mTargetServerURL = sharedPref.getString("pref_targetUrl", "");
-        mKeepScreenOn = sharedPref.getBoolean("pref_screen_on", false);
+        sharedPref.registerOnSharedPreferenceChangeListener(this); //to get pref changes to onSharePreferenceChanged
+        mDeviceId = sharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
+        mTargetServerURL = sharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
+        mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
 
         //if this is not orientation change (saved bundle doesn't exists) check for update
         if (savedInstanceState == null && sharedPref.getBoolean("pref_check4update", true))
@@ -95,6 +97,21 @@ public class MainScreen extends ActionBarActivity {
 
         //ACRA.getErrorReporter().putCustomData("myKey", "myValue");
         //ACRA.getErrorReporter().handleException(new Exception("Test exception"));
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+        switch (key){
+            case Const.PREF_KEY_DEVICE_ID:
+                mDeviceId = prefs.getString(key, "");
+                break;
+            case Const.PREF_KEY_TARGET_SERVUER_URL:
+                mTargetServerURL = prefs.getString(key,"");
+                break;
+            case Const.PREF_KEY_KEEP_SCREEN_ON:
+                mKeepScreenOn = prefs.getBoolean(key, false);
+                break;
+        }
     }
 
     @Override
@@ -145,7 +162,7 @@ public class MainScreen extends ActionBarActivity {
                     if (null == service) {
                         // something really wrong here
                         Toast.makeText(this, R.string.localiz_could_not_start, Toast.LENGTH_SHORT).show();
-                        if (Constants.LOG_BASIC)
+                        if (Const.LOG_BASIC)
                             Log.e(TAG, "Could not start localization service " + comp.toString());
                         return false;
                     } else
@@ -155,11 +172,11 @@ public class MainScreen extends ActionBarActivity {
                 }
             } else {
                 Toast.makeText(this, "Set device identifier", Toast.LENGTH_SHORT).show();
-                if (Constants.LOG_BASIC) Log.e(TAG, "Device identifier is not setted");
+                if (Const.LOG_BASIC) Log.e(TAG, "Device identifier is not setted");
             }
         } else {
             Toast.makeText(this, "Set target server URL", Toast.LENGTH_SHORT).show();
-            if (Constants.LOG_BASIC) Log.e(TAG, "Target server URL is not setted");
+            if (Const.LOG_BASIC) Log.e(TAG, "Target server URL is not setted");
         }
 
         return false;
@@ -239,16 +256,16 @@ public class MainScreen extends ActionBarActivity {
          */
         @Override
         public void onReceive(Context context, Intent intent) {
-            Location lastLocation = (Location) intent.getExtras().get(Constants.EXTRAS_POSITION_DATA);
-            mLastServerResponse = intent.getStringExtra(Constants.EXTRAS_SERVER_RESPONSE);
-            if (lastLocation != null || mLastServerResponse != null) {
+            Location newLocation = (Location) intent.getExtras().get(Const.EXTRAS_POSITION_DATA);
+            mLastServerResponse = intent.getStringExtra(Const.EXTRAS_SERVER_RESPONSE);
+            if (newLocation != null || mLastServerResponse != null) {
                 //2014-06-28T15:07:59
-                mLastLocationTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(lastLocation.getTime());
-                mLastLocationLat = Double.toString(lastLocation.getLatitude());
-                mLastLocationLon = Double.toString(lastLocation.getLongitude());
-                mLastLocationAlt = String.valueOf(lastLocation.getAltitude());
-                mLastLocationSpeed = String.valueOf(lastLocation.getSpeed());
-                mLastLocationBearing = String.valueOf(lastLocation.getBearing());
+                mLastLocationTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(newLocation.getTime());
+                mLastLocationLat = Double.toString(newLocation.getLatitude());
+                mLastLocationLon = Double.toString(newLocation.getLongitude());
+                mLastLocationAlt = String.valueOf(newLocation.getAltitude());
+                mLastLocationSpeed = String.valueOf(newLocation.getSpeed());
+                mLastLocationBearing = String.valueOf(newLocation.getBearing());
                 UpdateGUI();
             }
         }

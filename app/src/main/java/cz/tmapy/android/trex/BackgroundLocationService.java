@@ -83,12 +83,12 @@ public class BackgroundLocationService extends Service implements
         super.onCreate();
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        mTargetServerURL = sharedPref.getString("pref_targetUrl", "http://trex.tmapy.cz/track.php");
-        mDeviceIdentifier = sharedPref.getString("pref_id", "default");
-        mListPrefs = sharedPref.getString("pref_strategy", "PRIORITY_BALANCED_POWER_ACCURACY");
-        mFrequency = Integer.valueOf(sharedPref.getString("pref_frequency", String.valueOf(mFrequency)));
-        mMinDistance = Integer.valueOf(sharedPref.getString("pref_min_dist", String.valueOf(mMinDistance)));
-        mMaxInterval = Integer.valueOf(sharedPref.getString("pref_max_time", String.valueOf(mMaxInterval)));
+        mTargetServerURL = sharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
+        mDeviceIdentifier = sharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
+        mListPrefs = sharedPref.getString(Const.PREF_STRATEGY, "PRIORITY_HIGH_ACCURACY");
+        mFrequency = Integer.valueOf(sharedPref.getString(Const.PREF_FREQUENCY, String.valueOf(mFrequency)));
+        mMinDistance = Integer.valueOf(sharedPref.getString(Const.PREF_MIN_DIST, String.valueOf(mMinDistance)));
+        mMaxInterval = Integer.valueOf(sharedPref.getString(Const.PREF_MAX_TIME, String.valueOf(mMaxInterval)));
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -112,7 +112,7 @@ public class BackgroundLocationService extends Service implements
 
             // Creates an explicit intent for an Activity in your app
             Intent resultIntent = new Intent(this, MainScreen.class);
-            resultIntent.putExtra(Constants.EXTRAS_LOCALIZATION_IS_RUNNING, true);
+            resultIntent.putExtra(Const.EXTRAS_LOCALIZATION_IS_RUNNING, true);
             // The stack builder object will contain an artificial back stack for the started Activity.
             // This ensures that navigating backward from the Activity leads out of
             // your application to the Home screen.
@@ -129,7 +129,7 @@ public class BackgroundLocationService extends Service implements
 
             startForeground(NOTIFICATION, mBuilder.build()); //spuštění služby s vyšší prioritou na popředí - http://developer.android.com/reference/android/app/Service.html
 
-            if (Constants.LOG_ENHANCED) Log.i(TAG, "Localization Started");
+            if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Started");
             Toast.makeText(this, R.string.localiz_started, Toast.LENGTH_SHORT).show();
         }
 
@@ -151,7 +151,7 @@ public class BackgroundLocationService extends Service implements
         }
         // Display the connection status
         Toast.makeText(this, R.string.localiz_stopped, Toast.LENGTH_SHORT).show();
-        if (Constants.LOG_ENHANCED) Log.i(TAG, "Localization Stopped");
+        if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Stopped");
         super.onDestroy();
     }
 
@@ -189,7 +189,7 @@ public class BackgroundLocationService extends Service implements
     @Override
     public void onConnectionSuspended(int i) {
         Toast.makeText(this, "Location Services suspended: " + i, Toast.LENGTH_LONG).show();
-        if (Constants.LOG_BASIC) Log.e(TAG, "Location Services suspended: " + i);
+        if (Const.LOG_BASIC) Log.e(TAG, "Location Services suspended: " + i);
     }
 
     /*
@@ -198,8 +198,8 @@ public class BackgroundLocationService extends Service implements
      */
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Toast.makeText(this, "Connection to Location Services fails: " + connectionResult.getErrorCode(), Toast.LENGTH_LONG).show();
-        if (Constants.LOG_BASIC)
+        Toast.makeText(this, "Location Services fails", Toast.LENGTH_LONG).show();
+        if (Const.LOG_BASIC)
             Log.e(TAG, "Connection to Location Services fails: " + connectionResult.getErrorCode());
     }
 
@@ -237,7 +237,7 @@ public class BackgroundLocationService extends Service implements
 
             } catch (Exception e) {
                 Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                if (Constants.LOG_BASIC) Log.e(TAG, "Error during location parsing:", e);
+                if (Const.LOG_BASIC) Log.e(TAG, "Error during location parsing:", e);
             }
         }
     }
@@ -261,16 +261,16 @@ public class BackgroundLocationService extends Service implements
                 mLastSendedLocation = location;
                 new NetworkTask().execute(mTargetServerURL, mDeviceIdentifier, lastUpdateTime, lat, lon, alt, speed, bearing);
 
-                if (Constants.LOG_ENHANCED)
+                if (Const.LOG_ENHANCED)
                     Log.i(TAG, "Position sent to server " + lat + ", " + lon);
             } else {
                 Toast.makeText(this, "Cannot connect to server: '" + mTargetServerURL + "'", Toast.LENGTH_LONG).show();
-                if (Constants.LOG_BASIC)
+                if (Const.LOG_BASIC)
                     Log.e(TAG, "Cannot connect to server: '" + mTargetServerURL + "'");
             }
         } else {
             Toast.makeText(this, "Missing target server URL", Toast.LENGTH_LONG).show();
-            if (Constants.LOG_BASIC) Log.e(TAG, "Missing target server URL");
+            if (Const.LOG_BASIC) Log.e(TAG, "Missing target server URL");
         }
     }
 
@@ -278,9 +278,9 @@ public class BackgroundLocationService extends Service implements
      * Broadcasts the Intent to receivers in this app.
      */
     private void SendBroadcast() {
-        Intent localIntent = new Intent(Constants.LOCATION_BROADCAST);
-        localIntent.putExtra(Constants.EXTRAS_POSITION_DATA, mLastSendedLocation);
-        localIntent.putExtra(Constants.EXTRAS_SERVER_RESPONSE, mServerResponse);
+        Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
+        localIntent.putExtra(Const.EXTRAS_POSITION_DATA, mLastSendedLocation);
+        localIntent.putExtra(Const.EXTRAS_SERVER_RESPONSE, mServerResponse);
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }
@@ -342,7 +342,7 @@ public class BackgroundLocationService extends Service implements
                     response = "HTTP response: " + responseCode;
                 }
             } catch (Exception e) {
-                if (Constants.LOG_BASIC) Log.e(TAG, "Network connection:", e);
+                if (Const.LOG_BASIC) Log.e(TAG, "Network connection:", e);
                 response = e.getLocalizedMessage();
             }
             return response;

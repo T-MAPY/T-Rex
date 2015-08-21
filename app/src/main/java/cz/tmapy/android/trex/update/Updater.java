@@ -2,7 +2,6 @@ package cz.tmapy.android.trex.update;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -21,7 +20,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import cz.tmapy.android.trex.Constants;
+import cz.tmapy.android.trex.Const;
 import cz.tmapy.android.trex.R;
 
 /**
@@ -62,7 +61,7 @@ public class Updater extends AsyncTask<Void, Void, String> {
             return sBuilder.toString();
 
         } catch (Exception e) {
-            if (Constants.LOG_BASIC) Log.e(TAG, "Check for update error!", e);
+            if (Const.LOG_BASIC) Log.e(TAG, "Check for update error!", e);
         }
         return null;
     }
@@ -95,7 +94,7 @@ public class Updater extends AsyncTask<Void, Void, String> {
 
             } catch (JSONException | PackageManager.NameNotFoundException e) {
                 Toast.makeText(mActivity, "Check application version error!", Toast.LENGTH_LONG).show();
-                if (Constants.LOG_BASIC) Log.e(TAG, "Check application version error ", e);
+                if (Const.LOG_BASIC) Log.e(TAG, "Check application version error ", e);
             }
         } else {
             Toast.makeText(mActivity, "Cannot check new version!", Toast.LENGTH_LONG).show();
