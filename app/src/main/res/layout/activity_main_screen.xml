@@ -7,8 +7,8 @@
 
     <ToggleButton
         android:id="@+id/toggle_start"
-        android:textOn="Stop"
-        android:textOff="Start"
+        android:textOn="@string/button_stop_sending"
+        android:textOff="@string/button_start_sending"
         android:textSize="30sp"
         android:textStyle="bold"
         android:layout_height="60dp"

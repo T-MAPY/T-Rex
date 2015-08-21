@@ -68,12 +68,8 @@ public class MainScreen extends ActionBarActivity implements SharedPreferences.O
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     if (!startSending()) //cancel toggle switch when service' start is not successful
-                    {
                         toggle.setChecked(false);
-                    }
-                } else {
-                    stopSending();
-                }
+                } else stopSending();
             }
         });
 
@@ -101,12 +97,12 @@ public class MainScreen extends ActionBarActivity implements SharedPreferences.O
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-        switch (key){
+        switch (key) {
             case Const.PREF_KEY_DEVICE_ID:
                 mDeviceId = prefs.getString(key, "");
                 break;
             case Const.PREF_KEY_TARGET_SERVUER_URL:
-                mTargetServerURL = prefs.getString(key,"");
+                mTargetServerURL = prefs.getString(key, "");
                 break;
             case Const.PREF_KEY_KEEP_SCREEN_ON:
                 mKeepScreenOn = prefs.getBoolean(key, false);
