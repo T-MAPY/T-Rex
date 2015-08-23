@@ -1,10 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:key="pref_target_category" android:title="@string/pref_target_category">
+    <PreferenceCategory android:key="pref_basic_category"
+        android:title="@string/pref_basic_category">
         <EditTextPreference android:key="pref_targetUrl"
             android:title="@string/pref_targetUrl"
             android:inputType="textUri"
             android:summary="@string/pref_targetUrl_summ" />
+        <EditTextPreference android:key="pref_id"
+            android:title="@string/pref_id"
+            android:inputType="text"
+            android:summary="@string/pref_id_summ"/>
     </PreferenceCategory>
     <PreferenceCategory android:key="pref_location_category" android:title="@string/pref_location_category">
         <ListPreference
@@ -32,10 +37,6 @@
             android:summary="@string/pref_max_interval_sum"/>
     </PreferenceCategory>
     <PreferenceCategory android:key="pref_device_category" android:title="@string/pref_device">
-        <EditTextPreference android:key="pref_id"
-            android:title="@string/pref_id"
-            android:inputType="text"
-            android:summary="@string/pref_id_summ"/>
         <CheckBoxPreference
             android:key="pref_screen_on"
             android:title="@string/pref_keep_screen_on"

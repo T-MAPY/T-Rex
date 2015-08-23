@@ -4,11 +4,11 @@
     <string name="button_start_sending">Spustit</string>
     <string name="button_stop_sending">Zastavit</string>
     <string name="insert_target_url">Vložte URL</string>
-    <string name="pref_target_category">Cílový server pro zasílání pozic</string>
-    <string name="pref_targetUrl">URL adresa</string>
+    <string name="pref_basic_category">Základní nastavení</string>
+    <string name="pref_targetUrl">Server pro zasílání pozic</string>
     <string name="pref_targetUrl_summ">Vložte URL adresu serveru pro zasílání pozic</string>
     <string name="pref_id">Identifikátor zařízení</string>
-    <string name="pref_id_summ">Vložte uživatelský identifikátor (max 10 znaků)</string>
+    <string name="pref_id_summ">Vložte uživatelský identifikátor zařízení (max 10 znaků)</string>
     <string name="textview_date">Datum:</string>
     <string name="textview_lat">Zem. šířka:</string>
     <string name="textview_lon">Zem. délka:</string>
@@ -44,6 +44,6 @@
     <string name="app_up_to_date">Vaše aplikace je aktuální</string>
     <string name="new_version_title">K dispozici je nová verze</string>
     <string name="new_version_message">Chcete otevřít stránku s instalačním souborem?</string>
-    <string name="set_target_url">V nabídce Nastavení prosím neprve zadejte URL adresu cílového serveru</string>
+    <string name="set_target_url">V nabídce Nastavení prosím neprve zadejte URL adresu serveru pro zasílání pozic</string>
     <string name="set_device_id">V nabídce Nastavení ještě prosím zadejte identifikátor zařízení</string>
 </resources>

@@ -3,8 +3,8 @@
     <string name="action_settings">Settings</string>
     <string name="button_start_sending">Start</string>
     <string name="insert_target_url">Insert target URL</string>
-    <string name="pref_target_category">Target server</string>
-    <string name="pref_targetUrl">Server URL</string>
+    <string name="pref_basic_category">Basic settings</string>
+    <string name="pref_targetUrl">Target server</string>
     <string name="pref_targetUrl_summ">Insert URL of target server</string>
     <string name="pref_id">Device identifier</string>
     <string name="pref_id_summ">Insert user defined identifier (max 10 chars)</string>
