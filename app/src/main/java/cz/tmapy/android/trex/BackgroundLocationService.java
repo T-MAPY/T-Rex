@@ -64,8 +64,8 @@ public class BackgroundLocationService extends Service implements
     private String mServerResponse;
     private String mListPrefs;
     private Integer mFrequency = 20;
-    private Integer mMinDistance = 100;
-    private Integer mMaxInterval = 600;
+    private Integer mMinDistance = 60;
+    private Integer mMaxInterval = 120;
 
     public class LocalBinder extends Binder {
         public BackgroundLocationService getServerInstance() {

@@ -21,18 +21,18 @@
             android:title="@string/pref_strategy" />
         <EditTextPreference
             android:inputType="number"
-            android:defaultValue="30"
+            android:defaultValue="20"
             android:key="pref_frequency"
             android:title="@string/pref_frequency"
             android:summary="@string/pref_frequency_summ"/>
         <EditTextPreference android:key="pref_min_dist"
             android:inputType="number"
-            android:defaultValue="100"
+            android:defaultValue="60"
             android:title="@string/pref_min_dist"
             android:summary="@string/pref_min_dist_summ"/>
         <EditTextPreference android:key="pref_max_time"
             android:inputType="number"
-            android:defaultValue="10"
+            android:defaultValue="120"
             android:title="@string/pref_max_interval"
             android:summary="@string/pref_max_interval_sum"/>
     </PreferenceCategory>
