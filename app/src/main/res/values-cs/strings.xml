@@ -46,4 +46,7 @@
     <string name="new_version_message">Chcete otevřít stránku s instalačním souborem?</string>
     <string name="set_target_url">V nabídce Nastavení prosím neprve zadejte URL adresu serveru pro zasílání pozic</string>
     <string name="set_device_id">V nabídce Nastavení ještě prosím zadejte identifikátor zařízení</string>
+    <string name="drawer_title">Hlavní nabídka</string>
+    <string name="drawer_open">Otevřít hlavní nabídku</string>
+    <string name="drawer_close">Zavřít hlavní nabídku</string>
 </resources>

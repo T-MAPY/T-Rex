@@ -46,4 +46,7 @@
     <string name="new_version_message">Do you want to open the application download pate?</string>
     <string name="set_target_url">Set target server URL</string>
     <string name="set_device_id">Set device identifier</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="drawer_title">Main menu</string>
 </resources>
