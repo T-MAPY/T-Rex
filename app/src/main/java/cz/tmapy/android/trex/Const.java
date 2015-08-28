@@ -10,6 +10,10 @@ public final class Const {
     public static boolean LOG_BASIC = LOGLEVEL > 1;
     public static boolean LOG_ENHANCED = LOGLEVEL > 2;
 
+    public static final String CHECK_FOR_NEW_VER_URL = "http://distrib.tmapy.cz/pub/distrib/t-rex/version.json";
+    public static final String UPDATE_SITE_URL = "http://distrib.tmapy.cz/pub/distrib/t-rex/";
+    public static final String HELP_SITE_URL = "https://github.com/T-MAPY/T-Rex/wiki";
+
     //Preferences keys
     public static final String PREF_KEY_DEVICE_ID = "pref_id";
     public static final String PREF_KEY_TARGET_SERVUER_URL = "pref_targetUrl";

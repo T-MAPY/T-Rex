@@ -1,6 +1,5 @@
 package cz.tmapy.android.trex.update;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,9 +29,6 @@ import cz.tmapy.android.trex.R;
 public class Updater extends AsyncTask<Void, Void, String> {
     private static final String TAG = "Updater";
 
-    private static String checkForUpdateUrl = "http://distrib.tmapy.cz/pub/distrib/t-rex/version.json";
-    private static String updateSiteUrl = "http://distrib.tmapy.cz/pub/distrib/t-rex/";
-
     Context mContext;
 
     public Updater(Context context) {
@@ -42,7 +38,7 @@ public class Updater extends AsyncTask<Void, Void, String> {
     @Override
     protected String doInBackground(Void... params) {
         try {
-            URL url = new URL(checkForUpdateUrl);
+            URL url = new URL(Const.CHECK_FOR_NEW_VER_URL);
             HttpURLConnection c = (HttpURLConnection) url.openConnection();
             c.setRequestMethod("GET");
             c.setDoOutput(true);
@@ -86,7 +82,7 @@ public class Updater extends AsyncTask<Void, Void, String> {
                             .setIcon(android.R.drawable.ic_dialog_info)
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
-                                    mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(updateSiteUrl)));
+                                    mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Const.UPDATE_SITE_URL)));
                                 }})
                             .setNegativeButton(android.R.string.no, null).show();
                 }

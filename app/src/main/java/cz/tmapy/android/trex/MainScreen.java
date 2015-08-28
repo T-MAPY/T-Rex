@@ -1,6 +1,5 @@
 package cz.tmapy.android.trex;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -10,16 +9,15 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -135,11 +133,14 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                         Intent intent = new Intent(getApplicationContext(), Settings.class);
                         startActivity(intent);
                         break;
+                    case 1:
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Const.HELP_SITE_URL)));
+                        break;
                     case 2:
                         new Updater(getApplicationContext()).execute();
                         break;
                     default:
-                        Toast.makeText(MainScreen.this, "I'm sorry - not implemented yet!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainScreen.this, "I'm sorry - not implemented!", Toast.LENGTH_SHORT).show();
                         break;
                 }
                 //and close the drawer

@@ -15,7 +15,7 @@
     <string-array name="drawer_menu">
         <item>Nastavení</item>
         <item>Nápověda</item>
-        <item>Kontrola aktualizace</item>
+        <item>Aktualizace</item>
         <item>O aplikaci</item>
     </string-array>
 </resources>
