@@ -2,6 +2,7 @@ package cz.tmapy.android.trex.update;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -32,10 +33,10 @@ public class Updater extends AsyncTask<Void, Void, String> {
     private static String checkForUpdateUrl = "http://distrib.tmapy.cz/pub/distrib/t-rex/version.json";
     private static String updateSiteUrl = "http://distrib.tmapy.cz/pub/distrib/t-rex/";
 
-    Activity mActivity;
+    Context mContext;
 
-    public Updater(Activity activity) {
-        mActivity = activity;
+    public Updater(Context context) {
+        mContext = context;
     }
 
     @Override
@@ -74,30 +75,30 @@ public class Updater extends AsyncTask<Void, Void, String> {
                 JSONObject jObject = new JSONObject(versionJson);
                 serverVersionCode = jObject.getInt("versionCode");
 
-                PackageInfo pInfo = mActivity.getPackageManager().getPackageInfo(mActivity.getPackageName(), 0);
+                PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
                 int versionCode = pInfo.versionCode;
 
                 if (serverVersionCode > versionCode)
                 {
-                    new AlertDialog.Builder(mActivity)
+                    new AlertDialog.Builder(mContext)
                             .setTitle(R.string.new_version_title)
                             .setMessage(R.string.new_version_message)
                             .setIcon(android.R.drawable.ic_dialog_info)
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
-                                    mActivity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(updateSiteUrl)));
+                                    mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(updateSiteUrl)));
                                 }})
                             .setNegativeButton(android.R.string.no, null).show();
                 }
                 else
-                    Toast.makeText(mActivity, R.string.app_up_to_date, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, R.string.app_up_to_date, Toast.LENGTH_SHORT).show();
 
             } catch (JSONException | PackageManager.NameNotFoundException e) {
-                Toast.makeText(mActivity, "Check application version error!", Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext, "Check application version error!", Toast.LENGTH_LONG).show();
                 if (Const.LOG_BASIC) Log.e(TAG, "Check application version error ", e);
             }
         } else {
-            Toast.makeText(mActivity, "Cannot check new version!", Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, "Cannot check new version!", Toast.LENGTH_LONG).show();
         }
     }
 }

@@ -1,5 +1,6 @@
 package cz.tmapy.android.trex;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -16,6 +17,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,7 +35,7 @@ import java.text.SimpleDateFormat;
 
 import cz.tmapy.android.trex.update.Updater;
 
-public class MainScreen extends ActionBarActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainScreen extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "MainScreen";
 
@@ -122,6 +124,7 @@ public class MainScreen extends ActionBarActivity implements SharedPreferences.O
     private void addDrawerItems() {
         mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.drawer_menu));
         mDrawerList.setAdapter(mAdapter);
+
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -131,6 +134,9 @@ public class MainScreen extends ActionBarActivity implements SharedPreferences.O
                     case 0:
                         Intent intent = new Intent(getApplicationContext(), Settings.class);
                         startActivity(intent);
+                        break;
+                    case 2:
+                        new Updater(getApplicationContext()).execute();
                         break;
                     default:
                         Toast.makeText(MainScreen.this, "I'm sorry - not implemented yet!", Toast.LENGTH_SHORT).show();
