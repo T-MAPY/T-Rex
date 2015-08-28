@@ -120,14 +120,24 @@ public class MainScreen extends ActionBarActivity implements SharedPreferences.O
     }
 
     private void addDrawerItems() {
-        String[] osArray = { "Settings", "Help", "Check for update", "About" };
-        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
+        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.drawer_menu));
         mDrawerList.setAdapter(mAdapter);
-
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainScreen.this, "I'm sorry - not implemented yet!", Toast.LENGTH_SHORT).show();
+                // Highlight the selected item
+                mDrawerList.setItemChecked(position, true);
+                switch (position){
+                    case 0:
+                        Intent intent = new Intent(getApplicationContext(), Settings.class);
+                        startActivity(intent);
+                        break;
+                    default:
+                        Toast.makeText(MainScreen.this, "I'm sorry - not implemented yet!", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+                //and close the drawer
+                mDrawerLayout.closeDrawer(mDrawerList);
             }
         });
     }
@@ -171,38 +181,24 @@ public class MainScreen extends ActionBarActivity implements SharedPreferences.O
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main_screen, menu);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        // Activate the navigation drawer toggle
+        // Pass the event to ActionBarDrawerToggle, if it returns
+        // true, then it has handled the app icon touch event
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Intent intent = new Intent(this, Settings.class);
-            startActivity(intent);
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        // Sync the toggle state after onRestoreInstanceState has occurred.
+        // Sync the drawer toggle state after onRestoreInstanceState has occurred.
         mDrawerToggle.syncState();
     }
 

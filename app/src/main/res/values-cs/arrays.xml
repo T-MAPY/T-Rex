@@ -12,4 +12,10 @@
         <item>PRIORITY_LOW_POWER</item>
         <item>PRIORITY_NO_POWER</item>
     </string-array>
+    <string-array name="drawer_menu">
+        <item>Nastavení</item>
+        <item>Nápověda</item>
+        <item>Kontrola aktualizace</item>
+        <item>O aplikaci</item>
+    </string-array>
 </resources>
