@@ -49,4 +49,6 @@
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="drawer_title">Main menu</string>
+    <string name="app_version">Version</string>
+    <string name="app_credits">T-MAPY spol. s r.o., Apache License 2.0, https://github.com/T-MAPY/T-Rex</string>
 </resources>

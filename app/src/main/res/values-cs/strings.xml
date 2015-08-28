@@ -49,4 +49,6 @@
     <string name="drawer_title">Hlavní nabídka</string>
     <string name="drawer_open">Otevřít hlavní nabídku</string>
     <string name="drawer_close">Zavřít hlavní nabídku</string>
+    <string name="app_version">Verze</string>
+    <string name="app_credits">T-MAPY spol. s r.o., Apache License 2.0, https://github.com/T-MAPY/T-Rex</string>
 </resources>

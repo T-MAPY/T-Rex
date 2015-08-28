@@ -1,12 +1,15 @@
 package cz.tmapy.android.trex;
 
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
@@ -139,6 +142,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                     case 2:
                         new Updater(getApplicationContext()).execute();
                         break;
+                    case 3:
+                        showAbout();
+                        break;
                     default:
                         Toast.makeText(MainScreen.this, "I'm sorry - not implemented!", Toast.LENGTH_SHORT).show();
                         break;
@@ -147,6 +153,31 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 mDrawerLayout.closeDrawer(mDrawerList);
             }
         });
+    }
+
+    /**
+     * Shows about dialog
+     */
+    protected void showAbout() {
+        // Inflate the about message contents
+        View messageView = getLayoutInflater().inflate(R.layout.about_dialog, null, false);
+
+        TextView textView = (TextView) messageView.findViewById(R.id.app_version);
+        PackageInfo pInfo = null;
+        try {
+            pInfo = getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Package name not found", e);
+        }
+
+        textView.setText(getResources().getString(R.string.app_version) + ": " + pInfo.versionName);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(R.drawable.trainers);
+        builder.setTitle(R.string.app_name);
+        builder.setView(messageView);
+        builder.create();
+        builder.show();
     }
 
     private void setupDrawer() {
