@@ -34,16 +34,19 @@ import android.widget.ToggleButton;
 
 import java.text.SimpleDateFormat;
 
+import cz.tmapy.android.trex.drawer.DrawerItemCustomAdapter;
+import cz.tmapy.android.trex.drawer.ObjectDrawerItem;
 import cz.tmapy.android.trex.update.Updater;
 
 public class MainScreen extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "MainScreen";
 
-    private ListView mDrawerList;
+    private String[] mNavigationDrawerItemTitles;
+    private ListView mNavigationDrawerList;
+    private DrawerLayout mNavigationDrawerLayout;
     private ArrayAdapter<String> mAdapter;
     private ActionBarDrawerToggle mDrawerToggle;
-    private DrawerLayout mDrawerLayout;
     private String mActivityTitle;
 
     private PowerManager.WakeLock mWakeLock;
@@ -67,8 +70,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
 
-        mDrawerList = (ListView)findViewById(R.id.navList);
-        mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+        mNavigationDrawerItemTitles = getResources().getStringArray(R.array.drawer_menu);
+        mNavigationDrawerList = (ListView) findViewById(R.id.navList);
+        mNavigationDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
 
         addDrawerItems();
@@ -77,10 +81,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         final ToggleButton toggle = (ToggleButton) findViewById(R.id.toggle_start);
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked)  {
-                    if (!mLocalizationIsRunning)
-                    {
-                        Boolean startSuccess  = startSending();
+                if (isChecked) {
+                    if (!mLocalizationIsRunning) {
+                        Boolean startSuccess = startSending();
                         if (!startSuccess) //cancel toggle switch when service' start is not successful
                             toggle.setChecked(false);
                     }
@@ -91,8 +94,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         //get intent info from service (if any)
         Boolean locIsRunning = getIntent().getBooleanExtra(Const.STATE_LOCALIZATION_IS_RUNNING, false);
         //pokud bylo v předaném intentu, že lokalizace již běží
-        if (locIsRunning)
-        {
+        if (locIsRunning) {
             mLocalizationIsRunning = locIsRunning; //nastav, že lokalizace již běží
             toggle.setChecked(true); //nastav tlačítko na True
         }
@@ -123,15 +125,24 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     }
 
     private void addDrawerItems() {
-        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.drawer_menu));
-        mDrawerList.setAdapter(mAdapter);
 
-        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        ObjectDrawerItem[] drawerItem = new ObjectDrawerItem[4];
+
+        drawerItem[0] = new ObjectDrawerItem(R.drawable.ic_action_settings, mNavigationDrawerItemTitles[0]);
+        drawerItem[1] = new ObjectDrawerItem(R.drawable.ic_action_help, mNavigationDrawerItemTitles[1]);
+        drawerItem[2] = new ObjectDrawerItem(R.drawable.ic_action_refresh, mNavigationDrawerItemTitles[2]);
+        drawerItem[3] = new ObjectDrawerItem(R.drawable.ic_action_about, mNavigationDrawerItemTitles[3]);
+
+        DrawerItemCustomAdapter adapter = new DrawerItemCustomAdapter(this, R.layout.listview_item_row, drawerItem);
+        mNavigationDrawerList.setAdapter(adapter);
+
+        mNavigationDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Highlight the selected item
-                mDrawerList.setItemChecked(position, true);
-                switch (position){
+                mNavigationDrawerList.setItemChecked(position, true);
+                mNavigationDrawerList.setSelection(position);
+                switch (position) {
                     case 0:
                         Intent intent = new Intent(getApplicationContext(), Settings.class);
                         startActivity(intent);
@@ -150,7 +161,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                         break;
                 }
                 //and close the drawer
-                mDrawerLayout.closeDrawer(mDrawerList);
+                mNavigationDrawerLayout.closeDrawer(mNavigationDrawerList);
             }
         });
     }
@@ -181,7 +192,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     }
 
     private void setupDrawer() {
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mNavigationDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
 
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
@@ -199,7 +210,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         };
 
         mDrawerToggle.setDrawerIndicatorEnabled(true);
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mNavigationDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
     @Override
@@ -274,8 +285,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                             Log.e(TAG, "Could not start localization service " + comp.toString());
                         mLocalizationIsRunning = false;
                         return false;
-                    } else
-                    {
+                    } else {
                         mLocalizationIsRunning = true;
                         return true;
                     }
