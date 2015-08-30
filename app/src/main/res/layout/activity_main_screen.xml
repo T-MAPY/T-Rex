@@ -24,6 +24,7 @@
             android:layout_width="fill_parent"
             android:textColor="@android:color/white"
             android:background="@android:color/holo_blue_bright"/>
+        <!--android:drawableLeft="@drawable/ic_action_location_found"-->
 
         <LinearLayout
             android:orientation="horizontal"
