@@ -1,5 +1,6 @@
 package cz.tmapy.android.trex;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -115,7 +116,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
         //if this is not orientation change (saved bundle doesn't exists) check for update
         if (savedInstanceState == null && sharedPref.getBoolean("pref_check4update", true))
-            new Updater(this).execute();
+            new Updater(MainScreen.this).execute();
 
         //ACRA.getErrorReporter().putCustomData("myKey", "myValue");
         //ACRA.getErrorReporter().handleException(new Exception("Test exception"));
@@ -141,29 +142,37 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Highlight the selected item
                 mNavigationDrawerList.setItemChecked(position, true);
+                DrawerItemClick(position);
                 mNavigationDrawerList.setSelection(position);
-                switch (position) {
-                    case 0:
-                        Intent intent = new Intent(getApplicationContext(), Settings.class);
-                        startActivity(intent);
-                        break;
-                    case 1:
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Const.HELP_SITE_URL)));
-                        break;
-                    case 2:
-                        new Updater(getApplicationContext()).execute();
-                        break;
-                    case 3:
-                        showAbout();
-                        break;
-                    default:
-                        Toast.makeText(MainScreen.this, "I'm sorry - not implemented!", Toast.LENGTH_SHORT).show();
-                        break;
-                }
                 //and close the drawer
                 mNavigationDrawerLayout.closeDrawer(mNavigationDrawerList);
             }
         });
+    }
+
+    /**
+     * Handle clik on navigation drawer item
+     * @param position
+     */
+    private void DrawerItemClick(int position) {
+        switch (position) {
+            case 0:
+                Intent intent = new Intent(getApplicationContext(), Settings.class);
+                startActivity(intent);
+                break;
+            case 1:
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Const.HELP_SITE_URL)));
+                break;
+            case 2:
+                new Updater(MainScreen.this).execute();
+                break;
+            case 3:
+                showAbout();
+                break;
+            default:
+                Toast.makeText(MainScreen.this, "I'm sorry - not implemented!", Toast.LENGTH_SHORT).show();
+                break;
+        }
     }
 
     /**
