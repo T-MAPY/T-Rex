@@ -40,6 +40,8 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import cz.tmapy.android.trex.kalman.KalmanLatLong;
+
 /**
  * BackgroundLocationService used for tracking user location in the background.
  * https://gist.github.com/blackcj/20efe2ac885c7297a676
@@ -52,6 +54,12 @@ public class BackgroundLocationService extends Service implements
     private static final String TAG = "LocationService";
 
     IBinder mBinder = new LocalBinder();
+
+    // Kalman filters generally work better when the accuracy decays a bit quicker than one might expect,
+    // so for walking around with an Android phone I find that Q=3 metres per second works fine,
+    // even though I generally walk slower than that.
+    // But if travelling in a fast car a much larger number should obviously be used.
+    KalmanLatLong mKalman = new KalmanLatLong(3);
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -162,7 +170,10 @@ public class BackgroundLocationService extends Service implements
      */
     @Override
     public void onConnected(Bundle bundle) {
-        processLocation(LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient));
+        Location loc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        //Kalman initiation
+        mKalman.SetState(loc.getLatitude(),loc.getLongitude(),loc.getAccuracy(),loc.getTime());
+        processLocation(loc);
 
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(mFrequency * 1000);
@@ -223,6 +234,8 @@ public class BackgroundLocationService extends Service implements
     private void processLocation(Location location) {
         if (location != null) {
             try {
+                mKalman.Process(location.getLatitude(),location.getLongitude(),location.getAccuracy(),location.getTime());
+                //TODO: get Kalman processed values
                 if (mLastSendedLocation == null) {
                     SendPosition(location);
                     return;
