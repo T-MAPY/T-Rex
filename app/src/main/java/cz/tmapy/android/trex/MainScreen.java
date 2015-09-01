@@ -1,6 +1,5 @@
 package cz.tmapy.android.trex;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -37,6 +36,7 @@ import java.text.SimpleDateFormat;
 
 import cz.tmapy.android.trex.drawer.DrawerItemCustomAdapter;
 import cz.tmapy.android.trex.drawer.ObjectDrawerItem;
+import cz.tmapy.android.trex.service.BackgroundLocationService;
 import cz.tmapy.android.trex.update.Updater;
 
 public class MainScreen extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {

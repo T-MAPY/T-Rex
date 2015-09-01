@@ -1,4 +1,4 @@
-package cz.tmapy.android.trex;
+package cz.tmapy.android.trex.service;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -40,7 +40,9 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import cz.tmapy.android.trex.kalman.KalmanLatLong;
+import cz.tmapy.android.trex.Const;
+import cz.tmapy.android.trex.MainScreen;
+import cz.tmapy.android.trex.R;
 
 /**
  * BackgroundLocationService used for tracking user location in the background.
@@ -55,15 +57,11 @@ public class BackgroundLocationService extends Service implements
 
     IBinder mBinder = new LocalBinder();
 
-    // Kalman filters generally work better when the accuracy decays a bit quicker than one might expect,
-    // so for walking around with an Android phone I find that Q=3 metres per second works fine,
-    // even though I generally walk slower than that.
-    // But if travelling in a fast car a much larger number should obviously be used.
-    KalmanLatLong mKalman = new KalmanLatLong(3);
+    KalmanLatLong mKalman;
+
+    private Location mLastAcceptedLocation; //last accepted location, filtered by Mr. Kalman
 
     private GoogleApiClient mGoogleApiClient;
-
-    private Location mLastSendedLocation; //last lccation sent to server
 
     private int NOTIFICATION = 1975; //Unique number for this notification
 
@@ -74,6 +72,7 @@ public class BackgroundLocationService extends Service implements
     private Integer mFrequency = 20;
     private Integer mMinDistance = 60;
     private Integer mMaxInterval = 120;
+    private Integer mKalmanMPS = 0;
 
     public class LocalBinder extends Binder {
         public BackgroundLocationService getServerInstance() {
@@ -97,12 +96,20 @@ public class BackgroundLocationService extends Service implements
         mFrequency = Integer.valueOf(sharedPref.getString(Const.PREF_FREQUENCY, String.valueOf(mFrequency)));
         mMinDistance = Integer.valueOf(sharedPref.getString(Const.PREF_MIN_DIST, String.valueOf(mMinDistance)));
         mMaxInterval = Integer.valueOf(sharedPref.getString(Const.PREF_MAX_TIME, String.valueOf(mMaxInterval)));
+        mKalmanMPS = Integer.valueOf(sharedPref.getString(Const.PREF_KALMAN_MPS, String.valueOf(mKalmanMPS)));
+
+        // Kalman filters generally work better when the accuracy decays a bit quicker than one might expect,
+        // so for walking around with an Android phone I find that Q=3 metres per second works fine,
+        // even though I generally walk slower than that.
+        // But if travelling in a fast car a much larger number should obviously be used.
+        mKalman = new KalmanLatLong(mKalmanMPS);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
+
     }
 
     @Override
@@ -172,7 +179,7 @@ public class BackgroundLocationService extends Service implements
     public void onConnected(Bundle bundle) {
         Location loc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         //Kalman initiation
-        mKalman.SetState(loc.getLatitude(),loc.getLongitude(),loc.getAccuracy(),loc.getTime());
+        mKalman.SetState(loc.getLatitude(), loc.getLongitude(), loc.getAccuracy(), loc.getTime());
         processLocation(loc);
 
         LocationRequest mLocationRequest = new LocationRequest();
@@ -234,19 +241,29 @@ public class BackgroundLocationService extends Service implements
     private void processLocation(Location location) {
         if (location != null) {
             try {
-                mKalman.Process(location.getLatitude(),location.getLongitude(),location.getAccuracy(),location.getTime());
-                //TODO: get Kalman processed values
-                if (mLastSendedLocation == null) {
+                //If Kalman MPS settings > 0 apply Kalman filter
+                if (mKalmanMPS > 0)
+                {
+                    mKalman.Process(location.getLatitude(), location.getLongitude(), location.getAccuracy(), location.getTime());
+                    //update position by Mr. Kalman
+                    location.setLatitude(mKalman.get_lat());
+                    location.setLongitude(mKalman.get_lng());
+                }
+
+                if (mLastAcceptedLocation == null) { //ths is first position
+                    mLastAcceptedLocation = location; //location is accepted even if no connection
                     SendPosition(location);
                     return;
                 }
 
                 //calculate minutes diff between last and current location
-                long diff = location.getTime() - mLastSendedLocation.getTime();
+                long diff = location.getTime() - mLastAcceptedLocation.getTime();
                 long diffSeconds = diff / 1000 % 60;
 
-                if ((diffSeconds >= mMaxInterval) || (mLastSendedLocation.distanceTo(location) >= mMinDistance))
+                if ((diffSeconds >= mMaxInterval) || (mLastAcceptedLocation.distanceTo(location) >= mMinDistance)) {
+                    mLastAcceptedLocation = location; //location is accepted even if no connection
                     SendPosition(location);
+                }
 
             } catch (Exception e) {
                 Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
@@ -261,6 +278,7 @@ public class BackgroundLocationService extends Service implements
      * @param location
      */
     private void SendPosition(Location location) {
+
         if (mTargetServerURL != null && !mTargetServerURL.isEmpty()) {
             if (isNetworkOnline()) {
 
@@ -271,7 +289,6 @@ public class BackgroundLocationService extends Service implements
                 String speed = Float.toString(location.getSpeed());
                 String bearing = Float.toString(location.getBearing());
 
-                mLastSendedLocation = location;
                 new NetworkTask().execute(mTargetServerURL, mDeviceIdentifier, lastUpdateTime, lat, lon, alt, speed, bearing);
 
                 if (Const.LOG_ENHANCED)
@@ -293,7 +310,7 @@ public class BackgroundLocationService extends Service implements
     private void SendBroadcast() {
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
         localIntent.putExtra(Const.STATE_LOCALIZATION_IS_RUNNING, true);
-        localIntent.putExtra(Const.EXTRAS_POSITION_DATA, mLastSendedLocation);
+        localIntent.putExtra(Const.EXTRAS_POSITION_DATA, mLastAcceptedLocation);
         localIntent.putExtra(Const.EXTRAS_SERVER_RESPONSE, mServerResponse);
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);

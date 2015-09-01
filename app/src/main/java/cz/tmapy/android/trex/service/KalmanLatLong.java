@@ -1,4 +1,4 @@
-package cz.tmapy.android.trex.kalman;
+package cz.tmapy.android.trex.service;
 
 /**
  * Created by Stochastically - http://stackoverflow.com/questions/1134579/smooth-gps-data/15657798#15657798
@@ -6,6 +6,8 @@ package cz.tmapy.android.trex.kalman;
  * so for walking around with an Android phone I find that Q=3 metres per second works fine,
  * even though I generally walk slower than that.
  * But if travelling in a fast car a much larger number should obviously be used.
+ *
+ * http://stackoverflow.com/questions/1134579/smooth-gps-data/15657798#15657798
  */
 public class KalmanLatLong {
     private final float MinAccuracy = 1;
