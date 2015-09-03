@@ -156,7 +156,7 @@ public class BackgroundLocationService extends Service implements
 
         stopForeground(true); //http://developer.android.com/reference/android/app/Service.html
 
-        if (mGoogleApiClient != null) {
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
 
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
 
