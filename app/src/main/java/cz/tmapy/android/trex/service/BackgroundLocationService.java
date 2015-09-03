@@ -216,9 +216,9 @@ public class BackgroundLocationService extends Service implements
      */
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Toast.makeText(this, "Location Services fails", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Location services failed", Toast.LENGTH_LONG).show();
         if (Const.LOG_BASIC)
-            Log.e(TAG, "Connection to Location Services fails: " + connectionResult.getErrorCode());
+            Log.e(TAG, "Connection to location services failed: " + connectionResult.getErrorCode());
     }
 
     /**
