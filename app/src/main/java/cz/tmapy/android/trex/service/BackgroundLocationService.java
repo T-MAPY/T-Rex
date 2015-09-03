@@ -178,9 +178,11 @@ public class BackgroundLocationService extends Service implements
     @Override
     public void onConnected(Bundle bundle) {
         Location loc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        //Kalman initiation
-        mKalman.SetState(loc.getLatitude(), loc.getLongitude(), loc.getAccuracy(), loc.getTime());
-        processLocation(loc);
+        if (loc != null) {
+            //Kalman initiation
+            mKalman.SetState(loc.getLatitude(), loc.getLongitude(), loc.getAccuracy(), loc.getTime());
+            processLocation(loc);
+        }
 
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(mFrequency * 1000);
