@@ -6,9 +6,9 @@ package cz.tmapy.android.trex;
 public final class Const {
 
     //http://stackoverflow.com/questions/2018263/how-do-i-enable-disable-log-levels-in-android
-    private static int LOGLEVEL = 3;
-    public static boolean LOG_BASIC = LOGLEVEL > 1;
-    public static boolean LOG_ENHANCED = LOGLEVEL > 2;
+    private static int LOGLEVEL = 1;
+    public static boolean LOG_BASIC = LOGLEVEL >= 1;
+    public static boolean LOG_ENHANCED = LOGLEVEL >= 2;
 
     public static final String CHECK_FOR_NEW_VER_URL = "http://distrib.tmapy.cz/pub/distrib/t-rex/version.json";
     public static final String UPDATE_SITE_URL = "http://distrib.tmapy.cz/pub/distrib/t-rex/";
