@@ -55,6 +55,8 @@ public class BackgroundLocationService extends Service implements
 
     private static final String TAG = "LocationService";
 
+    SharedPreferences mSharedPref;
+
     IBinder mBinder = new LocalBinder();
 
     KalmanLatLong mKalman;
@@ -89,14 +91,14 @@ public class BackgroundLocationService extends Service implements
     public void onCreate() {
         super.onCreate();
 
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        mTargetServerURL = sharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
-        mDeviceIdentifier = sharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
-        mListPrefs = sharedPref.getString(Const.PREF_STRATEGY, "PRIORITY_HIGH_ACCURACY");
-        mFrequency = Integer.valueOf(sharedPref.getString(Const.PREF_FREQUENCY, String.valueOf(mFrequency)));
-        mMinDistance = Integer.valueOf(sharedPref.getString(Const.PREF_MIN_DIST, String.valueOf(mMinDistance)));
-        mMaxInterval = Integer.valueOf(sharedPref.getString(Const.PREF_MAX_TIME, String.valueOf(mMaxInterval)));
-        mKalmanMPS = Integer.valueOf(sharedPref.getString(Const.PREF_KALMAN_MPS, String.valueOf(mKalmanMPS)));
+        mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        mTargetServerURL = mSharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
+        mDeviceIdentifier = mSharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
+        mListPrefs = mSharedPref.getString(Const.PREF_STRATEGY, "PRIORITY_HIGH_ACCURACY");
+        mFrequency = Integer.valueOf(mSharedPref.getString(Const.PREF_FREQUENCY, String.valueOf(mFrequency)));
+        mMinDistance = Integer.valueOf(mSharedPref.getString(Const.PREF_MIN_DIST, String.valueOf(mMinDistance)));
+        mMaxInterval = Integer.valueOf(mSharedPref.getString(Const.PREF_MAX_TIME, String.valueOf(mMaxInterval)));
+        mKalmanMPS = Integer.valueOf(mSharedPref.getString(Const.PREF_KALMAN_MPS, String.valueOf(mKalmanMPS)));
 
         // Kalman filters generally work better when the accuracy decays a bit quicker than one might expect,
         // so for walking around with an Android phone I find that Q=3 metres per second works fine,
@@ -127,7 +129,7 @@ public class BackgroundLocationService extends Service implements
 
             // Creates an explicit intent for an Activity in your app
             Intent resultIntent = new Intent(this, MainScreen.class);
-            resultIntent.putExtra(Const.STATE_LOCALIZATION_IS_RUNNING, true);
+            //resultIntent.putExtra(Const.STATE_LOCALIZATION_IS_RUNNING, true);
             // The stack builder object will contain an artificial back stack for the started Activity.
             // This ensures that navigating backward from the Activity leads out of
             // your application to the Home screen.
@@ -143,6 +145,8 @@ public class BackgroundLocationService extends Service implements
             mBuilder.setContentIntent(resultPendingIntent);
 
             startForeground(NOTIFICATION, mBuilder.build()); //spuštění služby s vyšší prioritou na popředí - http://developer.android.com/reference/android/app/Service.html
+
+            mSharedPref.edit().putBoolean(Const.PREF_LOC_IS_RUNNING, true).commit(); //store state
 
             if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Started");
             Toast.makeText(this, R.string.localiz_started, Toast.LENGTH_SHORT).show();
@@ -164,6 +168,8 @@ public class BackgroundLocationService extends Service implements
             // Destroy the current location client
             mGoogleApiClient = null;
         }
+
+        mSharedPref.edit().putBoolean(Const.PREF_LOC_IS_RUNNING, false).commit(); //store state
         // Display the connection status
         Toast.makeText(this, R.string.localiz_stopped, Toast.LENGTH_SHORT).show();
         if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Stopped");
@@ -311,7 +317,7 @@ public class BackgroundLocationService extends Service implements
      */
     private void SendBroadcast() {
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
-        localIntent.putExtra(Const.STATE_LOCALIZATION_IS_RUNNING, true);
+        //localIntent.putExtra(Const.STATE_LOCALIZATION_IS_RUNNING, true);
         localIntent.putExtra(Const.EXTRAS_POSITION_DATA, mLastAcceptedLocation);
         localIntent.putExtra(Const.EXTRAS_SERVER_RESPONSE, mServerResponse);
 

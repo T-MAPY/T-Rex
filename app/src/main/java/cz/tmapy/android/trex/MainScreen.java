@@ -76,6 +76,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mNavigationDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
 
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        mLocalizationIsRunning = sharedPref.getBoolean(Const.PREF_LOC_IS_RUNNING, false);
+
         addDrawerItems();
         setupDrawer();
 
@@ -92,11 +95,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             }
         });
 
-        //get intent info from service (if any)
-        Boolean locIsRunning = getIntent().getBooleanExtra(Const.STATE_LOCALIZATION_IS_RUNNING, false);
-        //pokud bylo v předaném intentu, že lokalizace již běží
-        if (locIsRunning) {
-            mLocalizationIsRunning = locIsRunning; //nastav, že lokalizace již běží
+        if (mLocalizationIsRunning) {
             toggle.setChecked(true); //nastav tlačítko na True
         }
 
@@ -108,14 +107,16 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         // Registers the mPositionReceiver and its intent filters
         LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
 
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.registerOnSharedPreferenceChangeListener(this); //to get pref changes to onSharePreferenceChanged
         mDeviceId = sharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
         mTargetServerURL = sharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
         mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
 
-        //if this is not orientation change (saved bundle doesn't exists) check for update
-        if (savedInstanceState == null && sharedPref.getBoolean("pref_check4update", true))
+
+        // 1) localization is not running - activity was not executed from service
+        // 2) savedInstanceState is null - it is not change of device orientation (saved bundle doesn't exists)
+        // 3) automatic check for update is enabled
+        if (!mLocalizationIsRunning && savedInstanceState == null && sharedPref.getBoolean("pref_check4update", true))
             new Updater(MainScreen.this).execute();
 
         //ACRA.getErrorReporter().putCustomData("myKey", "myValue");
@@ -152,6 +153,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
     /**
      * Handle clik on navigation drawer item
+     *
      * @param position
      */
     private void DrawerItemClick(int position) {
@@ -269,7 +271,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
         if (!mTargetServerURL.isEmpty()) {
             if (!mDeviceId.isEmpty()) {
-                if (!isServiceRunning(BackgroundLocationService.class)) {
+                if (!mLocalizationIsRunning) {
                     //Keep CPU on
                     PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
                     mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -283,17 +285,16 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                     ComponentName comp = new ComponentName(getApplicationContext().getPackageName(), BackgroundLocationService.class.getName());
                     ComponentName service = getApplicationContext().startService(new Intent().setComponent(comp));
 
-                    if (null == service) {
-                        // something really wrong here
-                        Toast.makeText(this, R.string.localiz_could_not_start, Toast.LENGTH_SHORT).show();
-                        if (Const.LOG_BASIC)
-                            Log.e(TAG, "Could not start localization service " + comp.toString());
-                        mLocalizationIsRunning = false;
-                        return false;
-                    } else {
+                    if (null != service) {
                         mLocalizationIsRunning = true;
                         return true;
                     }
+
+                    // something really wrong here
+                    Toast.makeText(this, R.string.localiz_could_not_start, Toast.LENGTH_SHORT).show();
+                    if (Const.LOG_BASIC)
+                        Log.e(TAG, "Could not start localization service " + comp.toString());
+
                 } else {
                     Toast.makeText(this, R.string.localiz_run, Toast.LENGTH_SHORT).show();
                 }
@@ -313,10 +314,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
      * Switch off sending
      */
     public void stopSending() {
-        if (isServiceRunning(BackgroundLocationService.class)) {
+        if (mLocalizationIsRunning) {
             ComponentName comp = new ComponentName(getApplicationContext().getPackageName(), BackgroundLocationService.class.getName());
             getApplicationContext().stopService(new Intent().setComponent(comp));
-            mLocalizationIsRunning = false;
 
             TextView dateText = (TextView) findViewById(R.id.text_position_date);
             dateText.setText(null);
@@ -347,23 +347,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             }
         } else
             Toast.makeText(this, R.string.localiz_not_run, Toast.LENGTH_SHORT).show();
-    }
 
-    /**
-     * Check service is running
-     * http://stackoverflow.com/questions/600207/how-to-check-if-a-service-is-running-on-android
-     *
-     * @param serviceClass
-     * @return
-     */
-    private boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
+        mLocalizationIsRunning = false;
     }
 
     /**
@@ -425,21 +410,21 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        // Save the user's current state
-        savedInstanceState.putBoolean(Const.STATE_LOCALIZATION_IS_RUNNING, mLocalizationIsRunning);
-        savedInstanceState.putString(Const.STATE_LAST_LOCATION_TIME, mLastLocationTime);
-        savedInstanceState.putString(Const.STATE_LAST_LOCATION_LAT, mLastLocationLat);
-        savedInstanceState.putString(Const.STATE_LAST_LOCATION_LON, mLastLocationLon);
-        savedInstanceState.putString(Const.STATE_LAST_LOCATION_ALT, mLastLocationAlt);
-        savedInstanceState.putString(Const.STATE_LAST_LOCATION_SPEED, mLastLocationSpeed);
-        savedInstanceState.putString(Const.STATE_LAST_LOCATION_BEARING, mLastLocationBearing);
-        savedInstanceState.putString(Const.STATE_LAST_SERVER_RESPONSE, mLastServerResponse);
+        if (mLocalizationIsRunning) {
+            // Save the user's current state
+            savedInstanceState.putString(Const.STATE_LAST_LOCATION_TIME, mLastLocationTime);
+            savedInstanceState.putString(Const.STATE_LAST_LOCATION_LAT, mLastLocationLat);
+            savedInstanceState.putString(Const.STATE_LAST_LOCATION_LON, mLastLocationLon);
+            savedInstanceState.putString(Const.STATE_LAST_LOCATION_ALT, mLastLocationAlt);
+            savedInstanceState.putString(Const.STATE_LAST_LOCATION_SPEED, mLastLocationSpeed);
+            savedInstanceState.putString(Const.STATE_LAST_LOCATION_BEARING, mLastLocationBearing);
+            savedInstanceState.putString(Const.STATE_LAST_SERVER_RESPONSE, mLastServerResponse);
+        }
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         // Restore state members from saved instance
-        mLocalizationIsRunning = savedInstanceState.getBoolean(Const.STATE_LOCALIZATION_IS_RUNNING);
         mLastLocationTime = savedInstanceState.getString(Const.STATE_LAST_LOCATION_TIME);
         mLastLocationLat = savedInstanceState.getString(Const.STATE_LAST_LOCATION_LAT);
         mLastLocationLon = savedInstanceState.getString(Const.STATE_LAST_LOCATION_LON);

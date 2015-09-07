@@ -23,9 +23,10 @@ public final class Const {
     public static final String PREF_MIN_DIST = "pref_min_dist";
     public static final String PREF_MAX_TIME= "pref_max_time";
     public static final String PREF_KALMAN_MPS = "pref_kalman_mps";
+    public static final String PREF_LOC_IS_RUNNING = "pref_loc_is_running";
 
     //STATE konstants
-    public static final String STATE_LOCALIZATION_IS_RUNNING = "biz.svoboda.trex.localizationIsRunning";
+    //public static final String STATE_LOCALIZATION_IS_RUNNING = "biz.svoboda.trex.localizationIsRunning";
     public static final String STATE_LAST_LOCATION_TIME = "biz.svoboda.trex.lastLocationTime";
     public static final String STATE_LAST_LOCATION_LAT = "biz.svoboda.trex.lastLocationLast";
     public static final String STATE_LAST_LOCATION_LON = "biz.svoboda.trex.lastLocationLon";
