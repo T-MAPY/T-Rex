@@ -41,7 +41,7 @@ import cz.tmapy.android.trex.update.Updater;
 
 public class MainScreen extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private static final String TAG = "MainScreen";
+    private static final String TAG = MainScreen.class.getName();
 
     private String[] mNavigationDrawerItemTitles;
     private ListView mNavigationDrawerList;

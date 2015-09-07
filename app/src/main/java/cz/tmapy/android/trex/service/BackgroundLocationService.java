@@ -53,7 +53,7 @@ public class BackgroundLocationService extends Service implements
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
-    private static final String TAG = "LocationService";
+    private static final String TAG = BackgroundLocationService.class.getName();
 
     SharedPreferences mSharedPref;
 
