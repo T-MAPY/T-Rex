@@ -3,11 +3,15 @@ package cz.tmapy.android.trex.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Created by kasvo on 7.9.2015.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
+
+    private static final String TAG = DatabaseHelper.class.getName();
+
     private static final int DATABASE_VERSION = 3;
     private static final String DATABASE_NAME = "trex";
     private static final String LOCATIONS_TABLE_SQL = "DROP TABLE IF EXISTS locations; CREATE TABLE locations("+
@@ -37,28 +41,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     {
         mDb.execSQL(LOCATIONS_TABLE_SQL);
     }
-    /**
-     * Called when the database needs to be upgraded. The implementation
-     * should use this method to drop tables, add tables, or do anything else it
-     * needs to upgrade to the new schema version.
-     * <p/>
-     * <p>
-     * The SQLite ALTER TABLE documentation can be found
-     * <a href="http://sqlite.org/lang_altertable.html">here</a>. If you add new columns
-     * you can use ALTER TABLE to insert them into a live table. If you rename or remove columns
-     * you can use ALTER TABLE to rename the old table, then create the new table and then
-     * populate the new table with the contents of the old table.
-     * </p><p>
-     * This method executes within a transaction.  If an exception is thrown, all changes
-     * will automatically be rolled back.
-     * </p>
-     *
-     * @param db         The database.
-     * @param oldVersion The old database version.
-     * @param newVersion The new database version.
-     */
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        Log.w(DatabaseHelper.class.getName(),
+                "Upgrading database from version " + oldVersion + " to "
+                        + newVersion + ", which will destroy all old data");
+        db.execSQL("DROP TABLE IF EXISTS locations;");
+        CreateDatabase();
     }
 }
