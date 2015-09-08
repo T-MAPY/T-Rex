@@ -1,5 +1,6 @@
 package cz.tmapy.android.trex.service;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.TaskStackBuilder;
@@ -38,7 +39,6 @@ import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -100,6 +100,11 @@ public class BackgroundLocationService extends Service implements
     public void onCreate() {
         super.onCreate();
 
+        //Keep CPU on
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TRexWakelockTag");
+        mWakeLock.acquire();
+
         locationsDataSource = new LocationsDataSource(this);
 
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -136,7 +141,11 @@ public class BackgroundLocationService extends Service implements
                     new NotificationCompat.Builder(this)
                             .setSmallIcon(R.drawable.trainers)
                             .setContentTitle(getResources().getString(R.string.notif_title))
-                            .setContentText(getResources().getString(R.string.notif_text));
+                            .setContentText(getResources().getString(R.string.notif_text))
+                            .setWhen(System.currentTimeMillis())
+                            .setAutoCancel(false)
+                            .setOngoing(true)
+                            .setPriority(Notification.PRIORITY_HIGH);
 
             // Creates an explicit intent for an Activity in your app
             Intent resultIntent = new Intent(this, MainScreen.class);
@@ -155,14 +164,12 @@ public class BackgroundLocationService extends Service implements
                     );
             mBuilder.setContentIntent(resultPendingIntent);
 
-            startForeground(NOTIFICATION, mBuilder.build()); //spuštění služby s vyšší prioritou na popředí - http://developer.android.com/reference/android/app/Service.html
+            Notification notification = mBuilder.build();
+            notification.flags |= Notification.FLAG_NO_CLEAR;
+
+            startForeground(NOTIFICATION, notification); //spuštění služby s vyšší prioritou na popředí - http://developer.android.com/reference/android/app/Service.html
 
             mSharedPref.edit().putBoolean(Const.PREF_LOC_IS_RUNNING, true).commit(); //store state
-
-            //Keep CPU on
-            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-            mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TRexWakelockTag");
-            mWakeLock.acquire();
 
             if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Started");
             Toast.makeText(this, R.string.localiz_started, Toast.LENGTH_SHORT).show();
@@ -186,7 +193,7 @@ public class BackgroundLocationService extends Service implements
         }
         //remove wakelock
         if (mWakeLock != null) {
-            mWakeLock.release();
+            if (mWakeLock.isHeld()) mWakeLock.release();
             mWakeLock = null;
         }
 
@@ -307,6 +314,7 @@ public class BackgroundLocationService extends Service implements
 
     /**
      * Save position to the database
+     *
      * @param location
      */
     private void SavePosition(Location location) {
@@ -315,7 +323,7 @@ public class BackgroundLocationService extends Service implements
             Long id = locationsDataSource.createLocation(new LocationDob(location));
             locationsDataSource.close();
         } catch (SQLException e) {
-            Log.e(TAG,"Cannot load last location from database",e);
+            Log.e(TAG, "Cannot load last location from database", e);
         }
     }
 
