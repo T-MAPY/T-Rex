@@ -31,8 +31,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
+import cz.tmapy.android.trex.database.LocationsDataSource;
+import cz.tmapy.android.trex.database.dobs.LocationDob;
 import cz.tmapy.android.trex.drawer.DrawerItemCustomAdapter;
 import cz.tmapy.android.trex.drawer.ObjectDrawerItem;
 import cz.tmapy.android.trex.service.BackgroundLocationService;
@@ -63,10 +67,14 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private String mLastLocationBearing;
     private String mLastServerResponse;
 
+    private LocationsDataSource locationsDataSource;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
+
+        locationsDataSource = new LocationsDataSource(this);
 
         mNavigationDrawerItemTitles = getResources().getStringArray(R.array.drawer_menu);
         mNavigationDrawerList = (ListView) findViewById(R.id.navList);
@@ -109,18 +117,36 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mTargetServerURL = sharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
         mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
 
+        if (mLocalizationIsRunning)
+        {
+            //LoadLastLocationFromDb();
+        }
 
         // 1) localization is not running - activity was not executed from service
         // 2) savedInstanceState is null - it is not change of device orientation (saved bundle doesn't exists)
         // 3) automatic check for update is enabled
         if (!mLocalizationIsRunning && savedInstanceState == null && sharedPref.getBoolean("pref_check4update", true))
             new Updater(MainScreen.this).execute();
-
         //ACRA.getErrorReporter().putCustomData("myKey", "myValue");
         //ACRA.getErrorReporter().handleException(new Exception("Test exception"));
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+    }
+
+    /**
+     * Loads last connection from database
+     */
+    private void LoadLastLocationFromDb() {
+
+        try {
+            locationsDataSource.open();
+            List<LocationDob> values = locationsDataSource.getAllLocations();
+            locationsDataSource.close();
+        } catch (SQLException e) {
+            Log.e(TAG,"Cannot load last location from database",e);
+        }
+
     }
 
     private void addDrawerItems() {
