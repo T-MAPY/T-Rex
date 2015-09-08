@@ -18,7 +18,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -75,10 +74,10 @@ public class BackgroundLocationService extends Service implements
     private String mDeviceIdentifier;
     private String mServerResponse;
     private String mListPrefs;
-    private Integer mFrequency = 20;
-    private Integer mMinDistance = 60;
-    private Integer mMaxInterval = 120;
-    private Integer mKalmanMPS = 0;
+    private Integer mLocFrequency;
+    private Integer mMinDistance;
+    private Integer mSendInterval;
+    private Integer mKalmanMPS;
 
     public class LocalBinder extends Binder {
         public BackgroundLocationService getServerInstance() {
@@ -96,13 +95,13 @@ public class BackgroundLocationService extends Service implements
         super.onCreate();
 
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        mTargetServerURL = mSharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
-        mDeviceIdentifier = mSharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
-        mListPrefs = mSharedPref.getString(Const.PREF_STRATEGY, "PRIORITY_HIGH_ACCURACY");
-        mFrequency = Integer.valueOf(mSharedPref.getString(Const.PREF_FREQUENCY, String.valueOf(mFrequency)));
-        mMinDistance = Integer.valueOf(mSharedPref.getString(Const.PREF_MIN_DIST, String.valueOf(mMinDistance)));
-        mMaxInterval = Integer.valueOf(mSharedPref.getString(Const.PREF_MAX_TIME, String.valueOf(mMaxInterval)));
-        mKalmanMPS = Integer.valueOf(mSharedPref.getString(Const.PREF_KALMAN_MPS, String.valueOf(mKalmanMPS)));
+        mTargetServerURL = mSharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, null);
+        mDeviceIdentifier = mSharedPref.getString(Const.PREF_KEY_DEVICE_ID, null);
+        mListPrefs = mSharedPref.getString(Const.PREF_LOC_STRATEGY, null);
+        mLocFrequency = Integer.valueOf(mSharedPref.getString(Const.PREF_LOC_FREQUENCY, "20"));
+        mMinDistance = Integer.valueOf(mSharedPref.getString(Const.PREF_MIN_DIST, "60"));
+        mSendInterval = Integer.valueOf(mSharedPref.getString(Const.PREF_SEND_INTERVAL, "120"));
+        mKalmanMPS = Integer.valueOf(mSharedPref.getString(Const.PREF_KALMAN_MPS, "3"));
 
         // Kalman filters generally work better when the accuracy decays a bit quicker than one might expect,
         // so for walking around with an Android phone I find that Q=3 metres per second works fine,
@@ -206,7 +205,7 @@ public class BackgroundLocationService extends Service implements
         }
 
         LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(mFrequency * 1000);
+        mLocationRequest.setInterval(mLocFrequency * 1000);
         mLocationRequest.setFastestInterval(1000);
 
         switch (mListPrefs) {
@@ -280,10 +279,9 @@ public class BackgroundLocationService extends Service implements
                 }
 
                 //calculate minutes diff between last and current location
-                long diff = location.getTime() - mLastAcceptedLocation.getTime();
-                long diffSeconds = diff / 1000 % 60;
+                long diffSeconds = (location.getTime() - mLastAcceptedLocation.getTime()) / 1000;
 
-                if ((diffSeconds >= mMaxInterval) || (mLastAcceptedLocation.distanceTo(location) >= mMinDistance)) {
+                if ((diffSeconds >= mSendInterval) || (mLastAcceptedLocation.distanceTo(location) >= mMinDistance)) {
                     mLastAcceptedLocation = location; //location is accepted even if no connection
                     SendPosition(location);
                 }
@@ -362,8 +360,8 @@ public class BackgroundLocationService extends Service implements
             try {
                 URL url = new URL(params[0]);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout((mFrequency - 1) * 1000);
-                conn.setConnectTimeout((mFrequency - 1) * 1000);
+                conn.setReadTimeout((mLocFrequency - 1) * 1000);
+                conn.setConnectTimeout((mLocFrequency - 1) * 1000);
                 conn.setRequestMethod("POST");
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
