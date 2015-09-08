@@ -12,6 +12,27 @@
             android:summary="@string/pref_id_summ"/>
     </PreferenceCategory>
     <PreferenceCategory android:key="pref_location_category" android:title="@string/pref_location_category">
+        <EditTextPreference
+            android:inputType="number"
+            android:defaultValue="20"
+            android:key="pref_frequency"
+            android:title="@string/pref_frequency"
+            android:summary="@string/pref_frequency_summ"/>
+        <EditTextPreference android:key="pref_max_time"
+            android:inputType="number"
+            android:defaultValue="120"
+            android:title="@string/pref_max_interval"
+            android:summary="@string/pref_max_interval_sum"/>
+        <EditTextPreference android:key="pref_min_dist"
+            android:inputType="number"
+            android:defaultValue="60"
+            android:title="@string/pref_min_dist"
+            android:summary="@string/pref_min_dist_summ"/>
+        <EditTextPreference android:key="pref_kalman_mps"
+            android:inputType="number"
+            android:defaultValue="0"
+            android:title="@string/pref_kalman_mps"
+            android:summary="@string/pref_kalman_mps_sum"/>
         <ListPreference
             android:key="pref_strategy"
             android:entries="@array/strategyListOptions"
@@ -19,27 +40,6 @@
             android:defaultValue="PRIORITY_HIGH_ACCURACY"
             android:summary="@string/pref_strategy_sum"
             android:title="@string/pref_strategy" />
-        <EditTextPreference
-            android:inputType="number"
-            android:defaultValue="20"
-            android:key="pref_frequency"
-            android:title="@string/pref_frequency"
-            android:summary="@string/pref_frequency_summ"/>
-        <EditTextPreference android:key="pref_min_dist"
-            android:inputType="number"
-            android:defaultValue="60"
-            android:title="@string/pref_min_dist"
-            android:summary="@string/pref_min_dist_summ"/>
-        <EditTextPreference android:key="pref_max_time"
-            android:inputType="number"
-            android:defaultValue="120"
-            android:title="@string/pref_max_interval"
-            android:summary="@string/pref_max_interval_sum"/>
-        <EditTextPreference android:key="pref_kalman_mps"
-            android:inputType="number"
-            android:defaultValue="0"
-            android:title="@string/pref_kalman_mps"
-            android:summary="@string/pref_kalman_mps_sum"/>
     </PreferenceCategory>
     <PreferenceCategory android:key="pref_device_category" android:title="@string/pref_device">
         <CheckBoxPreference
