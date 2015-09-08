@@ -278,7 +278,7 @@ public class BackgroundLocationService extends Service implements
                     return;
                 }
 
-                //calculate minutes diff between last and current location
+                //calculate seconds diff between last and current location
                 long diffSeconds = (location.getTime() - mLastAcceptedLocation.getTime()) / 1000;
 
                 if ((diffSeconds >= mSendInterval) || (mLastAcceptedLocation.distanceTo(location) >= mMinDistance)) {
