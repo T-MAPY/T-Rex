@@ -386,7 +386,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         public void onReceive(Context context, Intent intent) {
             Location newLocation = (Location) intent.getExtras().get(Const.EXTRAS_POSITION_DATA);
             mLastServerResponse = intent.getStringExtra(Const.EXTRAS_SERVER_RESPONSE);
-            if (newLocation != null || mLastServerResponse != null) {
+            if (newLocation != null) {
                 //2014-06-28T15:07:59
                 mLastLocationTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(newLocation.getTime());
                 mLastLocationLat = Double.toString(newLocation.getLatitude());
@@ -394,8 +394,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 mLastLocationAlt = String.valueOf(newLocation.getAltitude());
                 mLastLocationSpeed = String.valueOf(newLocation.getSpeed());
                 mLastLocationBearing = String.valueOf(newLocation.getBearing());
-                UpdateGUI();
             }
+            UpdateGUI();
         }
     }
 

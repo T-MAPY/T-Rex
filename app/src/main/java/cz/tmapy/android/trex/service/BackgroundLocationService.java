@@ -35,8 +35,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -44,6 +46,8 @@ import javax.net.ssl.HttpsURLConnection;
 import cz.tmapy.android.trex.Const;
 import cz.tmapy.android.trex.MainScreen;
 import cz.tmapy.android.trex.R;
+import cz.tmapy.android.trex.database.LocationsDataSource;
+import cz.tmapy.android.trex.database.dobs.LocationDob;
 
 /**
  * BackgroundLocationService used for tracking user location in the background.
@@ -57,6 +61,8 @@ public class BackgroundLocationService extends Service implements
     private static final String TAG = BackgroundLocationService.class.getName();
 
     private PowerManager.WakeLock mWakeLock;
+
+    private LocationsDataSource locationsDataSource;
 
     SharedPreferences mSharedPref;
 
@@ -93,6 +99,8 @@ public class BackgroundLocationService extends Service implements
     @Override
     public void onCreate() {
         super.onCreate();
+
+        locationsDataSource = new LocationsDataSource(this);
 
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mTargetServerURL = mSharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, null);
@@ -264,8 +272,7 @@ public class BackgroundLocationService extends Service implements
         if (location != null) {
             try {
                 //If Kalman MPS settings > 0 apply Kalman filter
-                if (mKalmanMPS > 0)
-                {
+                if (mKalmanMPS > 0) {
                     mKalman.Process(location.getLatitude(), location.getLongitude(), location.getAccuracy(), location.getTime());
                     //update position by Mr. Kalman
                     location.setLatitude(mKalman.get_lat());
@@ -273,8 +280,7 @@ public class BackgroundLocationService extends Service implements
                 }
 
                 if (mLastAcceptedLocation == null) { //ths is first position
-                    mLastAcceptedLocation = location; //location is accepted even if no connection
-                    SendPosition(location);
+                    acceptLocation(location);
                     return;
                 }
 
@@ -282,14 +288,34 @@ public class BackgroundLocationService extends Service implements
                 long diffSeconds = (location.getTime() - mLastAcceptedLocation.getTime()) / 1000;
 
                 if ((diffSeconds >= mSendInterval) || (mLastAcceptedLocation.distanceTo(location) >= mMinDistance)) {
-                    mLastAcceptedLocation = location; //location is accepted even if no connection
-                    SendPosition(location);
+                    acceptLocation(location);
                 }
 
             } catch (Exception e) {
                 Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                 if (Const.LOG_BASIC) Log.e(TAG, "Error during location parsing:", e);
             }
+        }
+    }
+
+    private void acceptLocation(Location location) {
+        mLastAcceptedLocation = location;  //location is accepted even if it is not possible to send
+        SendAcceptedLocationBroadcast();
+        //SavePosition(location);
+        SendPosition(location);
+    }
+
+    /**
+     * Save position to the database
+     * @param location
+     */
+    private void SavePosition(Location location) {
+        try {
+            locationsDataSource.open();
+            Long id = locationsDataSource.createLocation(new LocationDob(location));
+            locationsDataSource.close();
+        } catch (SQLException e) {
+            Log.e(TAG,"Cannot load last location from database",e);
         }
     }
 
@@ -328,12 +354,18 @@ public class BackgroundLocationService extends Service implements
     /**
      * Broadcasts the Intent to receivers in this app.
      */
-    private void SendBroadcast() {
+    private void SendAcceptedLocationBroadcast() {
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
-        //localIntent.putExtra(Const.STATE_LOCALIZATION_IS_RUNNING, true);
         localIntent.putExtra(Const.EXTRAS_POSITION_DATA, mLastAcceptedLocation);
-        localIntent.putExtra(Const.EXTRAS_SERVER_RESPONSE, mServerResponse);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+    }
 
+    /**
+     * Broadcasts the Intent to receivers in this app.
+     */
+    private void SendServerResponseBroadcast() {
+        Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
+        localIntent.putExtra(Const.EXTRAS_SERVER_RESPONSE, mServerResponse);
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }
 
@@ -424,7 +456,7 @@ public class BackgroundLocationService extends Service implements
         @Override
         protected void onPostExecute(String result) {
             mServerResponse = result;
-            SendBroadcast();
+            SendServerResponseBroadcast();
         }
     }
 }
