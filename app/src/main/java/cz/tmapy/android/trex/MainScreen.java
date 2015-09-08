@@ -1,6 +1,5 @@
 package cz.tmapy.android.trex;
 
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -49,8 +48,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private ArrayAdapter<String> mAdapter;
     private ActionBarDrawerToggle mDrawerToggle;
     private String mActivityTitle;
-
-    private PowerManager.WakeLock mWakeLock;
 
     private String mTargetServerURL;
     private String mDeviceId;
@@ -272,11 +269,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         if (!mTargetServerURL.isEmpty()) {
             if (!mDeviceId.isEmpty()) {
                 if (!mLocalizationIsRunning) {
-                    //Keep CPU on
-                    PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-                    mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                            "TRexWakelockTag");
-                    mWakeLock.acquire();
 
                     if (mKeepScreenOn)
                         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -341,10 +333,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
             //remove flag, if any
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            if (mWakeLock != null) {
-                mWakeLock.release();
-                mWakeLock = null;
-            }
+
         } else
             Toast.makeText(this, R.string.localiz_not_run, Toast.LENGTH_SHORT).show();
 

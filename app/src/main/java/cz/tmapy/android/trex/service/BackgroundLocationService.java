@@ -13,10 +13,12 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -54,6 +56,8 @@ public class BackgroundLocationService extends Service implements
         LocationListener {
 
     private static final String TAG = BackgroundLocationService.class.getName();
+
+    private PowerManager.WakeLock mWakeLock;
 
     SharedPreferences mSharedPref;
 
@@ -148,6 +152,11 @@ public class BackgroundLocationService extends Service implements
 
             mSharedPref.edit().putBoolean(Const.PREF_LOC_IS_RUNNING, true).commit(); //store state
 
+            //Keep CPU on
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TRexWakelockTag");
+            mWakeLock.acquire();
+
             if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Started");
             Toast.makeText(this, R.string.localiz_started, Toast.LENGTH_SHORT).show();
         }
@@ -168,11 +177,17 @@ public class BackgroundLocationService extends Service implements
             // Destroy the current location client
             mGoogleApiClient = null;
         }
+        //remove wakelock
+        if (mWakeLock != null) {
+            mWakeLock.release();
+            mWakeLock = null;
+        }
 
         mSharedPref.edit().putBoolean(Const.PREF_LOC_IS_RUNNING, false).commit(); //store state
         // Display the connection status
         Toast.makeText(this, R.string.localiz_stopped, Toast.LENGTH_SHORT).show();
         if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Stopped");
+
         super.onDestroy();
     }
 
