@@ -18,10 +18,10 @@ public final class Const {
     public static final String PREF_KEY_DEVICE_ID = "pref_id";
     public static final String PREF_KEY_TARGET_SERVUER_URL = "pref_targetUrl";
     public static final String PREF_KEY_KEEP_SCREEN_ON = "pref_screen_on";
-    public static final String PREF_STRATEGY = "pref_strategy";
-    public static final String PREF_FREQUENCY = "pref_frequency";
+    public static final String PREF_LOC_STRATEGY = "pref_loc_strategy";
+    public static final String PREF_LOC_FREQUENCY = "pref_loc_frequency";
     public static final String PREF_MIN_DIST = "pref_min_dist";
-    public static final String PREF_MAX_TIME= "pref_max_time";
+    public static final String PREF_SEND_INTERVAL = "pref_send_interval";
     public static final String PREF_KALMAN_MPS = "pref_kalman_mps";
     public static final String PREF_LOC_IS_RUNNING = "pref_loc_is_running";
 

@@ -15,10 +15,10 @@
         <EditTextPreference
             android:inputType="number"
             android:defaultValue="20"
-            android:key="pref_frequency"
+            android:key="pref_loc_frequency"
             android:title="@string/pref_frequency"
             android:summary="@string/pref_frequency_summ"/>
-        <EditTextPreference android:key="pref_max_time"
+        <EditTextPreference android:key="pref_send_interval"
             android:inputType="number"
             android:defaultValue="120"
             android:title="@string/pref_max_interval"
@@ -30,11 +30,11 @@
             android:summary="@string/pref_min_dist_summ"/>
         <EditTextPreference android:key="pref_kalman_mps"
             android:inputType="number"
-            android:defaultValue="0"
+            android:defaultValue="3"
             android:title="@string/pref_kalman_mps"
             android:summary="@string/pref_kalman_mps_sum"/>
         <ListPreference
-            android:key="pref_strategy"
+            android:key="pref_loc_strategy"
             android:entries="@array/strategyListOptions"
             android:entryValues="@array/strategyListValues"
             android:defaultValue="PRIORITY_HIGH_ACCURACY"
