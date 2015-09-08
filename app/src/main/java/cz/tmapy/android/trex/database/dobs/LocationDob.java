@@ -1,5 +1,7 @@
 package cz.tmapy.android.trex.database.dobs;
 
+import android.location.Location;
+
 /**
  * Created by kasvo on 8.9.2015.
  */
@@ -18,6 +20,16 @@ public class LocationDob {
     }
 
     ;
+
+    public LocationDob (Location location)
+    {
+        this.gpsTime = location.getTime();
+        this.lat = location.getLatitude();
+        this.lon = location.getLongitude();
+        this.alt = location.getAltitude();
+        this.speed = location.getSpeed();
+        this.bearing = location.getBearing();
+    }
 
     public LocationDob(Long id, Long gpsTime, Double lat, Double lon, Double alt, Float speed, Float bearing, String serverResponse, Long updateTime) {
         this.id = id;
