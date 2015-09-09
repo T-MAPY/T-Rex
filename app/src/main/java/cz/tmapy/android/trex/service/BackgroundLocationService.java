@@ -128,7 +128,7 @@ public class BackgroundLocationService extends Service implements
         //Keep screen on
         if (mKeepScreenOn)
         {
-            mScreenWakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "TRexScreenlockTag");
+            mScreenWakeLock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "TRexScreenlockTag");
             mScreenWakeLock.acquire();
         }
 
