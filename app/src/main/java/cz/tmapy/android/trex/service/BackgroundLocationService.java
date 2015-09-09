@@ -245,7 +245,7 @@ public class BackgroundLocationService extends Service implements
                 mLocationRequest.setPriority(LocationRequest.PRIORITY_NO_POWER);
                 break;
             default:
-                mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+                mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
                 break;
         }
 
