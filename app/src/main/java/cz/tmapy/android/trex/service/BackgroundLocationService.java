@@ -235,8 +235,8 @@ public class BackgroundLocationService extends Service implements
         mLocationRequest.setFastestInterval(1000);
 
         switch (mListPrefs) {
-            case "PRIORITY_HIGH_ACCURACY":
-                mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            case "PRIORITY_BALANCED_POWER_ACCURACY":
+                mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
                 break;
             case "PRIORITY_LOW_POWER":
                 mLocationRequest.setPriority(LocationRequest.PRIORITY_LOW_POWER);
