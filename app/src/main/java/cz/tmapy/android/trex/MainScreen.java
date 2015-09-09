@@ -55,7 +55,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
     private String mTargetServerURL;
     private String mDeviceId;
-    private Boolean mKeepScreenOn = false;
 
     //members for state saving
     private Boolean mLocalizationIsRunning = false;
@@ -115,7 +114,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         sharedPref.registerOnSharedPreferenceChangeListener(this); //to get pref changes to onSharePreferenceChanged
         mDeviceId = sharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
         mTargetServerURL = sharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
-        mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
 
         if (mLocalizationIsRunning)
         {
@@ -253,9 +251,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             case Const.PREF_KEY_TARGET_SERVUER_URL:
                 mTargetServerURL = prefs.getString(key, "");
                 break;
-            case Const.PREF_KEY_KEEP_SCREEN_ON:
-                mKeepScreenOn = prefs.getBoolean(key, false);
-                break;
         }
     }
 
@@ -295,9 +290,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         if (!mTargetServerURL.isEmpty()) {
             if (!mDeviceId.isEmpty()) {
                 if (!mLocalizationIsRunning) {
-
-                    if (mKeepScreenOn)
-                        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
                     //Nastartovani sluzby
                     ComponentName comp = new ComponentName(getApplicationContext().getPackageName(), BackgroundLocationService.class.getName());

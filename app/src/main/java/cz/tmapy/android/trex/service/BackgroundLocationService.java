@@ -60,7 +60,8 @@ public class BackgroundLocationService extends Service implements
 
     private static final String TAG = BackgroundLocationService.class.getName();
 
-    private PowerManager.WakeLock mWakeLock;
+    private PowerManager.WakeLock mPartialWakeLock;
+    private PowerManager.WakeLock mScreenWakeLock;
 
     private LocationsDataSource locationsDataSource;
 
@@ -76,9 +77,10 @@ public class BackgroundLocationService extends Service implements
 
     private int NOTIFICATION = 1975; //Unique number for this notification
 
+    private Boolean mKeepScreenOn;
+    private String mServerResponse;
     private String mTargetServerURL;
     private String mDeviceIdentifier;
-    private String mServerResponse;
     private String mListPrefs;
     private Integer mLocFrequency;
     private Integer mMinDistance;
@@ -100,17 +102,13 @@ public class BackgroundLocationService extends Service implements
     public void onCreate() {
         super.onCreate();
 
-        //Keep CPU on
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TRexWakelockTag");
-        mWakeLock.acquire();
-
         locationsDataSource = new LocationsDataSource(this);
 
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        mKeepScreenOn = mSharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
         mTargetServerURL = mSharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, null);
         mDeviceIdentifier = mSharedPref.getString(Const.PREF_KEY_DEVICE_ID, null);
-        mListPrefs = mSharedPref.getString(Const.PREF_LOC_STRATEGY, null);
+        mListPrefs = mSharedPref.getString(Const.PREF_LOC_STRATEGY, "PRIORITY_HIGH_ACCURACY");
         mLocFrequency = Integer.valueOf(mSharedPref.getString(Const.PREF_LOC_FREQUENCY, "20"));
         mMinDistance = Integer.valueOf(mSharedPref.getString(Const.PREF_MIN_DIST, "60"));
         mSendInterval = Integer.valueOf(mSharedPref.getString(Const.PREF_SEND_INTERVAL, "120"));
@@ -202,11 +200,8 @@ public class BackgroundLocationService extends Service implements
             // Destroy the current location client
             mGoogleApiClient = null;
         }
-        //remove wakelock
-        if (mWakeLock != null) {
-            if (mWakeLock.isHeld()) mWakeLock.release();
-            mWakeLock = null;
-        }
+
+        ReleaseLocks();
 
         mSharedPref.edit().putBoolean(Const.PREF_LOC_IS_RUNNING, false).commit(); //store state
         // Display the connection status
@@ -214,6 +209,17 @@ public class BackgroundLocationService extends Service implements
         if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Stopped");
 
         super.onDestroy();
+    }
+
+    private void ReleaseLocks() {
+        //remove wakelock
+        if (mPartialWakeLock != null && mPartialWakeLock.isHeld()) {
+            mPartialWakeLock.release();
+        }
+        //remove screenwakelock
+        if (mScreenWakeLock != null && mScreenWakeLock.isHeld()) {
+            mScreenWakeLock.release();
+        }
     }
 
     /*
