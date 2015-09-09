@@ -405,7 +405,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         altText.setText(mLastLocationAlt);
 
         TextView speedText = (TextView) findViewById(R.id.text_position_speed);
-        speedText.setText(mLastLocationSpeed);
+        speedText.setText(mLastLocationSpeed + " m/s");
 
         TextView speedBearing = (TextView) findViewById(R.id.text_position_bearing);
         speedBearing.setText(mLastLocationBearing);
