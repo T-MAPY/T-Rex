@@ -12,7 +12,7 @@
     <string name="textview_date">Datum:</string>
     <string name="textview_lat">Zem. šířka:</string>
     <string name="textview_lon">Zem. délka:</string>
-    <string name="textview_alt">Výška:</string>
+    <string name="textview_alt">Nadm. výška:</string>
     <string name="textview_speed">Rychlost:</string>
     <string name="textview_bearing">Směr:</string>
     <string name="pref_location_category">Zjišťování a odesílání polohy</string>
