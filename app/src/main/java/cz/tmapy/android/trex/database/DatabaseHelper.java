@@ -27,7 +27,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void CreateDatabase(SQLiteDatabase db) {
-        LocationsDataSource.CreateTable(db);
+        LocationsDataSource.InitTable(db);
     }
 
     @Override

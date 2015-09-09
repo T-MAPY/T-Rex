@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import cz.tmapy.android.trex.database.dobs.LocationDob;
  * Created by kasvo on 8.9.2015.
  */
 public class LocationsDataSource {
+    private static final String TAG = LocationsDataSource.class.getName();
 
     private static final String TABLE_NAME = "locations";
     private static final String COL_ID = "_id"; //The database tables should use the identifier _id for the primary key of the table. Several Android functions rely on this standard.
@@ -50,10 +52,10 @@ public class LocationsDataSource {
 
     /**
      * Static method to create table
+     *
      * @param db
      */
-    public static void CreateTable (SQLiteDatabase db)
-    {
+    public static void InitTable(SQLiteDatabase db) {
         db.execSQL(DROP_TABLE_SQL);
         db.execSQL(CREATE_TABLE_SQL);
         db.execSQL(CREATE_INDEX);
@@ -71,45 +73,81 @@ public class LocationsDataSource {
         dbHelper.close();
     }
 
-    public Long createLocation(LocationDob loc) {
-        ContentValues values = new ContentValues();
-        values.put(COL_GPS_TIME, loc.getGpsTime());
-        values.put(COL_LAT, loc.getLat());
-        values.put(COL_LON, loc.getLon());
-        values.put(COL_ALT, loc.getAlt());
-        values.put(COL_SPEED, loc.getSpeed());
-        values.put(COL_BEARING, loc.getBearing());
-        values.put(COL_SERVER_RESP, loc.getServerResponse());
+    /**
+     * Complete table erase
+     *
+     * @throws SQLException
+     */
+    public void EraseTable() {
+        try {
+            open();
+            InitTable(database); //sqlite doesn't have TRUNCATE - drop is recomended
+            close();
+        } catch (Exception e) {
+            Log.e(TAG, "Cannot erase table", e);
+        }
+    }
 
-        long insertId = database.insert(TABLE_NAME, null, values);
+
+    public Long createLocation(LocationDob loc) {
+        long insertId = -1;
+
+        try {
+            open();
+            ContentValues values = new ContentValues();
+            values.put(COL_GPS_TIME, loc.getGpsTime());
+            values.put(COL_LAT, loc.getLat());
+            values.put(COL_LON, loc.getLon());
+            values.put(COL_ALT, loc.getAlt());
+            values.put(COL_SPEED, loc.getSpeed());
+            values.put(COL_BEARING, loc.getBearing());
+            values.put(COL_SERVER_RESP, loc.getServerResponse());
+
+            insertId = database.insert(TABLE_NAME, null, values);
+            close();
+        } catch (Exception e) {
+            Log.e(TAG, "Cannot crate location", e);
+        }
+
         return insertId;
     }
 
-    public LocationDob getLast()
-    {
-        Cursor cursor = database.query(TABLE_NAME, allColumns, null, null, null, null, null);
+    public LocationDob getLast() {
+        LocationDob loc = null;
+        try {
+            open();
+            //SELECT * FROM table ORDER BY column DESC LIMIT 1;
+            Cursor cursor = database.query(TABLE_NAME, allColumns, null, null, null, null, COL_ID + " DESC", "1");
+            cursor.moveToFirst();
+            loc = cursorToLocation(cursor);
 
-        cursor.moveToFirst();
-        LocationDob loc = cursorToLocation(cursor);
-
-        // make sure to close the cursor
-        cursor.close();
+            // make sure to close the cursor
+            cursor.close();
+            close();
+        } catch (Exception e) {
+            Log.e(TAG, "Cannot get last location", e);
+        }
         return loc;
     }
 
     public List<LocationDob> getAllLocations() {
         List<LocationDob> locations = new ArrayList<LocationDob>();
+        try {
+            open();
+            Cursor cursor = database.query(TABLE_NAME, allColumns, null, null, null, null, null);
 
-        Cursor cursor = database.query(TABLE_NAME, allColumns, null, null, null, null, null);
-
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            LocationDob loc = cursorToLocation(cursor);
-            locations.add(loc);
-            cursor.moveToNext();
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                LocationDob loc = cursorToLocation(cursor);
+                locations.add(loc);
+                cursor.moveToNext();
+            }
+            // make sure to close the cursor
+            cursor.close();
+            close();
+        } catch (Exception e) {
+            Log.e(TAG, "Cannot read all locations", e);
         }
-        // make sure to close the cursor
-        cursor.close();
         return locations;
     }
 

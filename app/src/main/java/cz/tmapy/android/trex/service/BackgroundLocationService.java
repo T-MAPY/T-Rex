@@ -102,8 +102,6 @@ public class BackgroundLocationService extends Service implements
     public void onCreate() {
         super.onCreate();
 
-        locationsDataSource = new LocationsDataSource(this);
-
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mKeepScreenOn = mSharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
         mTargetServerURL = mSharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, null);
@@ -119,6 +117,9 @@ public class BackgroundLocationService extends Service implements
         // even though I generally walk slower than that.
         // But if travelling in a fast car a much larger number should obviously be used.
         mKalman = new KalmanLatLong(mKalmanMPS);
+
+        locationsDataSource = new LocationsDataSource(this);
+        locationsDataSource.EraseTable();
 
         //Keep CPU on
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
@@ -324,24 +325,9 @@ public class BackgroundLocationService extends Service implements
 
     private void acceptLocation(Location location) {
         mLastAcceptedLocation = location;  //location is accepted even if it is not possible to send
+        //locationsDataSource.createLocation(new LocationDob(location));
         SendAcceptedLocationBroadcast();
-        SavePosition(location);
         SendPosition(location);
-    }
-
-    /**
-     * Save position to the database
-     *
-     * @param location
-     */
-    private void SavePosition(Location location) {
-        try {
-            locationsDataSource.open();
-            locationsDataSource.createLocation(new LocationDob(location));
-            locationsDataSource.close();
-        } catch (SQLException e) {
-            Log.e(TAG, "Cannot load last location from database", e);
-        }
     }
 
     /**
