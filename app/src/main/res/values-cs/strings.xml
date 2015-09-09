@@ -26,8 +26,8 @@
     <string name="pref_max_interval_sum">Maximální doba, po které bude odeslána pozice na server (pokud odeslání nezpůsobila změna vzdálenosti) - měla by být stejná, nebo delší, než frekvence zjišťování polohy</string>
     <string name="textview_http_response_title">Odpověď serveru:</string>
     <string name="pref_device">Nastavení zařízení</string>
-    <string name="pref_keep_screen_on">Nevypínat obrazovku při lokalizaci</string>
-    <string name="pref_keep_screen_on_summ">Udržovat během lokalizace obrazovku stále zapnutou</string>
+    <string name="pref_keep_screen_on">Nevypínat obrazovku</string>
+    <string name="pref_keep_screen_on_summ">Nevypínat obrazovku, pokud je spuštěna aplikace</string>
     <string name="pref_keep_cpu_on">Lokalizovat i po vypnutí obrazovky</string>
     <string name="pref_keep_cpu_on_summ">Odesílat pozici i když je obrazovka vypnutá</string>
     <string name="localiz_run">Lokalizace běží</string>

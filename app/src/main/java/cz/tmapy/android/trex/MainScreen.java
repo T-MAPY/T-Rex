@@ -55,6 +55,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
     private String mTargetServerURL;
     private String mDeviceId;
+    private Boolean mKeepScreenOn;
 
     //members for state saving
     private Boolean mLocalizationIsRunning = false;
@@ -81,7 +82,14 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mActivityTitle = getTitle().toString();
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPref.registerOnSharedPreferenceChangeListener(this); //to get pref changes to onSharePreferenceChanged
         mLocalizationIsRunning = sharedPref.getBoolean(Const.PREF_LOC_IS_RUNNING, false);
+        mDeviceId = sharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
+        mTargetServerURL = sharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
+        mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
+
+        if (mKeepScreenOn)
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         addDrawerItems();
         setupDrawer();
@@ -110,10 +118,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         NewPositionReceiver mPositionReceiver = new NewPositionReceiver();
         // Registers the mPositionReceiver and its intent filters
         LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
-
-        sharedPref.registerOnSharedPreferenceChangeListener(this); //to get pref changes to onSharePreferenceChanged
-        mDeviceId = sharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
-        mTargetServerURL = sharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
 
         if (mLocalizationIsRunning)
         {
@@ -242,6 +246,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 break;
             case Const.PREF_KEY_TARGET_SERVUER_URL:
                 mTargetServerURL = prefs.getString(key, "");
+                break;
+            case Const.PREF_KEY_KEEP_SCREEN_ON:
+                mKeepScreenOn = prefs.getBoolean(key,false);
                 break;
         }
     }

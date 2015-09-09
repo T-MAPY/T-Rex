@@ -61,7 +61,6 @@ public class BackgroundLocationService extends Service implements
     private static final String TAG = BackgroundLocationService.class.getName();
 
     private PowerManager.WakeLock mPartialWakeLock;
-    private PowerManager.WakeLock mScreenWakeLock;
 
     private LocationsDataSource locationsDataSource;
 
@@ -77,7 +76,6 @@ public class BackgroundLocationService extends Service implements
 
     private int NOTIFICATION = 1975; //Unique number for this notification
 
-    private Boolean mKeepScreenOn;
     private String mServerResponse;
     private String mTargetServerURL;
     private String mDeviceIdentifier;
@@ -103,7 +101,6 @@ public class BackgroundLocationService extends Service implements
         super.onCreate();
 
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        mKeepScreenOn = mSharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
         mTargetServerURL = mSharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, null);
         mDeviceIdentifier = mSharedPref.getString(Const.PREF_KEY_DEVICE_ID, null);
         mListPrefs = mSharedPref.getString(Const.PREF_LOC_STRATEGY, "PRIORITY_HIGH_ACCURACY");
@@ -125,12 +122,6 @@ public class BackgroundLocationService extends Service implements
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         mPartialWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TRexWakelockTag");
         mPartialWakeLock.acquire();
-        //Keep screen on
-        if (mKeepScreenOn)
-        {
-            mScreenWakeLock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "TRexScreenlockTag");
-            mScreenWakeLock.acquire();
-        }
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -202,7 +193,10 @@ public class BackgroundLocationService extends Service implements
             mGoogleApiClient = null;
         }
 
-        ReleaseLocks();
+        //remove wakelock
+        if (mPartialWakeLock != null && mPartialWakeLock.isHeld()) {
+            mPartialWakeLock.release();
+        }
 
         mSharedPref.edit().putBoolean(Const.PREF_LOC_IS_RUNNING, false).commit(); //store state
         // Display the connection status
@@ -210,17 +204,6 @@ public class BackgroundLocationService extends Service implements
         if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Stopped");
 
         super.onDestroy();
-    }
-
-    private void ReleaseLocks() {
-        //remove wakelock
-        if (mPartialWakeLock != null && mPartialWakeLock.isHeld()) {
-            mPartialWakeLock.release();
-        }
-        //remove screenwakelock
-        if (mScreenWakeLock != null && mScreenWakeLock.isHeld()) {
-            mScreenWakeLock.release();
-        }
     }
 
     /*

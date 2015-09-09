@@ -27,7 +27,7 @@
     <string name="textview_http_response_title">Server response:</string>
     <string name="pref_device">Device settings</string>
     <string name="pref_keep_screen_on">Keep screen on</string>
-    <string name="pref_keep_screen_on_summ">Keep screen on during localization</string>
+    <string name="pref_keep_screen_on_summ">Keep screen on when application is running</string>
     <string name="pref_keep_cpu_on">Keep CPU on</string>
     <string name="pref_keep_cpu_on_summ">Keep localization even if screen is off</string>
     <string name="localiz_run">Localization is running</string>
