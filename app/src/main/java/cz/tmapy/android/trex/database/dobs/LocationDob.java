@@ -75,9 +75,7 @@ public class LocationDob {
         this.serverResponse = serverResponse;
     }
 
-    public void setUpdateTime(Long updateTime) {
-        this.updateTime = updateTime;
-    }
+    public void setUpdateTime(Long updateTime) { this.updateTime = updateTime;  }
 
     public Long getId() {
         return id;

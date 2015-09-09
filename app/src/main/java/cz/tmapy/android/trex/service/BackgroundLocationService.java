@@ -325,7 +325,7 @@ public class BackgroundLocationService extends Service implements
     private void acceptLocation(Location location) {
         mLastAcceptedLocation = location;  //location is accepted even if it is not possible to send
         SendAcceptedLocationBroadcast();
-        //SavePosition(location);
+        SavePosition(location);
         SendPosition(location);
     }
 
@@ -337,7 +337,7 @@ public class BackgroundLocationService extends Service implements
     private void SavePosition(Location location) {
         try {
             locationsDataSource.open();
-            Long id = locationsDataSource.createLocation(new LocationDob(location));
+            locationsDataSource.createLocation(new LocationDob(location));
             locationsDataSource.close();
         } catch (SQLException e) {
             Log.e(TAG, "Cannot load last location from database", e);

@@ -28,8 +28,10 @@ public class LocationsDataSource {
     private static final String COL_UPDATE_TIME = "update_time";
     private static final String IDX_ID = "id_idx";
 
-    public static final String CREATE_TABLE_SQL = "DROP TABLE IF EXISTS " + TABLE_NAME + "; CREATE TABLE " + TABLE_NAME + "(" +
-            COL_ID + " INTEGER PRIMARY KEY NOT NULL, " +
+    public static final String DROP_TABLE_SQL = "DROP TABLE IF EXISTS " + TABLE_NAME + ";";
+
+    public static final String CREATE_TABLE_SQL = "CREATE TABLE " + TABLE_NAME + " (" +
+            COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
             COL_GPS_TIME + " INTEGER, " +
             COL_LAT + " REAL, " +
             COL_LON + " REAL, " +
@@ -37,8 +39,9 @@ public class LocationsDataSource {
             COL_SPEED + " REAL, " +
             COL_BEARING + " REAL, " +
             COL_SERVER_RESP + " TEXT, " +
-            COL_UPDATE_TIME + " INTEGER DEFAULT CURRENT_TIMESTAMP);" +
-            "CREATE INDEX " + IDX_ID + " ON WORD (" + COL_ID + ");";
+            COL_UPDATE_TIME + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP);";
+
+    public static final String CREATE_INDEX = "CREATE INDEX " + IDX_ID + " ON " + TABLE_NAME + " (" + COL_ID + ");";
 
     // Database fields
     private SQLiteDatabase database;
@@ -51,7 +54,9 @@ public class LocationsDataSource {
      */
     public static void CreateTable (SQLiteDatabase db)
     {
+        db.execSQL(DROP_TABLE_SQL);
         db.execSQL(CREATE_TABLE_SQL);
+        db.execSQL(CREATE_INDEX);
     }
 
     public LocationsDataSource(Context context) {
