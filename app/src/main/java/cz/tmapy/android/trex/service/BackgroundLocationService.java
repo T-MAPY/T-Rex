@@ -122,6 +122,17 @@ public class BackgroundLocationService extends Service implements
         // But if travelling in a fast car a much larger number should obviously be used.
         mKalman = new KalmanLatLong(mKalmanMPS);
 
+        //Keep CPU on
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        mPartialWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TRexWakelockTag");
+        mPartialWakeLock.acquire();
+        //Keep screen on
+        if (mKeepScreenOn)
+        {
+            mScreenWakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "TRexScreenlockTag");
+            mScreenWakeLock.acquire();
+        }
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
