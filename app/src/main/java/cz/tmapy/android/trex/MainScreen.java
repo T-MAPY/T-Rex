@@ -117,7 +117,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
         if (mLocalizationIsRunning)
         {
-            //LoadLastLocationFromDb();
+           LoadLastLocationFromDb();
         }
 
         // 1) localization is not running - activity was not executed from service
@@ -136,15 +136,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
      * Loads last connection from database
      */
     private void LoadLastLocationFromDb() {
-
-        try {
-            locationsDataSource.open();
-            List<LocationDob> values = locationsDataSource.getAllLocations();
-            locationsDataSource.close();
-        } catch (SQLException e) {
-            Log.e(TAG,"Cannot load last location from database",e);
-        }
-
+        LocationDob l = locationsDataSource.getLast();
     }
 
     private void addDrawerItems() {
