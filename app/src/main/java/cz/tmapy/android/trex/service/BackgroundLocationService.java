@@ -36,9 +36,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -58,23 +60,23 @@ public class BackgroundLocationService extends Service implements
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
+    IBinder mBinder = new LocalBinder();
+
     private static final String TAG = BackgroundLocationService.class.getName();
+    private int NOTIFICATION = 1975; //Unique number for this notification
+
+    private final int MAX_BUFFER_SIZE = 5000; //1 day when send every 20sec
 
     private PowerManager.WakeLock mPartialWakeLock;
 
-    private LocationsDataSource locationsDataSource;
+    private GoogleApiClient mGoogleApiClient;
 
     SharedPreferences mSharedPref;
-
-    IBinder mBinder = new LocalBinder();
 
     KalmanLatLong mKalman;
 
     private Location mLastAcceptedLocation; //last accepted location, filtered by Mr. Kalman
-
-    private GoogleApiClient mGoogleApiClient;
-
-    private int NOTIFICATION = 1975; //Unique number for this notification
+    private List<Location> locationsToSend = new ArrayList<Location>(); //cach of locations to send
 
     private String mServerResponse;
     private String mTargetServerURL;
@@ -115,9 +117,6 @@ public class BackgroundLocationService extends Service implements
         // But if travelling in a fast car a much larger number should obviously be used.
         mKalman = new KalmanLatLong(mKalmanMPS);
 
-        locationsDataSource = new LocationsDataSource(this);
-        locationsDataSource.EraseTable();
-
         //Keep CPU on
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         mPartialWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TRexWakelockTag");
@@ -139,7 +138,7 @@ public class BackgroundLocationService extends Service implements
             mGoogleApiClient.connect();
 
             NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(this)
+            new NotificationCompat.Builder(this)
                             .setSmallIcon(R.drawable.trainers)
                             .setContentTitle(getResources().getString(R.string.notif_title))
                             .setContentText(getResources().getString(R.string.notif_text))
@@ -306,24 +305,30 @@ public class BackgroundLocationService extends Service implements
     private void SendPosition(Location location) {
 
         if (mTargetServerURL != null && !mTargetServerURL.isEmpty()) {
+            locationsToSend.add(location);
+            if (locationsToSend.size() > MAX_BUFFER_SIZE) locationsToSend.remove(0); //if buffer overfill, remove first in list
             if (isNetworkOnline()) {
+                URL url = null;
+                try {
+                    url = new URL(mTargetServerURL);
+                } catch (Exception e) {
+                    Toast.makeText(this, "Bad URL: '" + mTargetServerURL + "'", Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Bad URL", e);
+                    return;
+                }
 
-                String lastUpdateTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(location.getTime());//2014-06-28T15:07:59
-                String lat = Double.toString(location.getLatitude());
-                String lon = Double.toString(location.getLongitude());
-                String alt = Double.toString(location.getAltitude());
-                String speed = Float.toString(location.getSpeed());
-                String bearing = Float.toString(location.getBearing());
-
-                new NetworkTask().execute(mTargetServerURL, mDeviceIdentifier, lastUpdateTime, lat, lon, alt, speed, bearing);
+                NetworkTask nt = new NetworkTask(url, mDeviceIdentifier);
+                nt.execute(locationsToSend);
+                locationsToSend = new ArrayList<Location>(); //Clean buffer
 
                 if (Const.LOG_ENHANCED)
-                    Log.i(TAG, "Position sent to server " + lat + ", " + lon);
+                    Log.i(TAG, "Position sent to server - lat: " + location.getLatitude() + ", lon: " + location.getLongitude());
             } else {
-                Toast.makeText(this, "Cannot connect to server: '" + mTargetServerURL + "'", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.cannot_connect_to_server, Toast.LENGTH_SHORT).show();
                 if (Const.LOG_BASIC)
-                    Log.e(TAG, "Cannot connect to server: '" + mTargetServerURL + "'");
+                    Log.w(TAG, "Cannot connect to server: '" + mTargetServerURL + "'");
             }
+
         } else {
             Toast.makeText(this, "Missing target server URL", Toast.LENGTH_LONG).show();
             if (Const.LOG_BASIC) Log.e(TAG, "Missing target server URL");
@@ -377,51 +382,63 @@ public class BackgroundLocationService extends Service implements
     /**
      * Private class for sending data
      */
-    private class NetworkTask extends AsyncTask<String, Void, String> {
+    private class NetworkTask extends AsyncTask<List<Location>, Void, String> {
+
+        private URL mTargetUrl;
+        private String mDeviceId;
+
+        public NetworkTask(URL url, String deviceId) {
+            mTargetUrl = url;
+            mDeviceId = deviceId;
+        }
+
         @Override
-        protected String doInBackground(String... params) {
-            String response = "";
+        protected String doInBackground(List<Location>... locations) {
+            String lastResponse = "";
             try {
-                URL url = new URL(params[0]);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout((mLocFrequency - 1) * 1000);
-                conn.setConnectTimeout((mLocFrequency - 1) * 1000);
-                conn.setRequestMethod("POST");
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
+                for (Location location : locations[0]) {
+                    lastResponse = ""; //reset last response for each location
+                    HttpURLConnection conn = (HttpURLConnection) mTargetUrl.openConnection();
+                    conn.setReadTimeout((mLocFrequency - 1) * 1000);
+                    conn.setConnectTimeout((mLocFrequency - 1) * 1000);
+                    conn.setRequestMethod("POST");
+                    conn.setDoInput(true);
+                    conn.setDoOutput(true);
 
-                HashMap<String, String> postDataParams = new HashMap<>();
-                postDataParams.put("i", params[1]);
-                postDataParams.put("t", params[2]);
-                postDataParams.put("a", params[3]);
-                postDataParams.put("o", params[4]);
-                postDataParams.put("l", params[5]);
-                postDataParams.put("s", params[6]);
-                postDataParams.put("b", params[7]);
+                    HashMap<String, String> postDataParams = new HashMap<>();
+                    postDataParams.put("i", mDeviceId);
+                    postDataParams.put("t", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(location.getTime()));//2014-06-28T15:07:59
+                    postDataParams.put("a", Double.toString(location.getLatitude()));
+                    postDataParams.put("o", Double.toString(location.getLongitude()));
+                    postDataParams.put("l", Double.toString(location.getAltitude()));
+                    postDataParams.put("s", Float.toString(location.getSpeed()));
+                    postDataParams.put("b", Float.toString(location.getBearing()));
 
-                OutputStream os = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-                writer.write(getPostDataString(postDataParams));
-                writer.flush();
-                writer.close();
-                os.close();
+                    OutputStream os = conn.getOutputStream();
+                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+                    writer.write(getPostDataString(postDataParams));
+                    writer.flush();
+                    writer.close();
+                    os.close();
 
-                int responseCode = conn.getResponseCode();
+                    int responseCode = conn.getResponseCode();
 
-                if (responseCode == HttpsURLConnection.HTTP_OK) {
-                    String line;
-                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    while ((line = br.readLine()) != null) {
-                        response += line;
+                    if (responseCode == HttpsURLConnection.HTTP_OK) {
+                        String line;
+                        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                        while ((line = br.readLine()) != null) {
+                            lastResponse += line;
+                        }
+                    } else {
+                        lastResponse = "HTTP response: " + responseCode;
                     }
-                } else {
-                    response = "HTTP response: " + responseCode;
                 }
             } catch (Exception e) {
-                if (Const.LOG_BASIC) Log.e(TAG, "Network connection:", e);
-                response = e.getLocalizedMessage();
+                Log.e(TAG, "Network connection error:", e);
+                lastResponse = e.getLocalizedMessage();
             }
-            return response;
+
+            return lastResponse;
         }
 
         private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {

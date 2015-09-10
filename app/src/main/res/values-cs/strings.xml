@@ -55,4 +55,6 @@
     <string name="pref_kalman_mps_sum">Nastavte filtrování pozic GPS pomocí obvyklé rychlosti v metrech za sekundu (0 - vypnuto, 3 - chůze, 8 - kolo, 15 - vozidlo ve městě)</string>
     <string name="test_exception">Testovací výjimka</string>
     <string name="test_exception_message">Potvrzením dialogu vyvoláte testovací výjimku.</string>
+    <string name="cannot_connect_to_server">Nejste připojeni k síti - pozice bude odeslána později</string>
+    <string name="cannot_check_new_version">Nepodařilo se ověřit novou verzi aplikace</string>
 </resources>

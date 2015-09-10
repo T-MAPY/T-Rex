@@ -55,4 +55,6 @@
     <string name="pref_kalman_mps_sum">Set filtering of locations by usual speed in meters per seconds (0 - disabled, 3 - walking, 7 - biking, 15 - driving city)</string>
     <string name="test_exception">Test exception</string>
     <string name="test_exception_message">Confirm dialog to raise testing exception.</string>
+    <string name="cannot_connect_to_server">Network connection disabled - position will be send later</string>
+    <string name="cannot_check_new_version">Can\'t check for new version</string>
 </resources>

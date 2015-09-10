@@ -56,7 +56,7 @@ public class Updater extends AsyncTask<Void, Void, String> {
             return sBuilder.toString();
 
         } catch (Exception e) {
-            if (Const.LOG_BASIC) Log.e(TAG, "Check for update error!", e);
+            Log.e(TAG, "Check for update error!", e);
         }
         return null;
     }
@@ -90,7 +90,7 @@ public class Updater extends AsyncTask<Void, Void, String> {
                 if (Const.LOG_BASIC) Log.e(TAG, "Check application version error ", e);
             }
         } else {
-            Toast.makeText(mActivity, "Cannot check new version!", Toast.LENGTH_LONG).show();
+            Toast.makeText(mActivity, R.string.cannot_check_new_version, Toast.LENGTH_LONG).show();
         }
     }
 }
