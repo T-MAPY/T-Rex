@@ -1,5 +1,6 @@
 package cz.tmapy.android.trex;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -13,7 +14,6 @@ import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
@@ -31,12 +31,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.List;
 
-import cz.tmapy.android.trex.database.LocationsDataSource;
-import cz.tmapy.android.trex.database.dobs.LocationDob;
 import cz.tmapy.android.trex.drawer.DrawerItemCustomAdapter;
 import cz.tmapy.android.trex.drawer.ObjectDrawerItem;
 import cz.tmapy.android.trex.service.BackgroundLocationService;
@@ -67,29 +63,23 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private String mLastLocationBearing;
     private String mLastServerResponse;
 
-    private LocationsDataSource locationsDataSource;
+    SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
 
-        locationsDataSource = new LocationsDataSource(this);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPref.registerOnSharedPreferenceChangeListener(this); //to get pref changes to onSharePreferenceChanged
+        mDeviceId = sharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
+        mTargetServerURL = sharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
+        mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
 
         mNavigationDrawerItemTitles = getResources().getStringArray(R.array.drawer_menu);
         mNavigationDrawerList = (ListView) findViewById(R.id.navList);
         mNavigationDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mActivityTitle = getTitle().toString();
-
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPref.registerOnSharedPreferenceChangeListener(this); //to get pref changes to onSharePreferenceChanged
-        mLocalizationIsRunning = sharedPref.getBoolean(Const.PREF_LOC_IS_RUNNING, false);
-        mDeviceId = sharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
-        mTargetServerURL = sharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
-        mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
-
-        if (mKeepScreenOn)
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         addDrawerItems();
         setupDrawer();
@@ -107,10 +97,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             }
         });
 
-        if (mLocalizationIsRunning) {
-            toggle.setChecked(true); //nastav tlačítko na True
-        }
-
         //Registrace broadcastreceiveru komunikaci se sluzbou (musi byt tady, aby fungoval i po nove inicializaci aplikace z notifikace
         // The filter's action is BROADCAST_ACTION
         IntentFilter mIntentFilter = new IntentFilter(Const.LOCATION_BROADCAST);
@@ -119,9 +105,10 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         // Registers the mPositionReceiver and its intent filters
         LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
 
-        if (mLocalizationIsRunning)
-        {
-           LoadLastLocationFromDb();
+        mLocalizationIsRunning = isServiceRunning(BackgroundLocationService.class);
+        if (mLocalizationIsRunning) {
+            RestoreGUIFromPreferences();
+            toggle.setChecked(true);
         }
 
         // 1) localization is not running - activity was not executed from service
@@ -129,6 +116,10 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         // 3) automatic check for update is enabled
         if (!mLocalizationIsRunning && savedInstanceState == null && sharedPref.getBoolean("pref_check4update", true))
             new Updater(MainScreen.this).execute();
+
+        if (mKeepScreenOn)
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         //ACRA.getErrorReporter().putCustomData("myKey", "myValue");
         //ACRA.getErrorReporter().handleException(new Exception("Test exception"));
 
@@ -137,10 +128,18 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     }
 
     /**
-     * Loads last connection from database
+     * Check service is running
+     * @param serviceClass
+     * @return
      */
-    private void LoadLastLocationFromDb() {
-        LocationDob l = locationsDataSource.getLast();
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void addDrawerItems() {
@@ -248,7 +247,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 mTargetServerURL = prefs.getString(key, "");
                 break;
             case Const.PREF_KEY_KEEP_SCREEN_ON:
-                mKeepScreenOn = prefs.getBoolean(key,false);
+                mKeepScreenOn = prefs.getBoolean(key, false);
                 break;
         }
     }
@@ -296,6 +295,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
                     if (null != service) {
                         mLocalizationIsRunning = true;
+
                         return true;
                     }
 
@@ -428,6 +428,11 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         }
     }
 
+    /**
+     * Used when app is restarted with passed state bundle
+     *
+     * @param savedInstanceState
+     */
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         // Restore state members from saved instance
@@ -441,6 +446,33 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         UpdateGUI();
 
         super.onRestoreInstanceState(savedInstanceState); //restore after set mLocalizationIsRunning (because of button state)
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();  // Always call the superclass method first
+        //store last know position
+        sharedPref.edit().putString(Const.PREF_LAST_LOCATION_TIME, mLastLocationTime).apply();
+        sharedPref.edit().putString(Const.PREF_LAST_LOCATION_LAT, mLastLocationLat).apply();
+        sharedPref.edit().putString(Const.PREF_LAST_LOCATION_LON, mLastLocationLon).apply();
+        sharedPref.edit().putString(Const.PREF_LAST_LOCATION_ALT, mLastLocationAlt).apply();
+        sharedPref.edit().putString(Const.PREF_LAST_LOCATION_SPEED, mLastLocationSpeed).apply();
+        sharedPref.edit().putString(Const.PREF_LAST_LOCATION_BEARING, mLastLocationBearing).apply();
+        sharedPref.edit().putString(Const.PREF_LAST_SERVER_RESPONSE, mLastServerResponse).apply();
+    }
+
+    /**
+     * Load last state from preferences
+     */
+    public void RestoreGUIFromPreferences() {
+        mLastLocationTime = sharedPref.getString(Const.PREF_LAST_LOCATION_TIME, "");
+        mLastLocationLat = sharedPref.getString(Const.PREF_LAST_LOCATION_LAT, "");
+        mLastLocationLon = sharedPref.getString(Const.PREF_LAST_LOCATION_LON, "");
+        mLastLocationAlt = sharedPref.getString(Const.PREF_LAST_LOCATION_ALT, "");
+        mLastLocationSpeed = sharedPref.getString(Const.PREF_LAST_LOCATION_SPEED, "");
+        mLastLocationBearing = sharedPref.getString(Const.PREF_LAST_LOCATION_BEARING, "");
+        mLastServerResponse = sharedPref.getString(Const.PREF_LAST_SERVER_RESPONSE, "");
+        UpdateGUI();
     }
 }
 
