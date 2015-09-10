@@ -170,40 +170,11 @@ public class BackgroundLocationService extends Service implements
 
             startForeground(NOTIFICATION, notification); //spuštění služby s vyšší prioritou na popředí - http://developer.android.com/reference/android/app/Service.html
 
-            mSharedPref.edit().putBoolean(Const.PREF_LOC_IS_RUNNING, true).commit(); //store state
-
             if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Started");
             Toast.makeText(this, R.string.localiz_started, Toast.LENGTH_SHORT).show();
         }
 
         return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-
-        stopForeground(true); //http://developer.android.com/reference/android/app/Service.html
-
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-
-            mGoogleApiClient.disconnect();
-            // Destroy the current location client
-            mGoogleApiClient = null;
-        }
-
-        //remove wakelock
-        if (mPartialWakeLock != null && mPartialWakeLock.isHeld()) {
-            mPartialWakeLock.release();
-        }
-
-        mSharedPref.edit().putBoolean(Const.PREF_LOC_IS_RUNNING, false).commit(); //store state
-        // Display the connection status
-        Toast.makeText(this, R.string.localiz_stopped, Toast.LENGTH_SHORT).show();
-        if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Stopped");
-
-        super.onDestroy();
     }
 
     /*
@@ -313,6 +284,20 @@ public class BackgroundLocationService extends Service implements
         SendPosition(location);
     }
 
+
+    /**
+     * Checks network connectivity
+     *
+     * @return
+     */
+    public boolean isNetworkOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
+
     /**
      * Send location to the server
      *
@@ -363,17 +348,30 @@ public class BackgroundLocationService extends Service implements
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }
 
-    /**
-     * Checks network connectivity
-     *
-     * @return
-     */
-    public boolean isNetworkOnline() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+    @Override
+    public void onDestroy() {
 
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        stopForeground(true); //http://developer.android.com/reference/android/app/Service.html
+
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+
+            mGoogleApiClient.disconnect();
+            // Destroy the current location client
+            mGoogleApiClient = null;
+        }
+
+        //remove wakelock
+        if (mPartialWakeLock != null && mPartialWakeLock.isHeld()) {
+            mPartialWakeLock.release();
+        }
+
+        // Display the connection status
+        Toast.makeText(this, R.string.localiz_stopped, Toast.LENGTH_SHORT).show();
+        if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Stopped");
+
+        super.onDestroy();
     }
 
     /**
