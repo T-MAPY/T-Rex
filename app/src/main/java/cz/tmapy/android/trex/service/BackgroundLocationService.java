@@ -319,6 +319,10 @@ public class BackgroundLocationService extends Service implements
 
                 NetworkTask nt = new NetworkTask(url, mDeviceIdentifier);
                 nt.execute(locationsToSend);
+
+                if (locationsToSend.size() > 1)
+                    Toast.makeText(this, R.string.buffered_locations_sent, Toast.LENGTH_SHORT).show();
+
                 locationsToSend = new ArrayList<Location>(); //Clean buffer
 
                 if (Const.LOG_ENHANCED)
@@ -433,6 +437,7 @@ public class BackgroundLocationService extends Service implements
                         lastResponse = "HTTP response: " + responseCode;
                     }
                 }
+
             } catch (Exception e) {
                 Log.e(TAG, "Network connection error:", e);
                 lastResponse = e.getLocalizedMessage();

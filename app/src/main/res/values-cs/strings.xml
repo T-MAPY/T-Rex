@@ -57,4 +57,5 @@
     <string name="test_exception_message">Potvrzením dialogu vyvoláte testovací výjimku.</string>
     <string name="cannot_connect_to_server">Nejste připojeni k síti - pozice bude odeslána později</string>
     <string name="cannot_check_new_version">Nepodařilo se ověřit novou verzi aplikace</string>
+    <string name="buffered_locations_sent">Předchozí pozice byly odeslány na server</string>
 </resources>

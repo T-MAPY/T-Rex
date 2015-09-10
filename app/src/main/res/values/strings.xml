@@ -57,4 +57,5 @@
     <string name="test_exception_message">Confirm dialog to raise testing exception.</string>
     <string name="cannot_connect_to_server">Network connection disabled - position will be send later</string>
     <string name="cannot_check_new_version">Can\'t check for new version</string>
+    <string name="buffered_locations_sent">Previous locations sent to server</string>
 </resources>
