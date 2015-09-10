@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -30,6 +31,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import org.acra.ACRA;
 
 import java.text.SimpleDateFormat;
 
@@ -199,6 +202,23 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     protected void showAbout() {
         // Inflate the about message contents
         View messageView = getLayoutInflater().inflate(R.layout.about_dialog, null, false);
+
+        messageView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                new AlertDialog.Builder(MainScreen.this)
+                        .setTitle(R.string.test_exception)
+                        .setMessage(R.string.test_exception_message)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                ACRA.getErrorReporter().handleException(new Exception("TEST EXCEPTION"));
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, null).show();
+                return true;
+            }
+        });
 
         PackageInfo pInfo = null;
         try {

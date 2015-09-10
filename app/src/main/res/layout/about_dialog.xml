@@ -12,5 +12,4 @@
         android:gravity="left"
         android:text="@string/app_credits"
         android:autoLink="web"/>
-
 </LinearLayout>

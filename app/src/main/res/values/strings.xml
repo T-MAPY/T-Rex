@@ -53,4 +53,6 @@
     <string name="app_credits">T-MAPY spol. s r.o.\nApache License 2.0\nhttps://github.com/T-MAPY/T-Rex</string>
     <string name="pref_kalman_mps">Kalman filter (mps)</string>
     <string name="pref_kalman_mps_sum">Set filtering of locations by usual speed in meters per seconds (0 - disabled, 3 - walking, 7 - biking, 15 - driving city)</string>
+    <string name="test_exception">Test exception</string>
+    <string name="test_exception_message">Confirm dialog to raise testing exception.</string>
 </resources>
