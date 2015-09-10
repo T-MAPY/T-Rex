@@ -13,6 +13,7 @@ import java.util.List;
 import cz.tmapy.android.trex.database.dobs.LocationDob;
 
 /**
+ * Manage Location table
  * Created by kasvo on 8.9.2015.
  */
 public class LocationsDataSource {

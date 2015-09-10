@@ -8,6 +8,7 @@ import android.util.Log;
 import cz.tmapy.android.trex.Const;
 
 /**
+ * Called by system to initialize database
  * Created by kasvo on 7.9.2015.
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
