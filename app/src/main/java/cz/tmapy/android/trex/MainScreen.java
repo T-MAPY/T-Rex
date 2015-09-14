@@ -15,6 +15,7 @@ import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
@@ -59,11 +60,13 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     //members for state saving
     private Boolean mLocalizationIsRunning = false;
     private String mLastLocationTime;
-    private String mLastLocationLat;
-    private String mLastLocationLon;
+    private String mAccuracy;
     private String mLastLocationAlt;
     private String mLastLocationSpeed;
-    private String mLastLocationBearing;
+    private String mAddress;
+    private String mDirectDistanceToStart;
+    private String mEstimatedDistance;
+    private String mDuration;
     private String mLastServerResponse;
 
     SharedPreferences sharedPref;
@@ -78,6 +81,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mDeviceId = sharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
         mTargetServerURL = sharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
         mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
+        HandleKeepScreenOn();
 
         mNavigationDrawerItemTitles = getResources().getStringArray(R.array.drawer_menu);
         mNavigationDrawerList = (ListView) findViewById(R.id.navList);
@@ -120,9 +124,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         if (!mLocalizationIsRunning && savedInstanceState == null && sharedPref.getBoolean("pref_check4update", true))
             new Updater(MainScreen.this).execute();
 
-        if (mKeepScreenOn)
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         //ACRA.getErrorReporter().putCustomData("myKey", "myValue");
         //ACRA.getErrorReporter().handleException(new Exception("Test exception"));
 
@@ -132,6 +133,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
     /**
      * Check service is running
+     *
      * @param serviceClass
      * @return
      */
@@ -268,8 +270,20 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 break;
             case Const.PREF_KEY_KEEP_SCREEN_ON:
                 mKeepScreenOn = prefs.getBoolean(key, false);
+                HandleKeepScreenOn();
                 break;
         }
+    }
+
+    /**
+     * Handle "keep screen on" flag
+     */
+    private void HandleKeepScreenOn() {
+        if (mKeepScreenOn) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else
+            //remove flag, if any
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
@@ -314,8 +328,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                     ComponentName service = getApplicationContext().startService(new Intent().setComponent(comp));
 
                     if (null != service) {
+                        resetGUI();
                         mLocalizationIsRunning = true;
-
                         return true;
                     }
 
@@ -346,35 +360,39 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         if (mLocalizationIsRunning) {
             ComponentName comp = new ComponentName(getApplicationContext().getPackageName(), BackgroundLocationService.class.getName());
             getApplicationContext().stopService(new Intent().setComponent(comp));
-
-            TextView dateText = (TextView) findViewById(R.id.text_position_date);
-            dateText.setText(null);
-
-            TextView latText = (TextView) findViewById(R.id.text_position_lat);
-            latText.setText(null);
-
-            TextView lonText = (TextView) findViewById(R.id.text_position_lon);
-            lonText.setText(null);
-
-            TextView altText = (TextView) findViewById(R.id.text_position_alt);
-            altText.setText(null);
-
-            TextView speedText = (TextView) findViewById(R.id.text_position_speed);
-            speedText.setText(null);
-
-            TextView speedBearing = (TextView) findViewById(R.id.text_position_bearing);
-            speedBearing.setText(null);
-
-            TextView respText = (TextView) findViewById(R.id.text_http_response);
-            respText.setText(null);
-
-            //remove flag, if any
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         } else
             Toast.makeText(this, R.string.localiz_not_run, Toast.LENGTH_SHORT).show();
 
         mLocalizationIsRunning = false;
+    }
+
+    private void resetGUI() {
+        TextView dateText = (TextView) findViewById(R.id.text_position_date);
+        dateText.setText(null);
+
+        TextView durationText = (TextView) findViewById(R.id.text_duration);
+        durationText.setText(null);
+
+        TextView accuText = (TextView) findViewById(R.id.text_position_accuracy);
+        accuText.setText(null);
+
+        TextView directDistToStartText = (TextView) findViewById(R.id.text_direct_distance_to_start);
+        directDistToStartText.setText(null);
+
+        TextView estDist = (TextView) findViewById(R.id.text_estimated_distance);
+        estDist.setText(null);
+
+        TextView altText = (TextView) findViewById(R.id.text_position_alt);
+        altText.setText(null);
+
+        TextView speedText = (TextView) findViewById(R.id.text_position_speed);
+        speedText.setText(null);
+
+        TextView addressText = (TextView) findViewById(R.id.text_address);
+        addressText.setText(null);
+
+        TextView respText = (TextView) findViewById(R.id.text_http_response);
+        respText.setText(null);
     }
 
     /**
@@ -395,42 +413,78 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
          */
         @Override
         public void onReceive(Context context, Intent intent) {
-            Location newLocation = (Location) intent.getExtras().get(Const.EXTRAS_POSITION_DATA);
-            mLastServerResponse = intent.getStringExtra(Const.EXTRAS_SERVER_RESPONSE);
-            if (newLocation != null) {
+            Location location = (Location) intent.getExtras().get(Const.POSITION);
+            if (location != null) {
                 //2014-06-28T15:07:59
-                mLastLocationTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(newLocation.getTime());
-                mLastLocationLat = Double.toString(newLocation.getLatitude());
-                mLastLocationLon = Double.toString(newLocation.getLongitude());
-                mLastLocationAlt = String.valueOf(newLocation.getAltitude());
-                mLastLocationSpeed = String.valueOf(newLocation.getSpeed());
-                mLastLocationBearing = String.valueOf(newLocation.getBearing());
+                mLastLocationTime = new SimpleDateFormat("HH:mm:ss").format(location.getTime());
+                mLastLocationAlt = String.format("%.0f", location.getAltitude());
+                mLastLocationSpeed = String.format("%.0f", (location.getSpeed() / 1000) * 3600);
+                mAccuracy = String.format("%.1f", location.getAccuracy());
             }
+            if (intent.hasExtra(Const.DIRECT_DISTANCE_TO_START))
+                mDirectDistanceToStart = String.format("%.2f", (intent.getFloatExtra(Const.DIRECT_DISTANCE_TO_START, 0.0f) / 1000));
+
+            if (intent.hasExtra(Const.ESTIMATED_DISTANCE))
+                mEstimatedDistance = String.format("%.2f", (intent.getFloatExtra(Const.ESTIMATED_DISTANCE, 0.0f) / 1000));
+
+            if (intent.hasExtra(Const.DURATION)) {
+                Long d = intent.getLongExtra(Const.DURATION, 0l) / 1000;
+                mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
+            }
+
+            if (intent.hasExtra(Const.ADDRESS)) {
+                String adr = intent.getStringExtra(Const.ADDRESS);
+                if (adr != null)
+                    mAddress = adr;
+            }
+
+            mLastServerResponse = intent.getStringExtra(Const.SERVER_RESPONSE);
+
             UpdateGUI();
         }
     }
 
     private void UpdateGUI() {
+
         TextView dateText = (TextView) findViewById(R.id.text_position_date);
         dateText.setText(mLastLocationTime);
 
-        TextView latText = (TextView) findViewById(R.id.text_position_lat);
-        latText.setText(mLastLocationLat);
+        if (mDuration != null) {
+            TextView durationText = (TextView) findViewById(R.id.text_duration);
+            durationText.setText(mDuration);
+        }
 
-        TextView lonText = (TextView) findViewById(R.id.text_position_lon);
-        lonText.setText(mLastLocationLon);
+        if (mAccuracy != null) {
+            TextView accuracy = (TextView) findViewById(R.id.text_position_accuracy);
+            accuracy.setText(mAccuracy + " m");
+        }
 
-        TextView altText = (TextView) findViewById(R.id.text_position_alt);
-        altText.setText(mLastLocationAlt + " m");
+        if (mEstimatedDistance != null) {
+            TextView estDist = (TextView) findViewById(R.id.text_estimated_distance);
+            estDist.setText(mEstimatedDistance + " km");
+        }
+        if (mDirectDistanceToStart != null) {
+            TextView distanceToStart = (TextView) findViewById(R.id.text_direct_distance_to_start);
+            distanceToStart.setText(mDirectDistanceToStart + " km");
 
-        TextView speedText = (TextView) findViewById(R.id.text_position_speed);
-        speedText.setText(mLastLocationSpeed + " m/s");
+            if (mLastLocationSpeed != null) {
+                TextView speedText = (TextView) findViewById(R.id.text_position_speed);
+                speedText.setText(mLastLocationSpeed + " km/h");
+            }
 
-        TextView speedBearing = (TextView) findViewById(R.id.text_position_bearing);
-        speedBearing.setText(mLastLocationBearing);
-
-        TextView httpRespText = (TextView) findViewById(R.id.text_http_response);
-        httpRespText.setText(mLastServerResponse);
+            if (mLastLocationAlt != null) {
+                TextView altText = (TextView) findViewById(R.id.text_position_alt);
+                altText.setText(mLastLocationAlt + " m");
+            }
+        }
+        if (mAddress != null) {
+            TextView address = (TextView) findViewById(R.id.text_address);
+            address.setText(mAddress);
+        }
+        if (mLastServerResponse != null) {
+            TextView httpRespText = (TextView) findViewById(R.id.text_http_response);
+            httpRespText.setText(mLastServerResponse);
+        }
     }
 
     @Override
@@ -438,13 +492,21 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         super.onSaveInstanceState(savedInstanceState);
         if (mLocalizationIsRunning) {
             // Save the user's current state
-            savedInstanceState.putString(Const.STATE_LAST_LOCATION_TIME, mLastLocationTime);
-            savedInstanceState.putString(Const.STATE_LAST_LOCATION_LAT, mLastLocationLat);
-            savedInstanceState.putString(Const.STATE_LAST_LOCATION_LON, mLastLocationLon);
-            savedInstanceState.putString(Const.STATE_LAST_LOCATION_ALT, mLastLocationAlt);
-            savedInstanceState.putString(Const.STATE_LAST_LOCATION_SPEED, mLastLocationSpeed);
-            savedInstanceState.putString(Const.STATE_LAST_LOCATION_BEARING, mLastLocationBearing);
-            savedInstanceState.putString(Const.STATE_LAST_SERVER_RESPONSE, mLastServerResponse);
+            if (mLastLocationTime != null)
+                savedInstanceState.putString(Const.LOCATION_TIME, mLastLocationTime);
+            if (mAccuracy != null) savedInstanceState.putString(Const.ACCURACY, mAccuracy);
+            if (mDuration != null) savedInstanceState.putString(Const.DURATION, mDuration);
+            if (mDirectDistanceToStart != null)
+                savedInstanceState.putString(Const.DIRECT_DISTANCE_TO_START, mDirectDistanceToStart);
+            if (mEstimatedDistance != null)
+                savedInstanceState.putString(Const.ESTIMATED_DISTANCE, mEstimatedDistance);
+            if (mLastLocationAlt != null)
+                savedInstanceState.putString(Const.ALTITUDE, mLastLocationAlt);
+            if (mLastLocationSpeed != null)
+                savedInstanceState.putString(Const.SPEED, mLastLocationSpeed);
+            if (mAddress != null) savedInstanceState.putString(Const.ADDRESS, mAddress);
+            if (mLastServerResponse != null)
+                savedInstanceState.putString(Const.SERVER_RESPONSE, mLastServerResponse);
         }
     }
 
@@ -456,13 +518,15 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         // Restore state members from saved instance
-        mLastLocationTime = savedInstanceState.getString(Const.STATE_LAST_LOCATION_TIME);
-        mLastLocationLat = savedInstanceState.getString(Const.STATE_LAST_LOCATION_LAT);
-        mLastLocationLon = savedInstanceState.getString(Const.STATE_LAST_LOCATION_LON);
-        mLastLocationAlt = savedInstanceState.getString(Const.STATE_LAST_LOCATION_ALT);
-        mLastLocationSpeed = savedInstanceState.getString(Const.STATE_LAST_LOCATION_SPEED);
-        mLastLocationBearing = savedInstanceState.getString(Const.STATE_LAST_LOCATION_BEARING);
-        mLastServerResponse = savedInstanceState.getString(Const.STATE_LAST_SERVER_RESPONSE);
+        mLastLocationTime = savedInstanceState.getString(Const.LOCATION_TIME);
+        mAccuracy = savedInstanceState.getString(Const.ACCURACY);
+        mDuration = savedInstanceState.getString(Const.DURATION);
+        mDirectDistanceToStart = savedInstanceState.getString(Const.DIRECT_DISTANCE_TO_START);
+        mEstimatedDistance = savedInstanceState.getString(Const.ESTIMATED_DISTANCE);
+        mLastLocationAlt = savedInstanceState.getString(Const.ALTITUDE);
+        mLastLocationSpeed = savedInstanceState.getString(Const.SPEED);
+        mAddress = savedInstanceState.getString(Const.ADDRESS);
+        mLastServerResponse = savedInstanceState.getString(Const.SERVER_RESPONSE);
         UpdateGUI();
 
         super.onRestoreInstanceState(savedInstanceState); //restore after set mLocalizationIsRunning (because of button state)
@@ -472,26 +536,30 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     public void onStop() {
         super.onStop();  // Always call the superclass method first
         //store last know position
-        sharedPref.edit().putString(Const.PREF_LAST_LOCATION_TIME, mLastLocationTime).apply();
-        sharedPref.edit().putString(Const.PREF_LAST_LOCATION_LAT, mLastLocationLat).apply();
-        sharedPref.edit().putString(Const.PREF_LAST_LOCATION_LON, mLastLocationLon).apply();
-        sharedPref.edit().putString(Const.PREF_LAST_LOCATION_ALT, mLastLocationAlt).apply();
-        sharedPref.edit().putString(Const.PREF_LAST_LOCATION_SPEED, mLastLocationSpeed).apply();
-        sharedPref.edit().putString(Const.PREF_LAST_LOCATION_BEARING, mLastLocationBearing).apply();
-        sharedPref.edit().putString(Const.PREF_LAST_SERVER_RESPONSE, mLastServerResponse).apply();
+        sharedPref.edit().putString(Const.LOCATION_TIME, mLastLocationTime).apply();
+        sharedPref.edit().putString(Const.ACCURACY, mAccuracy).apply();
+        sharedPref.edit().putString(Const.DURATION, mDuration).apply();
+        sharedPref.edit().putString(Const.DIRECT_DISTANCE_TO_START, mDirectDistanceToStart).apply();
+        sharedPref.edit().putString(Const.ESTIMATED_DISTANCE, mEstimatedDistance).apply();
+        sharedPref.edit().putString(Const.ALTITUDE, mLastLocationAlt).apply();
+        sharedPref.edit().putString(Const.SPEED, mLastLocationSpeed).apply();
+        sharedPref.edit().putString(Const.ADDRESS, mAddress).apply();
+        sharedPref.edit().putString(Const.SERVER_RESPONSE, mLastServerResponse).apply();
     }
 
     /**
      * Load last state from preferences
      */
     public void RestoreGUIFromPreferences() {
-        mLastLocationTime = sharedPref.getString(Const.PREF_LAST_LOCATION_TIME, "");
-        mLastLocationLat = sharedPref.getString(Const.PREF_LAST_LOCATION_LAT, "");
-        mLastLocationLon = sharedPref.getString(Const.PREF_LAST_LOCATION_LON, "");
-        mLastLocationAlt = sharedPref.getString(Const.PREF_LAST_LOCATION_ALT, "");
-        mLastLocationSpeed = sharedPref.getString(Const.PREF_LAST_LOCATION_SPEED, "");
-        mLastLocationBearing = sharedPref.getString(Const.PREF_LAST_LOCATION_BEARING, "");
-        mLastServerResponse = sharedPref.getString(Const.PREF_LAST_SERVER_RESPONSE, "");
+        mLastLocationTime = sharedPref.getString(Const.LOCATION_TIME, "");
+        mAccuracy = sharedPref.getString(Const.ACCURACY, "");
+        mDuration = sharedPref.getString(Const.DURATION, "");
+        mDirectDistanceToStart = sharedPref.getString(Const.DIRECT_DISTANCE_TO_START, "");
+        mEstimatedDistance = sharedPref.getString(Const.ESTIMATED_DISTANCE, "");
+        mLastLocationAlt = sharedPref.getString(Const.ALTITUDE, "");
+        mLastLocationSpeed = sharedPref.getString(Const.SPEED, "");
+        mAddress = sharedPref.getString(Const.ADDRESS, "");
+        mLastServerResponse = sharedPref.getString(Const.SERVER_RESPONSE, "");
         UpdateGUI();
     }
 }

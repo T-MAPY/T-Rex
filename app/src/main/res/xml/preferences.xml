@@ -30,7 +30,7 @@
             android:summary="@string/pref_min_dist_summ"/>
         <EditTextPreference android:key="pref_kalman_mps"
             android:inputType="number"
-            android:defaultValue="3"
+            android:defaultValue="15"
             android:title="@string/pref_kalman_mps"
             android:summary="@string/pref_kalman_mps_sum"/>
         <ListPreference
@@ -41,7 +41,13 @@
             android:summary="@string/pref_strategy_sum"
             android:title="@string/pref_strategy" />
     </PreferenceCategory>
-    <PreferenceCategory android:key="pref_device_category" android:title="@string/pref_device">
+    <PreferenceCategory android:key="pref_other_category"
+        android:title="@string/pref_other">
+        <CheckBoxPreference
+            android:key="pref_geocoding"
+            android:title="@string/pref_geocoding"
+            android:summary="@string/pref_geocoding_summ"
+            android:defaultValue="false"/>
         <CheckBoxPreference
             android:key="pref_screen_on"
             android:title="@string/pref_keep_screen_on"

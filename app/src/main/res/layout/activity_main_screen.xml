@@ -31,6 +31,20 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
             <TextView
+                android:text="@string/textview_duration"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/text_duration"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <TextView
                 android:text="@string/textview_date"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"/>
@@ -45,25 +59,11 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
             <TextView
-                android:text="@string/textview_lat"
+                android:text="@string/textview_accuracy"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"/>
             <TextView
-                android:id="@+id/text_position_lat"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
-            <TextView
-                android:text="@string/textview_lon"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/text_position_lon"
+                android:id="@+id/text_position_accuracy"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>
@@ -99,17 +99,36 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp">
+            android:layout_height="wrap_content">
             <TextView
-                android:text="@string/textview_bearing"
+                android:text="@string/textview_estimated_distance"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"/>
             <TextView
-                android:id="@+id/text_position_bearing"
+                android:id="@+id/text_estimated_distance"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="@string/textview_direct_distance_to_start"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/text_direct_distance_to_start"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/text_address"
+            android:layout_width="fill_parent"
+            android:textSize="18sp"
+            android:layout_height="wrap_content" />
 
         <TextView
             android:id="@+id/text_http_response_title"

@@ -9,12 +9,11 @@
     <string name="pref_id">Device identifier</string>
     <string name="pref_id_summ">Insert user defined identifier (max 10 chars)</string>
     <string name="button_stop_sending">Stop</string>
-    <string name="textview_date">Date:</string>
-    <string name="textview_lat">Latitude:</string>
-    <string name="textview_lon">Longitude:</string>
+    <string name="textview_date">Position at:</string>
+    <string name="textview_accurady">Accuracy:</string>
+    <string name="textview_direct_distance_to_start">Direct dist.:</string>
     <string name="textview_alt">Altitude:</string>
     <string name="textview_speed">Speed:</string>
-    <string name="textview_bearing">Bearing:</string>
     <string name="pref_location_category">Localization settings</string>
     <string name="pref_strategy">Localization strategy</string>
     <string name="pref_strategy_sum">Accuracy and localization strategy</string>
@@ -25,7 +24,7 @@
     <string name="pref_max_interval">Frequency of sending (sec)</string>
     <string name="pref_max_interval_sum">Maximal time of sending new position to server (in seconds) - should be equal to or longer then localization frequency</string>
     <string name="textview_http_response_title">Server response:</string>
-    <string name="pref_device">Device settings</string>
+    <string name="pref_other">Other settings</string>
     <string name="pref_keep_screen_on">Keep screen on</string>
     <string name="pref_keep_screen_on_summ">Keep screen on when application is running</string>
     <string name="pref_keep_cpu_on">Keep CPU on</string>
@@ -51,11 +50,15 @@
     <string name="drawer_title">Main menu</string>
     <string name="app_version">Version</string>
     <string name="app_credits">T-MAPY spol. s r.o.\nApache License 2.0\nhttps://github.com/T-MAPY/T-Rex</string>
-    <string name="pref_kalman_mps">Kalman filter (mps)</string>
-    <string name="pref_kalman_mps_sum">Set filtering of locations by usual speed in meters per seconds (0 - disabled, 3 - walking, 7 - biking, 15 - driving city)</string>
+    <string name="pref_kalman_mps">Average speed (mps)</string>
+    <string name="pref_kalman_mps_sum">Set filtering of locations by average speed in meters per seconds (0 - disabled, 3 - walking, 7 - biking, 15 - driving city)</string>
     <string name="test_exception">Test exception</string>
     <string name="test_exception_message">Confirm dialog to raise testing exception.</string>
     <string name="cannot_connect_to_server">Network connection disabled - position will be send later</string>
     <string name="cannot_check_new_version">Can\'t check for new version</string>
     <string name="buffered_locations_sent">Previous locations sent to server</string>
+    <string name="pref_geocoding">Address finding</string>
+    <string name="pref_geocoding_summ">Try to find address of current location</string>
+    <string name="textview_duration">Duration:</string>
+    <string name="textview_estimated_distance">Route:</string>
 </resources>
