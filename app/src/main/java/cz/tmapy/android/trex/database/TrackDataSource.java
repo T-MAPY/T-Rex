@@ -176,8 +176,8 @@ public class TrackDataSource {
         trackDob.setAveSpeed(cursor.getFloat(11));
         trackDob.setMinAlt(cursor.getDouble(12));
         trackDob.setMaxAlt(cursor.getDouble(13));
-        trackDob.setElevDiffUp(cursor.getFloat(14));
-        trackDob.setElevDiffDown(cursor.getFloat(15));
+        trackDob.setElevDiffUp(cursor.getDouble(14));
+        trackDob.setElevDiffDown(cursor.getDouble(15));
         trackDob.setNote(cursor.getString(16));
         trackDob.setUpdateTime(cursor.getLong(17));
         return trackDob;

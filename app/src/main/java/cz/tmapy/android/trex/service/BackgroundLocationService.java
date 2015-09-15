@@ -87,6 +87,7 @@ public class BackgroundLocationService extends Service implements
 
     Geocoder geocoder;
 
+    private Integer mLocationsCount = 0; //count of accepted locations
     private Long mLocationStart; //start of location
     private LocationWrapper mFirstLocation; //first accepted location
     private LocationWrapper mLastAcceptedLocation; //last accepted location, filtered by Mr. Kalman
@@ -95,8 +96,11 @@ public class BackgroundLocationService extends Service implements
     private Long mDuration = 0l;
     private Float mDistance = 0f;
     private Float mMaxSpeed = 0f;
+    private Float mSpeedSum = 0f;
     private Double mMinAltitude = 0d;
     private Double mMaxAltitude = 0d;
+    private Double mElevDiffUp = 0d;
+    private Double mElevDiffDown = 0d;
 
     public class LocalBinder extends Binder {
         public BackgroundLocationService getServerInstance() {
@@ -273,10 +277,11 @@ public class BackgroundLocationService extends Service implements
                 }
 
                 if (mLastAcceptedLocation == null) { //ths is first position
-                    acceptLocation(location);
                     mMaxSpeed = location.getSpeed();
+                    mSpeedSum = location.getSpeed();
                     mMaxAltitude = location.getAltitude();
                     mMinAltitude = location.getAltitude();
+                    acceptLocation(location);
                     return;
                 }
 
@@ -286,11 +291,18 @@ public class BackgroundLocationService extends Service implements
                 float dist = mLastAcceptedLocation.getLocation().distanceTo(location);
 
                 if ((diffSeconds >= mSendInterval) || dist >= mMinDistance) {
-                    mDistance = mDistance + dist;
+                    mDistance += dist;
                     mDuration = location.getTime() - mLocationStart;
+                    mSpeedSum += location.getSpeed();
                     if (location.getSpeed() > mMaxSpeed) mMaxSpeed = location.getSpeed();
                     if (location.getAltitude() > mMaxAltitude) mMaxAltitude = location.getAltitude();
                     if (location.getAltitude() < mMinAltitude) mMinAltitude = location.getAltitude();
+                    Double d = location.getAltitude() - mLastAcceptedLocation.getLocation().getAltitude();
+                    if (d > 0)
+                        mElevDiffUp += d;
+                    else
+                        mElevDiffDown += Math.abs(d);
+
                     acceptLocation(location);
                 }
 
@@ -319,6 +331,8 @@ public class BackgroundLocationService extends Service implements
         if (mGeocoding && Geocoder.isPresent()) {
             new GeocodingTask().execute(location);
         }
+
+        mLocationsCount++;
 
         SendAcceptedLocationBroadcast(loc);
         SendPosition(loc);
@@ -427,11 +441,11 @@ public class BackgroundLocationService extends Service implements
         localIntent.putExtra(Const.FINISH_ADDRESS, mLastAcceptedLocation.getAddress());
         localIntent.putExtra(Const.DISTANCE, mDistance);
         localIntent.putExtra(Const.MAX_SPEED, mMaxSpeed);
-        localIntent.putExtra(Const.AVE_SPEED, 22f);
+        localIntent.putExtra(Const.AVE_SPEED, mSpeedSum / mLocationsCount);
         localIntent.putExtra(Const.MIN_ALT, mMinAltitude);
         localIntent.putExtra(Const.MAX_ALT, mMaxAltitude);
-        localIntent.putExtra(Const.ELEV_DIFF_UP, 60f);
-        localIntent.putExtra(Const.ELEV_DIFF_DOWN, 40f);
+        localIntent.putExtra(Const.ELEV_DIFF_UP, mElevDiffUp);
+        localIntent.putExtra(Const.ELEV_DIFF_DOWN, mElevDiffDown);
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }

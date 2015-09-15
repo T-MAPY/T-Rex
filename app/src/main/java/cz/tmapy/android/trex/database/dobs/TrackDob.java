@@ -18,14 +18,14 @@ public class TrackDob {
     private Float aveSpeed;
     private Double minAlt;
     private Double maxAlt;
-    private Float elevDiffUp;
-    private Float elevDiffDown;
+    private Double elevDiffUp;
+    private Double elevDiffDown;
     private String note;
     private Long updateTime;
 
     public TrackDob(){};
 
-    public TrackDob(Long startTime, Double startLat, Double startLon, String startAddress, Long finishTime, Double finishLat, Double finishLon, String finishAddress, Float distance, Float maxSpeed, Float aveSpeed, Double minAlt, Double maxAlt, Float elevDiffUp, Float elevDiffDown, String note) {
+    public TrackDob(Long startTime, Double startLat, Double startLon, String startAddress, Long finishTime, Double finishLat, Double finishLon, String finishAddress, Float distance, Float maxSpeed, Float aveSpeed, Double minAlt, Double maxAlt, Double elevDiffUp, Double elevDiffDown, String note) {
         this.startTime = startTime;
         this.startLat = startLat;
         this.startLon = startLon;
@@ -156,19 +156,19 @@ public class TrackDob {
         this.maxAlt = maxAlt;
     }
 
-    public Float getElevDiffUp() {
+    public Double getElevDiffUp() {
         return elevDiffUp;
     }
 
-    public void setElevDiffUp(Float elevDiffUp) {
+    public void setElevDiffUp(Double elevDiffUp) {
         this.elevDiffUp = elevDiffUp;
     }
 
-    public Float getElevDiffDown() {
+    public Double getElevDiffDown() {
         return elevDiffDown;
     }
 
-    public void setElevDiffDown(Float elevDiffDown) {
+    public void setElevDiffDown(Double elevDiffDown) {
         this.elevDiffDown = elevDiffDown;
     }
 

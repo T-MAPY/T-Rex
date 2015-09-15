@@ -456,8 +456,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 trackDob.setAveSpeed(intent.getFloatExtra(Const.AVE_SPEED, 0f));
                 trackDob.setMinAlt(intent.getDoubleExtra(Const.MIN_ALT, 0d));
                 trackDob.setMaxAlt(intent.getDoubleExtra(Const.MAX_ALT, 0d));
-                trackDob.setElevDiffUp(intent.getFloatExtra(Const.ELEV_DIFF_UP, 0f));
-                trackDob.setElevDiffDown(intent.getFloatExtra(Const.ELEV_DIFF_DOWN, 0f));
+                trackDob.setElevDiffUp(intent.getDoubleExtra(Const.ELEV_DIFF_UP, 0d));
+                trackDob.setElevDiffDown(intent.getDoubleExtra(Const.ELEV_DIFF_DOWN, 0d));
                 trackDob.setNote("ěščřžýáíé");
                 trackDataSource.saveTrack(trackDob);
             }
