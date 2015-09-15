@@ -41,8 +41,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -78,13 +76,6 @@ public class BackgroundLocationService extends Service implements
 
     KalmanLatLong mKalman;
 
-    private Long mLocationStart; //start of location
-    private LocationWrapper mFirstLocation; //first accepted location
-    private LocationWrapper mLastAcceptedLocation; //last accepted location, filtered by Mr. Kalman
-    private List<LocationWrapper> locationsToSend = new ArrayList<LocationWrapper>(); //cach of locations to send
-
-    private Float mEstimatedDistance = 0f;
-
     private String mTargetServerURL;
     private String mDeviceIdentifier;
     private String mListPrefs;
@@ -95,6 +86,17 @@ public class BackgroundLocationService extends Service implements
     private Boolean mGeocoding;
 
     Geocoder geocoder;
+
+    private Long mLocationStart; //start of location
+    private LocationWrapper mFirstLocation; //first accepted location
+    private LocationWrapper mLastAcceptedLocation; //last accepted location, filtered by Mr. Kalman
+    private List<LocationWrapper> locationsToSend = new ArrayList<LocationWrapper>(); //cach of locations to send
+
+    private Long mDuration = 0l;
+    private Float mDistance = 0f;
+    private Float mMaxSpeed = 0f;
+    private Double mMinAltitude = 0d;
+    private Double mMaxAltitude = 0d;
 
     public class LocalBinder extends Binder {
         public BackgroundLocationService getServerInstance() {
@@ -271,8 +273,10 @@ public class BackgroundLocationService extends Service implements
                 }
 
                 if (mLastAcceptedLocation == null) { //ths is first position
-                    mEstimatedDistance = 0f;
                     acceptLocation(location);
+                    mMaxSpeed = location.getSpeed();
+                    mMaxAltitude = location.getAltitude();
+                    mMinAltitude = location.getAltitude();
                     return;
                 }
 
@@ -282,7 +286,11 @@ public class BackgroundLocationService extends Service implements
                 float dist = mLastAcceptedLocation.getLocation().distanceTo(location);
 
                 if ((diffSeconds >= mSendInterval) || dist >= mMinDistance) {
-                    mEstimatedDistance = mEstimatedDistance + dist;
+                    mDistance = mDistance + dist;
+                    mDuration = location.getTime() - mLocationStart;
+                    if (location.getSpeed() > mMaxSpeed) mMaxSpeed = location.getSpeed();
+                    if (location.getAltitude() > mMaxAltitude) mMaxAltitude = location.getAltitude();
+                    if (location.getAltitude() < mMinAltitude) mMinAltitude = location.getAltitude();
                     acceptLocation(location);
                 }
 
@@ -303,20 +311,14 @@ public class BackgroundLocationService extends Service implements
         LocationWrapper loc = new LocationWrapper();
         loc.setLocation(location);
 
+        if (mFirstLocation == null)
+            mFirstLocation = loc;
+
+        mLastAcceptedLocation = loc;  //location is accepted even if it is not possible to send
+
         if (mGeocoding && Geocoder.isPresent()) {
             new GeocodingTask().execute(location);
         }
-
-        if (mFirstLocation == null) {
-            mFirstLocation = loc;
-        } else {
-            loc.setDirectDistanceToStart(loc.getLocation().distanceTo(mFirstLocation.getLocation()));
-            loc.setBearingToStart(loc.getLocation().bearingTo(mFirstLocation.getLocation()));
-            loc.setEstimatedDistance(mEstimatedDistance); //vypočítá se v předchozí metodě
-            loc.setDuration(loc.getLocation().getTime() - mLocationStart);
-        }
-
-        mLastAcceptedLocation = loc;  //location is accepted even if it is not possible to send
 
         SendAcceptedLocationBroadcast(loc);
         SendPosition(loc);
@@ -384,10 +386,8 @@ public class BackgroundLocationService extends Service implements
     private void SendAcceptedLocationBroadcast(LocationWrapper location) {
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
         localIntent.putExtra(Const.POSITION, location.getLocation());
-        localIntent.putExtra(Const.DURATION, location.getDuration());
-        localIntent.putExtra(Const.DIRECT_DISTANCE_TO_START, location.getDirectDistanceToStart());
-        localIntent.putExtra(Const.ESTIMATED_DISTANCE, location.getEstimatedDistance());
-        localIntent.putExtra(Const.BEARING_TO_START, location.getBearingToStart());
+        localIntent.putExtra(Const.DISTANCE, mDistance);
+        localIntent.putExtra(Const.DURATION, mDuration);
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }
 
@@ -411,8 +411,35 @@ public class BackgroundLocationService extends Service implements
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }
 
+    /**
+     * Final broadcast
+     */
+    private void SendFinalBroadcast() {
+        Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
+
+        localIntent.putExtra(Const.START_TIME, mFirstLocation.getLocation().getTime());
+        localIntent.putExtra(Const.START_LAT, mFirstLocation.getLocation().getLatitude());
+        localIntent.putExtra(Const.START_LON, mFirstLocation.getLocation().getLongitude());
+        localIntent.putExtra(Const.START_ADDRESS, mFirstLocation.getAddress());
+        localIntent.putExtra(Const.FINISH_TIME, mLastAcceptedLocation.getLocation().getTime());
+        localIntent.putExtra(Const.FINISH_LAT, mLastAcceptedLocation.getLocation().getLatitude());
+        localIntent.putExtra(Const.FINISH_LON, mLastAcceptedLocation.getLocation().getLongitude());
+        localIntent.putExtra(Const.FINISH_ADDRESS, mLastAcceptedLocation.getAddress());
+        localIntent.putExtra(Const.DISTANCE, mDistance);
+        localIntent.putExtra(Const.MAX_SPEED, mMaxSpeed);
+        localIntent.putExtra(Const.AVE_SPEED, 22f);
+        localIntent.putExtra(Const.MIN_ALT, mMinAltitude);
+        localIntent.putExtra(Const.MAX_ALT, mMaxAltitude);
+        localIntent.putExtra(Const.ELEV_DIFF_UP, 60f);
+        localIntent.putExtra(Const.ELEV_DIFF_DOWN, 40f);
+
+        LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+    }
+
     @Override
     public void onDestroy() {
+
+        SendFinalBroadcast();
 
         stopForeground(true); //http://developer.android.com/reference/android/app/Service.html
 

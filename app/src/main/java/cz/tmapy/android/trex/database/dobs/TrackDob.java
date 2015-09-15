@@ -13,6 +13,7 @@ public class TrackDob {
     private Double finishLat;
     private Double finishLon;
     private String finishAddress;
+    private Float distance;
     private Float maxSpeed;
     private Float aveSpeed;
     private Double minAlt;
@@ -24,7 +25,7 @@ public class TrackDob {
 
     public TrackDob(){};
 
-    public TrackDob(Long startTime, Double startLat, Double startLon, String startAddress, Long finishTime, Double finishLat, Double finishLon, String finishAddress, Float maxSpeed, Float aveSpeed, Double minAlt, Double maxAlt, Float elevDiffUp, Float elevDiffDown, String note) {
+    public TrackDob(Long startTime, Double startLat, Double startLon, String startAddress, Long finishTime, Double finishLat, Double finishLon, String finishAddress, Float distance, Float maxSpeed, Float aveSpeed, Double minAlt, Double maxAlt, Float elevDiffUp, Float elevDiffDown, String note) {
         this.startTime = startTime;
         this.startLat = startLat;
         this.startLon = startLon;
@@ -33,6 +34,7 @@ public class TrackDob {
         this.finishLat = finishLat;
         this.finishLon = finishLon;
         this.finishAddress = finishAddress;
+        this.distance = distance;
         this.maxSpeed = maxSpeed;
         this.aveSpeed = aveSpeed;
         this.minAlt = minAlt;
@@ -112,6 +114,14 @@ public class TrackDob {
 
     public void setFinishAddress(String finishAddress) {
         this.finishAddress = finishAddress;
+    }
+
+    public Float getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Float distance) {
+        this.distance = distance;
     }
 
     public Float getMaxSpeed() {

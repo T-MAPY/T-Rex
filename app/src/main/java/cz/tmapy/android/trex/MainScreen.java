@@ -15,7 +15,6 @@ import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
@@ -37,6 +36,8 @@ import org.acra.ACRA;
 
 import java.text.SimpleDateFormat;
 
+import cz.tmapy.android.trex.database.TrackDataSource;
+import cz.tmapy.android.trex.database.dobs.TrackDob;
 import cz.tmapy.android.trex.drawer.DrawerItemCustomAdapter;
 import cz.tmapy.android.trex.drawer.ObjectDrawerItem;
 import cz.tmapy.android.trex.service.BackgroundLocationService;
@@ -64,10 +65,10 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private String mLastLocationAlt;
     private String mLastLocationSpeed;
     private String mAddress;
-    private String mDirectDistanceToStart;
-    private String mEstimatedDistance;
-    private String mDuration;
     private String mLastServerResponse;
+
+    private String mDistance;
+    private String mDuration;
 
     SharedPreferences sharedPref;
 
@@ -376,11 +377,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         TextView accuText = (TextView) findViewById(R.id.text_position_accuracy);
         accuText.setText(null);
 
-        TextView directDistToStartText = (TextView) findViewById(R.id.text_direct_distance_to_start);
-        directDistToStartText.setText(null);
-
-        TextView estDist = (TextView) findViewById(R.id.text_estimated_distance);
-        estDist.setText(null);
+        TextView distText = (TextView) findViewById(R.id.text_distance);
+        distText.setText(null);
 
         TextView altText = (TextView) findViewById(R.id.text_position_alt);
         altText.setText(null);
@@ -421,26 +419,45 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 mLastLocationSpeed = String.format("%.0f", (location.getSpeed() / 1000) * 3600);
                 mAccuracy = String.format("%.1f", location.getAccuracy());
             }
-            if (intent.hasExtra(Const.DIRECT_DISTANCE_TO_START))
-                mDirectDistanceToStart = String.format("%.2f", (intent.getFloatExtra(Const.DIRECT_DISTANCE_TO_START, 0.0f) / 1000));
-
-            if (intent.hasExtra(Const.ESTIMATED_DISTANCE))
-                mEstimatedDistance = String.format("%.2f", (intent.getFloatExtra(Const.ESTIMATED_DISTANCE, 0.0f) / 1000));
-
-            if (intent.hasExtra(Const.DURATION)) {
-                Long d = intent.getLongExtra(Const.DURATION, 0l) / 1000;
-                mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
-            }
-
             if (intent.hasExtra(Const.ADDRESS)) {
                 String adr = intent.getStringExtra(Const.ADDRESS);
                 if (adr != null)
                     mAddress = adr;
             }
 
-            mLastServerResponse = intent.getStringExtra(Const.SERVER_RESPONSE);
+            if (intent.hasExtra(Const.DURATION)) {
+                Long d = intent.getLongExtra(Const.DURATION, 0l) / 1000;
+                mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
+            }
 
+            if (intent.hasExtra(Const.DISTANCE))
+                mDistance = String.format("%.2f", (intent.getFloatExtra(Const.DISTANCE, 0.0f) / 1000));
+
+            mLastServerResponse = intent.getStringExtra(Const.SERVER_RESPONSE);
             UpdateGUI();
+
+            //if this is final broadcast
+            if (intent.hasExtra(Const.FINISH_TIME)) {
+                TrackDob trackDob = new TrackDob();
+                trackDob.setStartTime(intent.getLongExtra(Const.START_TIME, 0l));
+                trackDob.setStartLat(intent.getDoubleExtra(Const.START_LAT, 0d));
+                trackDob.setStartLon(intent.getDoubleExtra(Const.START_LON, 0d));
+                trackDob.setStartAddress(intent.getStringExtra(Const.ADDRESS));
+                trackDob.setFinishTime(intent.getLongExtra(Const.FINISH_TIME, 0l));
+                trackDob.setFinishLat(intent.getDoubleExtra(Const.FINISH_LAT, 0d));
+                trackDob.setFinishLon(intent.getDoubleExtra(Const.FINISH_LON, 0d));
+                trackDob.setFinishAddress(intent.getStringExtra(Const.FINISH_ADDRESS));
+                trackDob.setDistance(intent.getFloatExtra(Const.DISTANCE, 0f));
+                trackDob.setMaxSpeed(intent.getFloatExtra(Const.MAX_SPEED, 0f));
+                trackDob.setAveSpeed(intent.getFloatExtra(Const.AVE_SPEED, 0f));
+                trackDob.setMinAlt(intent.getDoubleExtra(Const.MIN_ALT, 0d));
+                trackDob.setMaxAlt(intent.getDoubleExtra(Const.MAX_ALT, 0d));
+                trackDob.setElevDiffUp(intent.getFloatExtra(Const.ELEV_DIFF_UP, 0f));
+                trackDob.setElevDiffDown(intent.getFloatExtra(Const.ELEV_DIFF_DOWN, 0f));
+                trackDob.setNote("ěščřžýáíé");
+                TrackDataSource trackDataSource = new TrackDataSource(MainScreen.this);
+                trackDataSource.saveTrack(trackDob);
+            }
         }
     }
 
@@ -459,24 +476,21 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             accuracy.setText(mAccuracy + " m");
         }
 
-        if (mEstimatedDistance != null) {
-            TextView estDist = (TextView) findViewById(R.id.text_estimated_distance);
-            estDist.setText(mEstimatedDistance + " km");
+        if (mDistance != null) {
+            TextView estDist = (TextView) findViewById(R.id.text_distance);
+            estDist.setText(mDistance + " km");
         }
-        if (mDirectDistanceToStart != null) {
-            TextView distanceToStart = (TextView) findViewById(R.id.text_direct_distance_to_start);
-            distanceToStart.setText(mDirectDistanceToStart + " km");
 
-            if (mLastLocationSpeed != null) {
-                TextView speedText = (TextView) findViewById(R.id.text_position_speed);
-                speedText.setText(mLastLocationSpeed + " km/h");
-            }
-
-            if (mLastLocationAlt != null) {
-                TextView altText = (TextView) findViewById(R.id.text_position_alt);
-                altText.setText(mLastLocationAlt + " m");
-            }
+        if (mLastLocationSpeed != null) {
+            TextView speedText = (TextView) findViewById(R.id.text_position_speed);
+            speedText.setText(mLastLocationSpeed + " km/h");
         }
+
+        if (mLastLocationAlt != null) {
+            TextView altText = (TextView) findViewById(R.id.text_position_alt);
+            altText.setText(mLastLocationAlt + " m");
+        }
+
         if (mAddress != null) {
             TextView address = (TextView) findViewById(R.id.text_address);
             address.setText(mAddress);
@@ -496,10 +510,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 savedInstanceState.putString(Const.LOCATION_TIME, mLastLocationTime);
             if (mAccuracy != null) savedInstanceState.putString(Const.ACCURACY, mAccuracy);
             if (mDuration != null) savedInstanceState.putString(Const.DURATION, mDuration);
-            if (mDirectDistanceToStart != null)
-                savedInstanceState.putString(Const.DIRECT_DISTANCE_TO_START, mDirectDistanceToStart);
-            if (mEstimatedDistance != null)
-                savedInstanceState.putString(Const.ESTIMATED_DISTANCE, mEstimatedDistance);
+            if (mDistance != null)
+                savedInstanceState.putString(Const.DISTANCE, mDistance);
             if (mLastLocationAlt != null)
                 savedInstanceState.putString(Const.ALTITUDE, mLastLocationAlt);
             if (mLastLocationSpeed != null)
@@ -521,8 +533,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mLastLocationTime = savedInstanceState.getString(Const.LOCATION_TIME);
         mAccuracy = savedInstanceState.getString(Const.ACCURACY);
         mDuration = savedInstanceState.getString(Const.DURATION);
-        mDirectDistanceToStart = savedInstanceState.getString(Const.DIRECT_DISTANCE_TO_START);
-        mEstimatedDistance = savedInstanceState.getString(Const.ESTIMATED_DISTANCE);
+        mDistance = savedInstanceState.getString(Const.DISTANCE);
         mLastLocationAlt = savedInstanceState.getString(Const.ALTITUDE);
         mLastLocationSpeed = savedInstanceState.getString(Const.SPEED);
         mAddress = savedInstanceState.getString(Const.ADDRESS);
@@ -539,8 +550,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         sharedPref.edit().putString(Const.LOCATION_TIME, mLastLocationTime).apply();
         sharedPref.edit().putString(Const.ACCURACY, mAccuracy).apply();
         sharedPref.edit().putString(Const.DURATION, mDuration).apply();
-        sharedPref.edit().putString(Const.DIRECT_DISTANCE_TO_START, mDirectDistanceToStart).apply();
-        sharedPref.edit().putString(Const.ESTIMATED_DISTANCE, mEstimatedDistance).apply();
+        sharedPref.edit().putString(Const.DISTANCE, mDistance).apply();
         sharedPref.edit().putString(Const.ALTITUDE, mLastLocationAlt).apply();
         sharedPref.edit().putString(Const.SPEED, mLastLocationSpeed).apply();
         sharedPref.edit().putString(Const.ADDRESS, mAddress).apply();
@@ -554,8 +564,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mLastLocationTime = sharedPref.getString(Const.LOCATION_TIME, "");
         mAccuracy = sharedPref.getString(Const.ACCURACY, "");
         mDuration = sharedPref.getString(Const.DURATION, "");
-        mDirectDistanceToStart = sharedPref.getString(Const.DIRECT_DISTANCE_TO_START, "");
-        mEstimatedDistance = sharedPref.getString(Const.ESTIMATED_DISTANCE, "");
+        mDistance = sharedPref.getString(Const.DISTANCE, "");
         mLastLocationAlt = sharedPref.getString(Const.ALTITUDE, "");
         mLastLocationSpeed = sharedPref.getString(Const.SPEED, "");
         mAddress = sharedPref.getString(Const.ADDRESS, "");

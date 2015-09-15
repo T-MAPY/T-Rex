@@ -11,7 +11,6 @@
     <string name="pref_id_summ">Vložte uživatelský identifikátor zařízení (max 10 znaků)</string>
     <string name="textview_date">Pozice z:</string>
     <string name="textview_accuracy">Přesnost:</string>
-    <string name="textview_direct_distance_to_start">Přímá vzd.:</string>
     <string name="textview_alt">Nadm. výš.:</string>
     <string name="textview_speed">Rychlost:</string>
     <string name="pref_location_category">Zjišťování a odesílání polohy</string>

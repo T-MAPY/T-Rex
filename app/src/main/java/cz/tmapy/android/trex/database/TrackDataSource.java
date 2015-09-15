@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.tmapy.android.trex.Const;
 import cz.tmapy.android.trex.database.dobs.TrackDob;
 
 /**
@@ -29,6 +30,7 @@ public class TrackDataSource {
     private static final String FINISH_LAT = "finish_lat";
     private static final String FINISH_LON = "finish_lon";
     private static final String FINISH_ADDRESS = "finish_address";
+    private static final String DISTANCE = "distance";
     private static final String MAX_SPEED = "max_speed";
     private static final String AVE_SPEED = "ave_speed";
     private static final String MIN_ALT = "min_alt";
@@ -42,22 +44,23 @@ public class TrackDataSource {
     public static final String DROP_TABLE_SQL = "DROP TABLE IF EXISTS " + TABLE_NAME + ";";
 
     public static final String CREATE_TABLE_SQL = "CREATE TABLE " + TABLE_NAME + " (" +
-            COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
-            START_TIME + " INTEGER, " +
-            START_LAT + " REAL, " +
-            START_LON + " REAL, " +
-            START_ADDRESS + " TEXT, " +
-            FINISH_TIME + " INTEGER, " +
-            FINISH_LAT + " REAL, " +
-            FINISH_LON + " REAL, " +
+            COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+            START_TIME + " INTEGER," +
+            START_LAT + " REAL," +
+            START_LON + " REAL," +
+            START_ADDRESS + " TEXT," +
+            FINISH_TIME + " INTEGER," +
+            FINISH_LAT + " REAL," +
+            FINISH_LON + " REAL," +
             FINISH_ADDRESS + " TEXT," +
-            MAX_SPEED + " REAL, " +
-            AVE_SPEED + " REAL, " +
-            MIN_ALT + " REAL, " +
-            MAX_ALT + " REAL, " +
-            ELEV_DIFF_UP + " REAL, " +
-            ELEV_DIFF_DOWN + " REAL, " +
-            NOTE + " TEXT, " +
+            DISTANCE + " DISTANCE," +
+            MAX_SPEED + " REAL," +
+            AVE_SPEED + " REAL," +
+            MIN_ALT + " REAL," +
+            MAX_ALT + " REAL," +
+            ELEV_DIFF_UP + " REAL," +
+            ELEV_DIFF_DOWN + " REAL," +
+            NOTE + " TEXT," +
             COL_UPDATE_TIME + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP);";
 
     public static final String CREATE_INDEX = "CREATE INDEX " + IDX_ID + " ON " + TABLE_NAME + " (" + COL_ID + ");";
@@ -65,7 +68,7 @@ public class TrackDataSource {
     // Database fields
     private SQLiteDatabase database;
     private DatabaseHelper dbHelper;
-    private String[] allColumns = {COL_ID, START_TIME, START_LAT, START_LON, START_ADDRESS, FINISH_TIME, FINISH_LAT, FINISH_LON, FINISH_ADDRESS, MAX_SPEED, AVE_SPEED, MIN_ALT, MAX_ALT, ELEV_DIFF_UP, ELEV_DIFF_DOWN, NOTE, COL_UPDATE_TIME};
+    private String[] allColumns = {COL_ID, START_TIME, START_LAT, START_LON, START_ADDRESS, FINISH_TIME, FINISH_LAT, FINISH_LON, FINISH_ADDRESS, DISTANCE, MAX_SPEED, AVE_SPEED, MIN_ALT, MAX_ALT, ELEV_DIFF_UP, ELEV_DIFF_DOWN, NOTE, COL_UPDATE_TIME};
 
     /**
      * Static method to create table
@@ -118,6 +121,7 @@ public class TrackDataSource {
             values.put(FINISH_LAT, trackDob.getFinishLat());
             values.put(FINISH_LON, trackDob.getFinishLon());
             values.put(FINISH_ADDRESS, trackDob.getFinishAddress());
+            values.put(DISTANCE, trackDob.getDistance());
             values.put(MAX_SPEED, trackDob.getMaxSpeed());
             values.put(AVE_SPEED, trackDob.getAveSpeed());
             values.put(MIN_ALT, trackDob.getMinAlt());
@@ -126,6 +130,7 @@ public class TrackDataSource {
             values.put(ELEV_DIFF_DOWN, trackDob.getElevDiffDown());
             values.put(NOTE, trackDob.getNote());
             insertId = database.insert(TABLE_NAME, null, values);
+            if (Const.LOG_ENHANCED) Log.i(TAG,"Track successfully saved with id = " + insertId);
             close();
         } catch (Exception e) {
             Log.e(TAG, "Cannot save track", e);
@@ -165,14 +170,16 @@ public class TrackDataSource {
         trackDob.setFinishTime(cursor.getLong(5));
         trackDob.setFinishLat(cursor.getDouble(6));
         trackDob.setFinishLon(cursor.getDouble(7));
-        trackDob.setMaxSpeed(cursor.getFloat(8));
-        trackDob.setAveSpeed(cursor.getFloat(9));
-        trackDob.setMinAlt(cursor.getDouble(10));
-        trackDob.setMaxAlt(cursor.getDouble(11));
-        trackDob.setElevDiffUp(cursor.getFloat(12));
-        trackDob.setElevDiffDown(cursor.getFloat(13));
-        trackDob.setNote(cursor.getString(14));
-        trackDob.setUpdateTime(cursor.getLong(15));
+        trackDob.setFinishAddress(cursor.getString(8));
+        trackDob.setDistance(cursor.getFloat(9));
+        trackDob.setMaxSpeed(cursor.getFloat(10));
+        trackDob.setAveSpeed(cursor.getFloat(11));
+        trackDob.setMinAlt(cursor.getDouble(12));
+        trackDob.setMaxAlt(cursor.getDouble(13));
+        trackDob.setElevDiffUp(cursor.getFloat(14));
+        trackDob.setElevDiffDown(cursor.getFloat(15));
+        trackDob.setNote(cursor.getString(16));
+        trackDob.setUpdateTime(cursor.getLong(17));
         return trackDob;
     }
 }

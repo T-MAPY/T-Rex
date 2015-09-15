@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import cz.tmapy.android.trex.Const;
+import cz.tmapy.android.trex.database.dobs.TrackDob;
 
 /**
  * Called by system to initialize database
@@ -28,7 +29,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void CreateDatabase(SQLiteDatabase db) {
-        LocationsDataSource.InitTable(db);
+        TrackDataSource.InitTable(db);
     }
 
     @Override

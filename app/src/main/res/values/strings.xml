@@ -11,7 +11,6 @@
     <string name="button_stop_sending">Stop</string>
     <string name="textview_date">Position at:</string>
     <string name="textview_accuracy">Accuracy:</string>
-    <string name="textview_direct_distance_to_start">Direct dist.:</string>
     <string name="textview_alt">Altitude:</string>
     <string name="textview_speed">Speed:</string>
     <string name="pref_location_category">Localization settings</string>
