@@ -70,12 +70,16 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private String mDistance;
     private String mDuration;
 
+    TrackDataSource trackDataSource;
+
     SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
+
+        trackDataSource = new TrackDataSource(MainScreen.this);
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.registerOnSharedPreferenceChangeListener(this); //to get pref changes to onSharePreferenceChanged
@@ -455,7 +459,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 trackDob.setElevDiffUp(intent.getFloatExtra(Const.ELEV_DIFF_UP, 0f));
                 trackDob.setElevDiffDown(intent.getFloatExtra(Const.ELEV_DIFF_DOWN, 0f));
                 trackDob.setNote("ěščřžýáíé");
-                TrackDataSource trackDataSource = new TrackDataSource(MainScreen.this);
                 trackDataSource.saveTrack(trackDob);
             }
         }
@@ -539,7 +542,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mAddress = savedInstanceState.getString(Const.ADDRESS);
         mLastServerResponse = savedInstanceState.getString(Const.SERVER_RESPONSE);
         UpdateGUI();
-
         super.onRestoreInstanceState(savedInstanceState); //restore after set mLocalizationIsRunning (because of button state)
     }
 
