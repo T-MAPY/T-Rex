@@ -60,4 +60,5 @@
     <string name="pref_geocoding_summ">Try to find address of current location</string>
     <string name="textview_duration">Duration:</string>
     <string name="textview_estimated_distance">Route:</string>
+    <string name="textview_previous_tracks">Previous tracks:</string>
 </resources>

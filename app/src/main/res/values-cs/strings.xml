@@ -60,4 +60,5 @@
     <string name="pref_geocoding_summ">Pokusit se vyhledat adresu aktuální polohy</string>
     <string name="textview_duration">Trvání:</string>
     <string name="textview_estimated_distance">Trasa:</string>
+    <string name="textview_previous_tracks">Předchozí trasy:</string>
 </resources>

@@ -61,21 +61,15 @@ public class BackgroundLocationService extends Service implements
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
-    IBinder mBinder = new LocalBinder();
-
     private static final String TAG = BackgroundLocationService.class.getName();
-    private int NOTIFICATION = 1975; //Unique number for this notification
-
     private final int MAX_BUFFER_SIZE = 5000; //1 day when send every 20sec
-
-    private PowerManager.WakeLock mPartialWakeLock;
-
-    private GoogleApiClient mGoogleApiClient;
-
+    IBinder mBinder = new LocalBinder();
     SharedPreferences mSharedPref;
-
     KalmanLatLong mKalman;
-
+    Geocoder geocoder;
+    private int NOTIFICATION = 1975; //Unique number for this notification
+    private PowerManager.WakeLock mPartialWakeLock;
+    private GoogleApiClient mGoogleApiClient;
     private String mTargetServerURL;
     private String mDeviceIdentifier;
     private String mListPrefs;
@@ -84,10 +78,6 @@ public class BackgroundLocationService extends Service implements
     private Integer mSendInterval;
     private Integer mKalmanMPS;
     private Boolean mGeocoding;
-
-    Geocoder geocoder;
-
-    private Integer mLocationsCount = 0; //count of accepted locations
     private Long mLocationStart; //start of location
     private LocationWrapper mFirstLocation; //first accepted location
     private LocationWrapper mLastAcceptedLocation; //last accepted location, filtered by Mr. Kalman
@@ -97,16 +87,12 @@ public class BackgroundLocationService extends Service implements
     private Float mDistance = 0f;
     private Float mMaxSpeed = 0f;
     private Float mSpeedSum = 0f;
+    private Integer mSpeedLocationsCount = 0; //count of locations with speed
     private Double mMinAltitude = 0d;
     private Double mMaxAltitude = 0d;
+    private Double mLastElevationValue = 0d; //last elevation value
     private Double mElevDiffUp = 0d;
     private Double mElevDiffDown = 0d;
-
-    public class LocalBinder extends Binder {
-        public BackgroundLocationService getServerInstance() {
-            return BackgroundLocationService.this;
-        }
-    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -293,15 +279,29 @@ public class BackgroundLocationService extends Service implements
                 if ((diffSeconds >= mSendInterval) || dist >= mMinDistance) {
                     mDistance += dist;
                     mDuration = location.getTime() - mLocationStart;
-                    mSpeedSum += location.getSpeed();
-                    if (location.getSpeed() > mMaxSpeed) mMaxSpeed = location.getSpeed();
-                    if (location.getAltitude() > mMaxAltitude) mMaxAltitude = location.getAltitude();
-                    if (location.getAltitude() < mMinAltitude) mMinAltitude = location.getAltitude();
-                    Double d = location.getAltitude() - mLastAcceptedLocation.getLocation().getAltitude();
-                    if (d > 0)
-                        mElevDiffUp += d;
-                    else
-                        mElevDiffDown += Math.abs(d);
+
+                    if (location.hasSpeed()) //rise number of positions with speed only when it is > 0
+                    {
+                        mSpeedLocationsCount++;
+                        mSpeedSum += location.getSpeed();
+                        if (location.getSpeed() > mMaxSpeed) mMaxSpeed = location.getSpeed();
+                    }
+
+                    if (location.hasAltitude()) {
+                        if (location.getAltitude() > mMaxAltitude)
+                            mMaxAltitude = location.getAltitude();
+                        if (location.getAltitude() < mMinAltitude || mMinAltitude == 0)
+                            mMinAltitude = location.getAltitude();
+
+                        if (mLastElevationValue > 0) {
+                            Double d = location.getAltitude() - mLastElevationValue;
+                            if (d > 0)
+                                mElevDiffUp += d;
+                            else
+                                mElevDiffDown += Math.abs(d);
+                        }
+                        mLastElevationValue = location.getAltitude();
+                    }
 
                     acceptLocation(location);
                 }
@@ -332,12 +332,9 @@ public class BackgroundLocationService extends Service implements
             new GeocodingTask().execute(location);
         }
 
-        mLocationsCount++;
-
         SendAcceptedLocationBroadcast(loc);
         SendPosition(loc);
     }
-
 
     /**
      * Checks network connectivity
@@ -441,7 +438,7 @@ public class BackgroundLocationService extends Service implements
         localIntent.putExtra(Const.FINISH_ADDRESS, mLastAcceptedLocation.getAddress());
         localIntent.putExtra(Const.DISTANCE, mDistance);
         localIntent.putExtra(Const.MAX_SPEED, mMaxSpeed);
-        localIntent.putExtra(Const.AVE_SPEED, mSpeedSum / mLocationsCount);
+        localIntent.putExtra(Const.AVE_SPEED, mSpeedSum / mSpeedLocationsCount);
         localIntent.putExtra(Const.MIN_ALT, mMinAltitude);
         localIntent.putExtra(Const.MAX_ALT, mMaxAltitude);
         localIntent.putExtra(Const.ELEV_DIFF_UP, mElevDiffUp);
@@ -476,6 +473,12 @@ public class BackgroundLocationService extends Service implements
         if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Stopped");
 
         super.onDestroy();
+    }
+
+    public class LocalBinder extends Binder {
+        public BackgroundLocationService getServerInstance() {
+            return BackgroundLocationService.this;
+        }
     }
 
     /**
@@ -523,11 +526,14 @@ public class BackgroundLocationService extends Service implements
                     int responseCode = conn.getResponseCode();
 
                     if (responseCode == HttpsURLConnection.HTTP_OK) {
-                        String line;
-                        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                        while ((line = br.readLine()) != null) {
-                            lastResponse += line;
-                        }
+                        if (Const.LOG_ENHANCED) {
+                            String line;
+                            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                            while ((line = br.readLine()) != null) {
+                                lastResponse += line;
+                            }
+                        } else
+                            lastResponse = "OK";
                     } else {
                         lastResponse = "HTTP response: " + responseCode;
                     }

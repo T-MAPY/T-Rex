@@ -6,21 +6,44 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import cz.tmapy.android.trex.Const;
-import cz.tmapy.android.trex.database.dobs.TrackDob;
 
 /**
- * Called by system to initialize database
+ * Database manager
  * Created by kasvo on 7.9.2015.
  */
-public class DatabaseHelper extends SQLiteOpenHelper {
+public class DatabaseManager extends SQLiteOpenHelper {
 
-    private static final String TAG = DatabaseHelper.class.getName();
+    private static final String TAG = DatabaseManager.class.getName();
 
     private static final int DATABASE_VERSION = 3;
-    private static final String DATABASE_NAME = "trex";
+    private static final String DATABASE_NAME = "trex.db3";
 
-    DatabaseHelper(Context context) {
+    static DatabaseManager instance = null;
+    static SQLiteDatabase db = null;
+
+    DatabaseManager(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    public static void init(Context context) {
+        if (null == instance) {
+            instance = new DatabaseManager(context);
+        }
+    }
+
+    public static SQLiteDatabase getDb() {
+        if (null == db) {
+            db = instance.getWritableDatabase();
+        }
+        return db;
+    }
+
+    public static void deactivate() {
+        if (null != db && db.isOpen()) {
+            db.close();
+        }
+        db = null;
+        instance = null;
     }
 
     @Override
@@ -29,7 +52,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void CreateDatabase(SQLiteDatabase db) {
-        TrackDataSource.InitTable(db);
+        TrackDataSource.init(db);
     }
 
     @Override

@@ -48,7 +48,7 @@ public class LocationsDataSource {
 
     // Database fields
     private SQLiteDatabase database;
-    private DatabaseHelper dbHelper;
+    private DatabaseManager dbHelper;
     private String[] allColumns = {COL_ID, COL_GPS_TIME, COL_LAT, COL_LON, COL_ALT, COL_SPEED, COL_BEARING, COL_SERVER_RESP, COL_UPDATE_TIME};
 
     /**
@@ -63,7 +63,7 @@ public class LocationsDataSource {
     }
 
     public LocationsDataSource(Context context) {
-        dbHelper = new DatabaseHelper(context);
+        dbHelper = new DatabaseManager(context);
     }
 
     public void open() throws SQLException {

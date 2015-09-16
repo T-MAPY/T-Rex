@@ -25,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -36,28 +35,30 @@ import org.acra.ACRA;
 
 import java.text.SimpleDateFormat;
 
+import cz.tmapy.android.trex.database.DatabaseManager;
 import cz.tmapy.android.trex.database.TrackDataSource;
 import cz.tmapy.android.trex.database.dobs.TrackDob;
 import cz.tmapy.android.trex.drawer.DrawerItemCustomAdapter;
 import cz.tmapy.android.trex.drawer.ObjectDrawerItem;
+import cz.tmapy.android.trex.layout.TrackDataCursorAdapter;
 import cz.tmapy.android.trex.service.BackgroundLocationService;
 import cz.tmapy.android.trex.update.Updater;
 
 public class MainScreen extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = MainScreen.class.getName();
-
+    TrackDataSource mTrackDataSource;
+    TrackDataCursorAdapter mTrackDataCursorAdapter;
+    ListView mTracksListView;
+    SharedPreferences sharedPref;
     private String[] mNavigationDrawerItemTitles;
     private ListView mNavigationDrawerList;
     private DrawerLayout mNavigationDrawerLayout;
-    private ArrayAdapter<String> mAdapter;
     private ActionBarDrawerToggle mDrawerToggle;
     private String mActivityTitle;
-
     private String mTargetServerURL;
     private String mDeviceId;
     private Boolean mKeepScreenOn;
-
     //members for state saving
     private Boolean mLocalizationIsRunning = false;
     private String mLastLocationTime;
@@ -66,20 +67,26 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private String mLastLocationSpeed;
     private String mAddress;
     private String mLastServerResponse;
-
     private String mDistance;
     private String mDuration;
-
-    TrackDataSource trackDataSource;
-
-    SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
 
-        trackDataSource = new TrackDataSource(MainScreen.this);
+        DatabaseManager.init(this);
+        mTrackDataSource = new TrackDataSource();
+        mTracksListView = (ListView) findViewById(R.id.list_view);
+        mTracksListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                Toast.makeText(getApplicationContext(),
+                        "Click Item Number " + position, Toast.LENGTH_SHORT)
+                        .show();
+            }
+        });
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.registerOnSharedPreferenceChangeListener(this); //to get pref changes to onSharePreferenceChanged
@@ -161,7 +168,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         drawerItem[2] = new ObjectDrawerItem(R.drawable.ic_action_refresh, mNavigationDrawerItemTitles[2]);
         drawerItem[3] = new ObjectDrawerItem(R.drawable.ic_action_about, mNavigationDrawerItemTitles[3]);
 
-        DrawerItemCustomAdapter adapter = new DrawerItemCustomAdapter(this, R.layout.listview_item_row, drawerItem);
+        DrawerItemCustomAdapter adapter = new DrawerItemCustomAdapter(this, R.layout.menu_listview_row, drawerItem);
         mNavigationDrawerList.setAdapter(adapter);
 
         mNavigationDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -397,73 +404,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         respText.setText(null);
     }
 
-    /**
-     * This class uses the BroadcastReceiver framework to detect and handle new postition messages from
-     * the service
-     */
-    private class NewPositionReceiver extends BroadcastReceiver {
-        // prevents instantiation by other packages.
-        private NewPositionReceiver() {
-        }
-
-        /**
-         * This method is called by the system when a broadcast Intent is matched by this class'
-         * intent filters
-         *
-         * @param context
-         * @param intent
-         */
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Location location = (Location) intent.getExtras().get(Const.POSITION);
-            if (location != null) {
-                //2014-06-28T15:07:59
-                mLastLocationTime = new SimpleDateFormat("HH:mm:ss").format(location.getTime());
-                mLastLocationAlt = String.format("%.0f", location.getAltitude());
-                mLastLocationSpeed = String.format("%.0f", (location.getSpeed() / 1000) * 3600);
-                mAccuracy = String.format("%.1f", location.getAccuracy());
-            }
-            if (intent.hasExtra(Const.ADDRESS)) {
-                String adr = intent.getStringExtra(Const.ADDRESS);
-                if (adr != null)
-                    mAddress = adr;
-            }
-
-            if (intent.hasExtra(Const.DURATION)) {
-                Long d = intent.getLongExtra(Const.DURATION, 0l) / 1000;
-                mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
-            }
-
-            if (intent.hasExtra(Const.DISTANCE))
-                mDistance = String.format("%.2f", (intent.getFloatExtra(Const.DISTANCE, 0.0f) / 1000));
-
-            mLastServerResponse = intent.getStringExtra(Const.SERVER_RESPONSE);
-            UpdateGUI();
-
-            //if this is final broadcast
-            if (intent.hasExtra(Const.FINISH_TIME)) {
-                TrackDob trackDob = new TrackDob();
-                trackDob.setStartTime(intent.getLongExtra(Const.START_TIME, 0l));
-                trackDob.setStartLat(intent.getDoubleExtra(Const.START_LAT, 0d));
-                trackDob.setStartLon(intent.getDoubleExtra(Const.START_LON, 0d));
-                trackDob.setStartAddress(intent.getStringExtra(Const.ADDRESS));
-                trackDob.setFinishTime(intent.getLongExtra(Const.FINISH_TIME, 0l));
-                trackDob.setFinishLat(intent.getDoubleExtra(Const.FINISH_LAT, 0d));
-                trackDob.setFinishLon(intent.getDoubleExtra(Const.FINISH_LON, 0d));
-                trackDob.setFinishAddress(intent.getStringExtra(Const.FINISH_ADDRESS));
-                trackDob.setDistance(intent.getFloatExtra(Const.DISTANCE, 0f));
-                trackDob.setMaxSpeed(intent.getFloatExtra(Const.MAX_SPEED, 0f));
-                trackDob.setAveSpeed(intent.getFloatExtra(Const.AVE_SPEED, 0f));
-                trackDob.setMinAlt(intent.getDoubleExtra(Const.MIN_ALT, 0d));
-                trackDob.setMaxAlt(intent.getDoubleExtra(Const.MAX_ALT, 0d));
-                trackDob.setElevDiffUp(intent.getDoubleExtra(Const.ELEV_DIFF_UP, 0d));
-                trackDob.setElevDiffDown(intent.getDoubleExtra(Const.ELEV_DIFF_DOWN, 0d));
-                trackDob.setNote("ěščřžýáíé");
-                trackDataSource.saveTrack(trackDob);
-            }
-        }
-    }
-
     private void UpdateGUI() {
 
         TextView dateText = (TextView) findViewById(R.id.text_position_date);
@@ -572,6 +512,98 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mAddress = sharedPref.getString(Const.ADDRESS, "");
         mLastServerResponse = sharedPref.getString(Const.SERVER_RESPONSE, "");
         UpdateGUI();
+    }
+
+    @Override
+    protected void onPause() {
+        mTracksListView.setAdapter(null);
+        mTrackDataCursorAdapter = null;
+        DatabaseManager.deactivate();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DatabaseManager.init(this);
+        mTrackDataCursorAdapter = new TrackDataCursorAdapter(MainScreen.this, mTrackDataSource.getAllTracksCursor(), 0);
+        mTracksListView.setAdapter(mTrackDataCursorAdapter);
+    }
+
+    private void reloadTracks() {
+        if (null != mTrackDataCursorAdapter) {
+            mTrackDataCursorAdapter.swapCursor(mTrackDataSource.getAllTracksCursor());
+            mTrackDataCursorAdapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * This class uses the BroadcastReceiver framework to detect and handle new postition messages from
+     * the service
+     */
+    private class NewPositionReceiver extends BroadcastReceiver {
+        // prevents instantiation by other packages.
+        private NewPositionReceiver() {
+        }
+
+        /**
+         * This method is called by the system when a broadcast Intent is matched by this class'
+         * intent filters
+         *
+         * @param context
+         * @param intent
+         */
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Location location = (Location) intent.getExtras().get(Const.POSITION);
+            if (location != null) {
+                //2014-06-28T15:07:59
+                mLastLocationTime = new SimpleDateFormat("HH:mm:ss").format(location.getTime());
+                mLastLocationAlt = String.format("%.0f", location.getAltitude());
+                mLastLocationSpeed = String.format("%.0f", (location.getSpeed() / 1000) * 3600);
+                mAccuracy = String.format("%.1f", location.getAccuracy());
+            }
+            if (intent.hasExtra(Const.ADDRESS)) {
+                String adr = intent.getStringExtra(Const.ADDRESS);
+                if (adr != null)
+                    mAddress = adr;
+            }
+
+            if (intent.hasExtra(Const.DURATION)) {
+                Long d = intent.getLongExtra(Const.DURATION, 0l) / 1000;
+                mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
+            }
+
+            if (intent.hasExtra(Const.DISTANCE))
+                mDistance = String.format("%.2f", (intent.getFloatExtra(Const.DISTANCE, 0.0f) / 1000));
+
+            mLastServerResponse = intent.getStringExtra(Const.SERVER_RESPONSE);
+            UpdateGUI();
+
+            //if this is final broadcast
+            if (intent.hasExtra(Const.FINISH_TIME)) {
+                TrackDob trackDob = new TrackDob();
+                trackDob.setStartTime(intent.getLongExtra(Const.START_TIME, 0l));
+                trackDob.setStartLat(intent.getDoubleExtra(Const.START_LAT, 0d));
+                trackDob.setStartLon(intent.getDoubleExtra(Const.START_LON, 0d));
+                trackDob.setStartAddress(intent.getStringExtra(Const.ADDRESS));
+                trackDob.setFinishTime(intent.getLongExtra(Const.FINISH_TIME, 0l));
+                trackDob.setFinishLat(intent.getDoubleExtra(Const.FINISH_LAT, 0d));
+                trackDob.setFinishLon(intent.getDoubleExtra(Const.FINISH_LON, 0d));
+                trackDob.setFinishAddress(intent.getStringExtra(Const.FINISH_ADDRESS));
+                trackDob.setDistance(intent.getFloatExtra(Const.DISTANCE, 0f));
+                trackDob.setMaxSpeed(intent.getFloatExtra(Const.MAX_SPEED, 0f));
+                trackDob.setAveSpeed(intent.getFloatExtra(Const.AVE_SPEED, 0f));
+                trackDob.setMinAlt(intent.getDoubleExtra(Const.MIN_ALT, 0d));
+                trackDob.setMaxAlt(intent.getDoubleExtra(Const.MAX_ALT, 0d));
+                trackDob.setElevDiffUp(intent.getDoubleExtra(Const.ELEV_DIFF_UP, 0d));
+                trackDob.setElevDiffDown(intent.getDoubleExtra(Const.ELEV_DIFF_DOWN, 0d));
+                trackDob.setNote(mLastLocationTime);
+
+                mTrackDataSource.saveTrack(trackDob);
+                reloadTracks();
+            }
+        }
     }
 }
 

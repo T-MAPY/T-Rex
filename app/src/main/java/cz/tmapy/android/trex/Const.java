@@ -37,21 +37,21 @@ public final class Const {
     public static final String ADDRESS = "cz.tmapy.android.trex.ADDRESS";
     public static final String SERVER_RESPONSE = "cz.tmapy.android.trex.SERVER_RESPONSE";
 
-    public static final String START_TIME = "cz.tmapy.android.trex.START_TIME";
-    public static final String START_LAT = "cz.tmapy.android.trex.START_LAT";
-    public static final String START_LON = "cz.tmapy.android.trex.START_LON";
-    public static final String START_ADDRESS = "cz.tmapy.android.trex.START_ADDRESS";
-    public static final String FINISH_TIME = "cz.tmapy.android.trex.FINISH_TIME";
-    public static final String FINISH_LAT = "cz.tmapy.android.trex.FINISH_LAT";
-    public static final String FINISH_LON = "cz.tmapy.android.trex.FINISH_LON";
-    public static final String FINISH_ADDRESS = "cz.tmapy.android.trex.FINISH_ADDRESS";
-    public static final String DISTANCE = "cz.tmapy.android.trex.DISTANCE";
+    public static final String START_TIME = "cz.tmapy.android.trex.COL_START_TIME";
+    public static final String START_LAT = "cz.tmapy.android.trex.COL_START_LAT";
+    public static final String START_LON = "cz.tmapy.android.trex.COL_START_LON";
+    public static final String START_ADDRESS = "cz.tmapy.android.trex.COL_START_ADDRESS";
+    public static final String FINISH_TIME = "cz.tmapy.android.trex.COL_FINISH_TIME";
+    public static final String FINISH_LAT = "cz.tmapy.android.trex.COL_FINISH_LAT";
+    public static final String FINISH_LON = "cz.tmapy.android.trex.COL_FINISH_LON";
+    public static final String FINISH_ADDRESS = "cz.tmapy.android.trex.COL_FINISH_ADDRESS";
+    public static final String DISTANCE = "cz.tmapy.android.trex.COL_DISTANCE";
     public static final String DURATION ="cz.tmapy.android.trex.DURATION";
-    public static final String MAX_SPEED = "cz.tmapy.android.trex.MAX_SPEED";
-    public static final String AVE_SPEED = "cz.tmapy.android.trex.AVE_SPEED";
+    public static final String MAX_SPEED = "cz.tmapy.android.trex.COL_MAX_SPEED";
+    public static final String AVE_SPEED = "cz.tmapy.android.trex.COL_AVE_SPEED";
     public static final String MIN_ALT = "cz.tmapy.android.trex.MIN_AlT";
-    public static final String MAX_ALT = "cz.tmapy.android.trex.MAX_ALT";
-    public static final String ELEV_DIFF_UP = "cz.tmapy.android.trex.ELEV_DIFF_UP";
-    public static final String ELEV_DIFF_DOWN = "cz.tmapy.android.trex.ELEV_DIFF_DOWN";
+    public static final String MAX_ALT = "cz.tmapy.android.trex.COL_MAX_ALT";
+    public static final String ELEV_DIFF_UP = "cz.tmapy.android.trex.COL_ELEV_DIFF_UP";
+    public static final String ELEV_DIFF_DOWN = "cz.tmapy.android.trex.COL_ELEV_DIFF_DOWN";
 
 }
