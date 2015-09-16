@@ -417,6 +417,7 @@ public class BackgroundLocationService extends Service implements
      * @param result
      */
     private void SendAddressBroadcast(String result) {
+        mLastAcceptedLocation.setAddress(result);
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
         localIntent.putExtra(Const.ADDRESS, result);
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
