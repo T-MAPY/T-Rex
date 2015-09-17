@@ -406,6 +406,10 @@ public class BackgroundLocationService extends Service implements
      * Broadcasts the Intent with server response
      */
     private void SendServerResponseBroadcast(String serverResponse) {
+        if (mFirstLocation.getServerResponse() == null)
+            mFirstLocation.setServerResponse(serverResponse);
+        mLastAcceptedLocation.setServerResponse(serverResponse);
+
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
         localIntent.putExtra(Const.SERVER_RESPONSE, serverResponse);
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
@@ -417,7 +421,10 @@ public class BackgroundLocationService extends Service implements
      * @param result
      */
     private void SendAddressBroadcast(String result) {
+        if (mFirstLocation.getAddress() == null)
+            mFirstLocation.setAddress(result);
         mLastAcceptedLocation.setAddress(result);
+
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
         localIntent.putExtra(Const.ADDRESS, result);
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
@@ -439,7 +446,7 @@ public class BackgroundLocationService extends Service implements
         localIntent.putExtra(Const.FINISH_ADDRESS, mLastAcceptedLocation.getAddress());
         localIntent.putExtra(Const.DISTANCE, mDistance);
         localIntent.putExtra(Const.MAX_SPEED, mMaxSpeed);
-        localIntent.putExtra(Const.AVE_SPEED, mSpeedSum / mSpeedLocationsCount);
+        localIntent.putExtra(Const.AVE_SPEED, mSpeedLocationsCount > 0 ? mSpeedSum / mSpeedLocationsCount : 0f );
         localIntent.putExtra(Const.MIN_ALT, mMinAltitude);
         localIntent.putExtra(Const.MAX_ALT, mMaxAltitude);
         localIntent.putExtra(Const.ELEV_DIFF_UP, mElevDiffUp);
