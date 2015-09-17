@@ -1,14 +1,12 @@
 <resources>
     <string name="app_name">T-Rex</string>
     <string name="action_settings">Settings</string>
-    <string name="button_start_sending">Start</string>
     <string name="insert_target_url">Insert target URL</string>
     <string name="pref_basic_category">Basic settings</string>
     <string name="pref_targetUrl">Target server</string>
     <string name="pref_targetUrl_summ">Insert URL of target server</string>
     <string name="pref_id">Device identifier</string>
     <string name="pref_id_summ">Insert user defined identifier (max 10 chars)</string>
-    <string name="button_stop_sending">Stop</string>
     <string name="textview_date">Position at:</string>
     <string name="textview_accuracy">Accuracy:</string>
     <string name="textview_alt">Altitude:</string>
@@ -60,7 +58,6 @@
     <string name="pref_geocoding_summ">Try to find address of current location</string>
     <string name="textview_duration">Duration:</string>
     <string name="textview_estimated_distance">Route:</string>
-    <string name="textview_previous_tracks">Previous tracks:</string>
     <string name="textview_track_row_desc_speed">Sp:</string>
     <string name="textview_track_row_desc_alt">Alt:</string>
     <string name="dialog_delete_title">Delete?</string>

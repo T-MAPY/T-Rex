@@ -17,6 +17,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -118,23 +119,24 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         addDrawerItems();
         setupDrawer();
 
-        final ToggleButton toggle = (ToggleButton) findViewById(R.id.toggle_start);
-        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    if (!mLocalizationIsRunning) {
-                        Boolean startSuccess = startSending();
-                        if (!startSuccess) //cancel toggle switch when service' start is not successful
-                            toggle.setChecked(false);
-                    }
-                } else stopSending();
+        final FloatingActionButton startButton = (FloatingActionButton) findViewById(R.id.start_button);
+        startButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mLocalizationIsRunning) {
+                    Boolean startSuccess = startSending();
+                    if (startSuccess) startButton.setImageResource(R.drawable.ic_action_refresh);
+                } else {
+                    stopSending();
+                    startButton.setImageResource(R.drawable.ic_action_location_found);
+                }
             }
         });
 
         mLocalizationIsRunning = isServiceRunning(BackgroundLocationService.class);
         if (mLocalizationIsRunning) {
             RestoreGUIFromPreferences();
-            toggle.setChecked(true);
+            startButton.setImageResource(R.drawable.ic_action_refresh);
         }
 
         // 1) localization is not running - activity was not executed from service
