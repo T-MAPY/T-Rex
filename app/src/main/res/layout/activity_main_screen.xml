@@ -18,7 +18,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="20dp"
-                android:background="@android:color/holo_purple"
+                android:background="@android:color/light_blue"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -144,7 +144,6 @@
             </LinearLayout>
             <ListView
                 android:id="@+id/list_view"
-                android:background="@android:color/holo_orange_light"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
