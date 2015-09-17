@@ -12,27 +12,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-            <!--
-                        <ToggleButton
-                            android:id="@+id/toggle_start"
-                            android:layout_width="fill_parent"
-                            android:layout_height="60dp"
-                            android:layout_marginBottom="20dp"
-                            android:background="@android:color/holo_blue_bright"
-                            android:shadowColor="#A8A8A8"
-                            android:shadowRadius="5"
-                            android:textColor="@android:color/white"
-                            android:textOff="@string/button_start_sending"
-                            android:textOn="@string/button_stop_sending"
-                            android:textSize="30sp"
-                            android:textStyle="bold" />
-                        -->
 
             <LinearLayout
                 android:id="@+id/new_track"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="20dp"
+                android:background="@android:color/holo_purple"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -41,6 +27,7 @@
                     android:orientation="horizontal">
 
                     <TextView
+                        android:textColor="@android:color/white"
                         android:layout_width="100dp"
                         android:layout_height="wrap_content"
                         android:text="@string/textview_duration" />
@@ -157,8 +144,9 @@
             </LinearLayout>
             <ListView
                 android:id="@+id/list_view"
+                android:background="@android:color/holo_orange_light"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"></ListView>
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton
