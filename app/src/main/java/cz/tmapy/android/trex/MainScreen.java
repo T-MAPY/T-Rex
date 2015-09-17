@@ -591,7 +591,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 trackDob.setStartTime(intent.getLongExtra(Const.START_TIME, 0l));
                 trackDob.setStartLat(intent.getDoubleExtra(Const.START_LAT, 0d));
                 trackDob.setStartLon(intent.getDoubleExtra(Const.START_LON, 0d));
-                trackDob.setStartAddress(intent.getStringExtra(Const.ADDRESS));
+                trackDob.setStartAddress(intent.getStringExtra(Const.START_ADDRESS));
                 trackDob.setFinishTime(intent.getLongExtra(Const.FINISH_TIME, 0l));
                 trackDob.setFinishLat(intent.getDoubleExtra(Const.FINISH_LAT, 0d));
                 trackDob.setFinishLon(intent.getDoubleExtra(Const.FINISH_LON, 0d));
