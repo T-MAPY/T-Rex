@@ -61,4 +61,6 @@
     <string name="textview_duration">Duration:</string>
     <string name="textview_estimated_distance">Route:</string>
     <string name="textview_previous_tracks">Previous tracks:</string>
+    <string name="textview_track_row_desc_speed">Sp:</string>
+    <string name="textview_track_row_desc_alt">Alt:</string>
 </resources>

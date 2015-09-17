@@ -61,4 +61,6 @@
     <string name="textview_duration">Trvání:</string>
     <string name="textview_estimated_distance">Trasa:</string>
     <string name="textview_previous_tracks">Předchozí trasy:</string>
+    <string name="textview_track_row_desc_speed">Rych:</string>
+    <string name="textview_track_row_desc_alt">N.m.:</string>
 </resources>

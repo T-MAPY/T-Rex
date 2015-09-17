@@ -32,8 +32,8 @@ public class TrackDataCursorAdapter extends CursorAdapter {
                 "  " + String.format("%.2f", (cursor.getFloat(9) / 1000)) + "km");
 
         TextView descView = (TextView) view.findViewById(R.id.text_tracks_list_item_description);
-        descView.setText("Sp:" + String.format("%.2f", cursor.getFloat(10)) + "/" + String.format("%.2f", cursor.getFloat(11)) +
-                " Alt:" + String.format("%.0f", cursor.getDouble(12)) + "/" + String.format("%.0f", cursor.getDouble(13)) + "/" +
+        descView.setText(R.string.textview_track_row_desc_speed + String.format("%.0f", (cursor.getFloat(10) / 1000) * 3600) + "/" + String.format("%.0f", (cursor.getFloat(11) / 1000) * 3600) +
+                "  " + R.string.textview_track_row_desc_alt + String.format("%.0f", cursor.getDouble(12)) + "/" + String.format("%.0f", cursor.getDouble(13)) + "/" +
                 String.format("%.0f", cursor.getDouble(14)) + "/" + String.format("%.0f", cursor.getDouble(15)));
     }
 
