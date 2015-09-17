@@ -110,21 +110,27 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/text_http_response_title"
+                android:text="@string/textview_http_response_title"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/text_http_response"
+                android:singleLine="true"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
         <TextView
             android:id="@+id/text_address"
             android:layout_width="fill_parent"
             android:textSize="18sp"
             android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/text_http_response_title"
-            android:text="@string/textview_http_response_title"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"/>
-        <TextView
-            android:id="@+id/text_http_response"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"/>
 
         <TextView
             android:text="@string/textview_previous_tracks"
