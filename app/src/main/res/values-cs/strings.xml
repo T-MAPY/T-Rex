@@ -63,4 +63,6 @@
     <string name="textview_previous_tracks">Předchozí trasy:</string>
     <string name="textview_track_row_desc_speed">Rychlost:</string>
     <string name="textview_track_row_desc_alt">Výška:</string>
+    <string name="dialog_delete_title">Smazat záznam?</string>
+    <string name="dialog_delete_message">Opravdu smazat záznam o trase?</string>
 </resources>

@@ -63,4 +63,6 @@
     <string name="textview_previous_tracks">Previous tracks:</string>
     <string name="textview_track_row_desc_speed">Sp:</string>
     <string name="textview_track_row_desc_alt">Alt:</string>
+    <string name="dialog_delete_title">Delete?</string>
+    <string name="dialog_delete_message">Are you sure you want to delete the track?</string>
 </resources>

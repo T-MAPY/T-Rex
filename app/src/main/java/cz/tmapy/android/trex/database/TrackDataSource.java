@@ -111,6 +111,15 @@ public class TrackDataSource {
         return insertId;
     }
 
+    public void deleteTrack(Long value) {
+        try {
+            DatabaseManager.getDb().delete(TABLE_NAME, COL_ID + "=" + value, null);
+        } catch (Exception e) {
+            Log.e(TAG, "Can't delete row", e);
+        }
+
+    }
+
     public Cursor getAllTracksCursor() {
         return DatabaseManager.getDb().query(TABLE_NAME, allColumns, null, null, null, null, COL_ID + " DESC");
     }

@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -83,13 +84,22 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         DatabaseManager.init(this);
         mTrackDataSource = new TrackDataSource();
         mTracksListView = (ListView) findViewById(R.id.list_view);
-        mTracksListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                Toast.makeText(getApplicationContext(),
-                        "Click Item Number " + position, Toast.LENGTH_SHORT)
-                        .show();
+        mTracksListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int pos, long id) {
+                AlertDialog.Builder ad = new AlertDialog.Builder(MainScreen.this);
+                ad.setTitle(R.string.dialog_delete_title);
+                ad.setMessage(R.string.dialog_delete_message);
+                final int positionToRemove = pos;
+                ad.setNegativeButton(android.R.string.no, null);
+                ad.setPositiveButton(android.R.string.yes, new AlertDialog.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Cursor c = (Cursor) mTrackDataCursorAdapter.getItem(positionToRemove);
+                        mTrackDataSource.deleteTrack(c.getLong(0));
+                        reloadTracks();
+                    }
+                });
+                ad.show();
+                return true;
             }
         });
 
