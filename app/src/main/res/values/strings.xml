@@ -22,7 +22,7 @@
     <string name="pref_min_dist_summ">Distance between positions, evoking sending position to server (in meters)</string>
     <string name="pref_max_interval">Frequency of sending (sec)</string>
     <string name="pref_max_interval_sum">Maximal time of sending new position to server (in seconds) - should be equal to or longer then localization frequency</string>
-    <string name="textview_http_response_title">Server response:</string>
+    <string name="textview_http_response_title">Server:</string>
     <string name="pref_other">Other settings</string>
     <string name="pref_keep_screen_on">Keep screen on</string>
     <string name="pref_keep_screen_on_summ">Keep screen on when application is running</string>
