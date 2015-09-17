@@ -7,8 +7,8 @@ import android.location.Location;
  */
 public class LocationWrapper {
     private Location location = null;
-    private String address = "";
-    private String serverResponse = "";
+    private String address = null;
+    private String serverResponse = null;
 
     public Location getLocation() {
         return location;
