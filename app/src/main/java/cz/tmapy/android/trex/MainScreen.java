@@ -47,10 +47,15 @@ import cz.tmapy.android.trex.update.Updater;
 public class MainScreen extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = MainScreen.class.getName();
-    TrackDataSource mTrackDataSource;
-    TrackDataCursorAdapter mTrackDataCursorAdapter;
-    ListView mTracksListView;
-    SharedPreferences sharedPref;
+
+    private IntentFilter mIntentFilter;
+    private NewPositionReceiver mPositionReceiver;
+
+    private TrackDataSource mTrackDataSource;
+    private TrackDataCursorAdapter mTrackDataCursorAdapter;
+    private ListView mTracksListView;
+
+    private SharedPreferences sharedPref;
     private String[] mNavigationDrawerItemTitles;
     private ListView mNavigationDrawerList;
     private DrawerLayout mNavigationDrawerLayout;
@@ -115,14 +120,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 } else stopSending();
             }
         });
-
-        //Registrace broadcastreceiveru komunikaci se sluzbou (musi byt tady, aby fungoval i po nove inicializaci aplikace z notifikace
-        // The filter's action is BROADCAST_ACTION
-        IntentFilter mIntentFilter = new IntentFilter(Const.LOCATION_BROADCAST);
-        // Instantiates a new mPositionReceiver
-        NewPositionReceiver mPositionReceiver = new NewPositionReceiver();
-        // Registers the mPositionReceiver and its intent filters
-        LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
 
         mLocalizationIsRunning = isServiceRunning(BackgroundLocationService.class);
         if (mLocalizationIsRunning) {
@@ -519,6 +516,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mTracksListView.setAdapter(null);
         mTrackDataCursorAdapter = null;
         DatabaseManager.deactivate();
+        // Musí se odregistrovat receiver, jinak se bude volat vícekrát (podle počtu, kolikrát přešel do pause a zpět)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mPositionReceiver);
         super.onPause();
     }
 
@@ -528,6 +527,12 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         DatabaseManager.init(this);
         mTrackDataCursorAdapter = new TrackDataCursorAdapter(MainScreen.this, mTrackDataSource.getAllTracksCursor(), 0);
         mTracksListView.setAdapter(mTrackDataCursorAdapter);
+
+        //Registrace broadcastreceiveru komunikaci se sluzbou (musi byt tady, aby fungoval i po nove inicializaci aplikace z notifikace
+        mIntentFilter = new IntentFilter(Const.LOCATION_BROADCAST);
+        mPositionReceiver = new NewPositionReceiver();
+        // Registers the mPositionReceiver and its intent filters
+        LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
     }
 
     private void reloadTracks() {
