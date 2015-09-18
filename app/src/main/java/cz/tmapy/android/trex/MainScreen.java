@@ -172,10 +172,10 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
         ObjectDrawerItem[] drawerItem = new ObjectDrawerItem[4];
 
-        drawerItem[0] = new ObjectDrawerItem(R.drawable.ic_settings_black_36dp, mNavigationDrawerItemTitles[0]);
-        drawerItem[1] = new ObjectDrawerItem(R.drawable.ic_autorenew_black_36dp, mNavigationDrawerItemTitles[1]);
-        drawerItem[2] = new ObjectDrawerItem(R.drawable.ic_help_outline_black_36dp, mNavigationDrawerItemTitles[2]);
-        drawerItem[3] = new ObjectDrawerItem(R.drawable.ic_info_outline_black_36dp, mNavigationDrawerItemTitles[3]);
+        drawerItem[0] = new ObjectDrawerItem(R.drawable.ic_settings_black_24dp, mNavigationDrawerItemTitles[0]);
+        drawerItem[1] = new ObjectDrawerItem(R.drawable.ic_autorenew_black_24dp, mNavigationDrawerItemTitles[1]);
+        drawerItem[2] = new ObjectDrawerItem(R.drawable.ic_help_outline_black_24dp, mNavigationDrawerItemTitles[2]);
+        drawerItem[3] = new ObjectDrawerItem(R.drawable.ic_info_outline_black_24dp, mNavigationDrawerItemTitles[3]);
 
         DrawerItemCustomAdapter adapter = new DrawerItemCustomAdapter(this, R.layout.menu_listview_row, drawerItem);
         mNavigationDrawerList.setAdapter(adapter);
