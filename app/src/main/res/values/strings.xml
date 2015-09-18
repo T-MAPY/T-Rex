@@ -7,10 +7,6 @@
     <string name="pref_targetUrl_summ">Insert URL of target server</string>
     <string name="pref_id">Device identifier</string>
     <string name="pref_id_summ">Insert user defined identifier (max 10 chars)</string>
-    <string name="textview_date">Position at:</string>
-    <string name="textview_accuracy">Accuracy:</string>
-    <string name="textview_alt">Altitude:</string>
-    <string name="textview_speed">Speed:</string>
     <string name="pref_location_category">Localization settings</string>
     <string name="pref_strategy">Localization strategy</string>
     <string name="pref_strategy_sum">Accuracy and localization strategy</string>
@@ -20,7 +16,6 @@
     <string name="pref_min_dist_summ">Distance between positions, evoking sending position to server (in meters)</string>
     <string name="pref_max_interval">Frequency of sending (sec)</string>
     <string name="pref_max_interval_sum">Maximal time of sending new position to server (in seconds) - should be equal to or longer then localization frequency</string>
-    <string name="textview_http_response_title">Server:</string>
     <string name="pref_other">Other settings</string>
     <string name="pref_keep_screen_on">Keep screen on</string>
     <string name="pref_keep_screen_on_summ">Keep screen on when application is running</string>
@@ -56,8 +51,6 @@
     <string name="buffered_locations_sent">Previous locations sent to server</string>
     <string name="pref_geocoding">Address finding</string>
     <string name="pref_geocoding_summ">Try to find address of current location</string>
-    <string name="textview_duration">Duration:</string>
-    <string name="textview_estimated_distance">Route:</string>
     <string name="textview_track_row_desc_speed">Sp:</string>
     <string name="textview_track_row_desc_alt">Alt:</string>
     <string name="dialog_delete_title">Delete?</string>

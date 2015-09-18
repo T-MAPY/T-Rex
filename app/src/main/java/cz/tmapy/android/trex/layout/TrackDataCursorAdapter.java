@@ -28,8 +28,10 @@ public class TrackDataCursorAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         TextView headerView = (TextView) view.findViewById(R.id.text_tracks_list_item_header);
 
-        headerView.setText(new SimpleDateFormat("d.M. H:mm").format(cursor.getLong(1)) + "-" + new SimpleDateFormat("H:mm").format(cursor.getLong(5)) +
-                "  " + String.format("%.2f", (cursor.getFloat(9) / 1000)) + "km");
+        Long d = (cursor.getLong(5) - cursor.getLong(1)) / 1000;
+
+        headerView.setText(String.format("%.2f", (cursor.getFloat(9) / 1000)) + "km  (" + String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60))
+                + ")     " + new SimpleDateFormat("H:mm d.M.").format(cursor.getLong(1)));
 
         TextView descView = (TextView) view.findViewById(R.id.text_tracks_list_item_description);
 

@@ -17,116 +17,31 @@
                 android:id="@+id/new_track"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="20dp"
                 android:background="@color/primary"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="20dp">
 
                 <LinearLayout
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="100dp"
-                        android:textColor="@color/icons"
-                        android:layout_height="wrap_content"
-                        android:text="@string/textview_duration" />
 
                     <TextView
                         android:id="@+id/text_duration"
-                        android:textColor="@color/icons"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="100dp"
-                        android:textColor="@color/icons"
+                        style="@style/LastPositionTextViewStyle"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/textview_date" />
-
-                    <TextView
-                        android:id="@+id/text_position_date"
-                        android:textColor="@color/icons"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="100dp"
-                        android:textColor="@color/icons"
-                        android:layout_height="wrap_content"
-                        android:text="@string/textview_accuracy" />
-
-                    <TextView
-                        android:id="@+id/text_position_accuracy"
-                        android:textColor="@color/icons"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="100dp"
-                        android:textColor="@color/icons"
-                        android:layout_height="wrap_content"
-                        android:text="@string/textview_alt" />
-
-                    <TextView
-                        android:id="@+id/text_position_alt"
-                        android:textColor="@color/icons"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="100dp"
-                        android:textColor="@color/icons"
-                        android:layout_height="wrap_content"
-                        android:text="@string/textview_speed" />
-
-                    <TextView
-                        android:id="@+id/text_position_speed"
-                        android:textColor="@color/icons"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="100dp"
-                        android:textColor="@color/icons"
-                        android:layout_height="wrap_content"
-                        android:text="@string/textview_estimated_distance" />
+                        android:text="0:00:00"
+                        android:textSize="32sp" />
 
                     <TextView
                         android:id="@+id/text_distance"
-                        android:textColor="@color/icons"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content" />
+                        style="@style/LastPositionTextViewStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="40dp"
+                        android:text="0,00 km"
+                        android:textSize="32sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -134,40 +49,134 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="fill_parent"
+                        android:layout_marginRight="6dp"
+                        android:alpha="0.7"
+                        android:src="@drawable/ic_directions_run_white_24dp" />
+
                     <TextView
-                        android:id="@+id/text_http_response_title"
-                        android:textColor="@color/icons"
-                        android:layout_width="100dp"
+                        android:id="@+id/text_position_speed"
+                        style="@style/LastPositionTextViewStyle"
+                        android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/textview_http_response_title" />
+                        android:text="0 km/h" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="fill_parent"
+                        android:layout_marginRight="6dp"
+                        android:alpha="0.7"
+                        android:src="@drawable/ic_terrain_white_24dp" />
+
+                    <TextView
+                        android:id="@+id/text_position_alt"
+                        style="@style/LastPositionTextViewStyle"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0 m" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="fill_parent"
+                        android:layout_marginRight="6dp"
+                        android:alpha="0.7"
+                        android:src="@drawable/ic_timelapse_white_24dp" />
+
+                    <TextView
+                        android:id="@+id/text_position_date"
+                        style="@style/LastPositionTextViewStyle"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0:00:00" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="fill_parent"
+                        android:layout_marginRight="6dp"
+                        android:alpha="0.7"
+                        android:src="@drawable/ic_gps_fixed_white_24dp" />
+
+                    <TextView
+                        android:id="@+id/text_position_accuracy"
+                        style="@style/LastPositionTextViewStyle"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0 m" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="fill_parent"
+                        android:layout_marginRight="6dp"
+                        android:alpha="0.7"
+                        android:src="@drawable/ic_import_export_white_24dp" />
 
                     <TextView
                         android:id="@+id/text_http_response"
-                        android:textColor="@color/icons"
+                        style="@style/LastPositionTextViewStyle"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:singleLine="true" />
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/text_address"
-                    android:textColor="@color/icons"
+                <LinearLayout
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="18sp" />
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="fill_parent"
+                        android:layout_marginRight="6dp"
+                        android:alpha="0.7"
+                        android:src="@drawable/ic_location_city_white_24dp" />
+
+                    <TextView
+                        android:id="@+id/text_address"
+                        style="@style/LastPositionTextViewStyle"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="18sp" />
+                </LinearLayout>
             </LinearLayout>
+
             <ListView
                 android:id="@+id/list_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/start_button"
-            android:clickable="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
+            android:clickable="true"
             android:scaleType="center"
             android:src="@drawable/ic_play_arrow_white_36dp"
             app:backgroundTint="@color/accent"
