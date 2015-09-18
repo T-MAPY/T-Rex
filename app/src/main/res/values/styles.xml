@@ -35,7 +35,7 @@
         <!--it has to be here twice!!! https://developer.android.com/training/basics/actionbar/styling.html-->
         <item name="android:actionBarStyle" tools:ignore="NewApi">@style/ActionBarStyle</item>
         <item name="actionBarStyle">@style/ActionBarStyle</item>
-        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@color/primary_text</item>
         <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
