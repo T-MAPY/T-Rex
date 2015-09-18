@@ -1,9 +1,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
     <!--colors picked on https://www.materialpalette.com/teal/amber -->
-    <color name="primary">#009688</color>
-    <color name="primary_dark">#00796B</color>
-    <color name="primary_light">#B2DFDB</color>
-    <color name="accent">#FFC107</color>
+    <color name="primary">#607D8B</color>
+    <color name="primary_dark">#455A64</color>
+    <color name="primary_light">#CFD8DC</color>
+    <color name="accent">#FF5722</color>
     <color name="primary_text">#212121</color>
     <color name="secondary_text">#727272</color>
     <color name="icons">#FFFFFF</color>
@@ -15,7 +15,7 @@
         <item name="actionBarStyle">@style/ActionBarStyle</item>
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:typeface">monospace</item>
+        <item name="android:textColor">@color/primary_text</item>
     </style>
 
     <!-- ActionBar styles see: http://stackoverflow.com/questions/23155637/change-background-color-of-the-action-bar-using-appcompat-->
@@ -24,7 +24,6 @@
         <item name="android:background" tools:ignore="NewApi">@color/primary</item>
         <item name="background">@color/primary</item>
     </style>
-
 
     <style name="Theme.Dialog" parent="@android:style/Theme.Dialog" />
     <!-- For ACRA crash report dialog -->

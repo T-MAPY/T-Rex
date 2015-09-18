@@ -125,10 +125,10 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             public void onClick(View v) {
                 if (!mLocalizationIsRunning) {
                     Boolean startSuccess = startSending();
-                    if (startSuccess) startButton.setImageResource(R.drawable.ic_action_refresh);
+                    if (startSuccess) startButton.setImageResource(R.drawable.ic_pause_white_36dp);
                 } else {
                     stopSending();
-                    startButton.setImageResource(R.drawable.ic_action_location_found);
+                    startButton.setImageResource(R.drawable.ic_play_arrow_white_36dp);
                 }
             }
         });
@@ -136,7 +136,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mLocalizationIsRunning = isServiceRunning(BackgroundLocationService.class);
         if (mLocalizationIsRunning) {
             RestoreGUIFromPreferences();
-            startButton.setImageResource(R.drawable.ic_action_refresh);
+            startButton.setImageResource(R.drawable.ic_pause_white_36dp);
         }
 
         // 1) localization is not running - activity was not executed from service
@@ -172,10 +172,10 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
         ObjectDrawerItem[] drawerItem = new ObjectDrawerItem[4];
 
-        drawerItem[0] = new ObjectDrawerItem(R.drawable.ic_action_settings, mNavigationDrawerItemTitles[0]);
-        drawerItem[1] = new ObjectDrawerItem(R.drawable.ic_action_help, mNavigationDrawerItemTitles[1]);
-        drawerItem[2] = new ObjectDrawerItem(R.drawable.ic_action_refresh, mNavigationDrawerItemTitles[2]);
-        drawerItem[3] = new ObjectDrawerItem(R.drawable.ic_action_about, mNavigationDrawerItemTitles[3]);
+        drawerItem[0] = new ObjectDrawerItem(R.drawable.ic_settings_black_36dp, mNavigationDrawerItemTitles[0]);
+        drawerItem[1] = new ObjectDrawerItem(R.drawable.ic_autorenew_black_36dp, mNavigationDrawerItemTitles[1]);
+        drawerItem[2] = new ObjectDrawerItem(R.drawable.ic_help_outline_black_36dp, mNavigationDrawerItemTitles[2]);
+        drawerItem[3] = new ObjectDrawerItem(R.drawable.ic_info_outline_black_36dp, mNavigationDrawerItemTitles[3]);
 
         DrawerItemCustomAdapter adapter = new DrawerItemCustomAdapter(this, R.layout.menu_listview_row, drawerItem);
         mNavigationDrawerList.setAdapter(adapter);
@@ -205,10 +205,10 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 startActivity(intent);
                 break;
             case 1:
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Const.HELP_SITE_URL)));
+                new Updater(MainScreen.this).execute();
                 break;
             case 2:
-                new Updater(MainScreen.this).execute();
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Const.HELP_SITE_URL)));
                 break;
             case 3:
                 showAbout();

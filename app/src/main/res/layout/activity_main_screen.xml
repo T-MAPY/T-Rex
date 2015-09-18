@@ -18,6 +18,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="20dp"
+                android:background="@color/primary"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -27,11 +28,13 @@
 
                     <TextView
                         android:layout_width="100dp"
+                        android:textColor="@color/icons"
                         android:layout_height="wrap_content"
                         android:text="@string/textview_duration" />
 
                     <TextView
                         android:id="@+id/text_duration"
+                        android:textColor="@color/icons"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content" />
                 </LinearLayout>
@@ -43,11 +46,13 @@
 
                     <TextView
                         android:layout_width="100dp"
+                        android:textColor="@color/icons"
                         android:layout_height="wrap_content"
                         android:text="@string/textview_date" />
 
                     <TextView
                         android:id="@+id/text_position_date"
+                        android:textColor="@color/icons"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content" />
                 </LinearLayout>
@@ -59,11 +64,13 @@
 
                     <TextView
                         android:layout_width="100dp"
+                        android:textColor="@color/icons"
                         android:layout_height="wrap_content"
                         android:text="@string/textview_accuracy" />
 
                     <TextView
                         android:id="@+id/text_position_accuracy"
+                        android:textColor="@color/icons"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content" />
                 </LinearLayout>
@@ -75,11 +82,13 @@
 
                     <TextView
                         android:layout_width="100dp"
+                        android:textColor="@color/icons"
                         android:layout_height="wrap_content"
                         android:text="@string/textview_alt" />
 
                     <TextView
                         android:id="@+id/text_position_alt"
+                        android:textColor="@color/icons"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content" />
                 </LinearLayout>
@@ -91,11 +100,13 @@
 
                     <TextView
                         android:layout_width="100dp"
+                        android:textColor="@color/icons"
                         android:layout_height="wrap_content"
                         android:text="@string/textview_speed" />
 
                     <TextView
                         android:id="@+id/text_position_speed"
+                        android:textColor="@color/icons"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content" />
                 </LinearLayout>
@@ -107,11 +118,13 @@
 
                     <TextView
                         android:layout_width="100dp"
+                        android:textColor="@color/icons"
                         android:layout_height="wrap_content"
                         android:text="@string/textview_estimated_distance" />
 
                     <TextView
                         android:id="@+id/text_distance"
+                        android:textColor="@color/icons"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content" />
                 </LinearLayout>
@@ -123,12 +136,14 @@
 
                     <TextView
                         android:id="@+id/text_http_response_title"
+                        android:textColor="@color/icons"
                         android:layout_width="100dp"
                         android:layout_height="wrap_content"
                         android:text="@string/textview_http_response_title" />
 
                     <TextView
                         android:id="@+id/text_http_response"
+                        android:textColor="@color/icons"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:singleLine="true" />
@@ -136,6 +151,7 @@
 
                 <TextView
                     android:id="@+id/text_address"
+                    android:textColor="@color/icons"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:textSize="18sp" />
@@ -148,11 +164,16 @@
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/start_button"
+            android:clickable="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:clickable="true"
-            android:src="@drawable/ic_action_location_found"
+            android:scaleType="center"
+            android:src="@drawable/ic_play_arrow_white_36dp"
+            app:backgroundTint="@color/accent"
+            app:borderWidth="0dp"
+            app:elevation="10dp"
+            app:fabSize="normal"
             app:layout_anchor="@id/new_track"
             app:layout_anchorGravity="bottom|right|end" />
 

@@ -42,6 +42,7 @@ public class DrawerItemCustomAdapter extends ArrayAdapter<ObjectDrawerItem> {
         ObjectDrawerItem folder = data[position];
 
         imageViewIcon.setImageResource(folder.icon);
+        imageViewIcon.setAlpha(0.38f);
         textViewName.setText(folder.name);
 
         return listItem;
