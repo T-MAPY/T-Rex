@@ -18,7 +18,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="20dp"
-                android:background="@android:color/light_blue"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -27,7 +26,6 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:textColor="@android:color/white"
                         android:layout_width="100dp"
                         android:layout_height="wrap_content"
                         android:text="@string/textview_duration" />

@@ -1,17 +1,31 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <!--colors picked on https://www.materialpalette.com/teal/amber -->
+    <color name="primary">#009688</color>
+    <color name="primary_dark">#00796B</color>
+    <color name="primary_light">#B2DFDB</color>
+    <color name="accent">#FFC107</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#727272</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="divider">#B6B6B6</color>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-    </style>
-
-    <style name="MainScreenTheme" parent="AppTheme">
+    <style name="TRexTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!--it has to be here twice!!! https://developer.android.com/training/basics/actionbar/styling.html-->
+        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/ActionBarStyle</item>
+        <item name="actionBarStyle">@style/ActionBarStyle</item>
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@android:color/holo_blue_dark</item>
-        <item name="android:textColor">@android:color/primary_text_dark</item>
-        <item name="android:textSize">14sp</item>
         <item name="android:typeface">monospace</item>
     </style>
 
-    <style name="Theme.Dialog" parent="@android:style/Theme.Dialog" /> <!-- For ACRA crash report dialog -->
+    <!-- ActionBar styles see: http://stackoverflow.com/questions/23155637/change-background-color-of-the-action-bar-using-appcompat-->
+    <style name="ActionBarStyle" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <!--it has to be here twice!!! https://developer.android.com/training/basics/actionbar/styling.html-->
+        <item name="android:background" tools:ignore="NewApi">@color/primary</item>
+        <item name="background">@color/primary</item>
+    </style>
+
+
+    <style name="Theme.Dialog" parent="@android:style/Theme.Dialog" />
+    <!-- For ACRA crash report dialog -->
 </resources>
