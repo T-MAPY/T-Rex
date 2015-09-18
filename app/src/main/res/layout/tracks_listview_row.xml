@@ -10,9 +10,10 @@
         android:layout_height="fill_parent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="6dip"
+        android:layout_marginRight="12dp"
+        android:layout_marginLeft="6dp"
         android:alpha="0.38"
-        android:src="@drawable/ic_gps_fixed_black_36dp" />
+        android:src="@drawable/ic_gps_fixed_black_24dp" />
 
     <TextView
         android:id="@+id/text_tracks_list_item_description"
