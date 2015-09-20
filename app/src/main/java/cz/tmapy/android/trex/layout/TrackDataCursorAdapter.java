@@ -26,20 +26,27 @@ public class TrackDataCursorAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        TextView headerView = (TextView) view.findViewById(R.id.text_tracks_list_item_header);
-
+        TextView lengthView = (TextView) view.findViewById(R.id.text_tracks_list_item_length);
         Long d = (cursor.getLong(5) - cursor.getLong(1)) / 1000;
+        lengthView.setText(String.format("%.2f", (cursor.getFloat(9) / 1000)) + " km");
 
-        headerView.setText(String.format("%.2f", (cursor.getFloat(9) / 1000)) + "km  (" + String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60))
-                + ")     " + new SimpleDateFormat("H:mm d.M.").format(cursor.getLong(1)));
+        TextView durationView = (TextView) view.findViewById(R.id.text_tracks_list_item_duration);
+        durationView.setText(String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60)));
 
-        TextView descView = (TextView) view.findViewById(R.id.text_tracks_list_item_description);
+        TextView timeView = (TextView) view.findViewById(R.id.text_tracks_list_item_time);
+        timeView.setText(new SimpleDateFormat("H:mm").format(cursor.getLong(1)));
 
-        descView.setText(context.getResources().getString(R.string.textview_track_row_desc_speed) + String.format("%.0f", (cursor.getFloat(10) / 1000) * 3600) + "/" + String.format("%.0f", (cursor.getFloat(11) / 1000) * 3600) +
-                "  " + context.getResources().getString(R.string.textview_track_row_desc_alt) + String.format("%.0f", cursor.getDouble(12)) + "/" + String.format("%.0f", cursor.getDouble(13)) + "/" +
-                String.format("%.0f", cursor.getDouble(14)) + "/" + String.format("%.0f", cursor.getDouble(15)));
+        TextView dateView = (TextView) view.findViewById(R.id.text_tracks_list_item_date);
+        dateView.setText(new SimpleDateFormat("d.M.").format(cursor.getLong(1)));
 
-        //descView.setText(cursor.getString(4) != null ? cursor.getString(4) + "-" : "" + cursor.getString(8) != null ? cursor.getString(8) : "");
+        TextView speedView = (TextView) view.findViewById(R.id.text_tracks_list_item_speed);
+        speedView.setText(String.format("%.0f", (cursor.getFloat(10) / 1000) * 3600) + "/" + String.format("%.0f", (cursor.getFloat(11) / 1000) * 3600) + " km/h");
+
+        TextView elevView = (TextView) view.findViewById(R.id.text_tracks_list_item_elevation);
+        elevView.setText(String.format("%.0f", cursor.getDouble(12)) + "/" + String.format("%.0f", cursor.getDouble(13)) + " m");
+
+        TextView addView = (TextView) view.findViewById(R.id.text_tracks_list_item_address);
+        addView.setText((cursor.getString(4) != null ? cursor.getString(4) + " - " : "") + (cursor.getString(8) != null ? cursor.getString(8) : ""));
     }
 
     @Override

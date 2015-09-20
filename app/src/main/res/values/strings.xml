@@ -51,8 +51,6 @@
     <string name="buffered_locations_sent">Previous locations sent to server</string>
     <string name="pref_geocoding">Address finding</string>
     <string name="pref_geocoding_summ">Try to find address of current location</string>
-    <string name="textview_track_row_desc_speed">Sp:</string>
-    <string name="textview_track_row_desc_alt">Alt:</string>
     <string name="dialog_delete_title">Delete?</string>
     <string name="dialog_delete_message">Are you sure you want to delete the track?</string>
 </resources>
