@@ -27,11 +27,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 import org.acra.ACRA;
 
@@ -82,6 +83,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_screen);
 
+        if (!checkPlayServices()) return;
+
+        //google play services available, hooray
         DatabaseManager.init(this);
         mTrackDataSource = new TrackDataSource();
         mTracksListView = (ListView) findViewById(R.id.list_view);
@@ -125,7 +129,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             public void onClick(View v) {
                 if (!mLocalizationIsRunning) {
                     Boolean startSuccess = startSending();
-                    if (startSuccess) startButton.setImageResource(R.drawable.ic_pause_white_36dp);
+                    if (startSuccess)
+                        startButton.setImageResource(R.drawable.ic_pause_white_36dp);
                 } else {
                     stopSending();
                     startButton.setImageResource(R.drawable.ic_play_arrow_white_36dp);
@@ -150,6 +155,25 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+    }
+
+    /**
+     * Check for google play services availability
+     * @return
+     */
+    private boolean checkPlayServices() {
+        GoogleApiAvailability api = GoogleApiAvailability.getInstance();
+        int errorCheck = api.isGooglePlayServicesAvailable(this);
+        if (errorCheck == ConnectionResult.SUCCESS) {
+            //google play services available, hooray
+            return true;
+        } else if (api.isUserResolvableError(errorCheck)) {
+            //GPS_REQUEST_CODE = 1000, and is used in onActivityResult
+            api.showErrorDialogFragment(this, errorCheck, 1111);
+            //stop our activity initialization code
+        }
+        Log.e(TAG, "Google play services not available");
+        return false;
     }
 
     /**
