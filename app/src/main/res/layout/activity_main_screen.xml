@@ -1,6 +1,5 @@
 <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -38,6 +37,8 @@
                     <LinearLayout
                         android:paddingTop="5dp"
                         android:layout_gravity="start|top"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
                         android:orientation="horizontal">
                         <ImageView
                             android:layout_width="wrap_content"
@@ -53,6 +54,8 @@
                     <LinearLayout
                         android:paddingTop="2dp"
                         android:layout_gravity="left|top"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
                         android:orientation="horizontal">
                         <ImageView
                             android:layout_width="wrap_content"
@@ -68,6 +71,8 @@
                     <LinearLayout
                         android:paddingTop="2dp"
                         android:layout_gravity="start|top"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
                         android:orientation="horizontal">
                         <ImageView
                             android:layout_width="wrap_content"
@@ -97,6 +102,8 @@
                     <LinearLayout
                         android:paddingTop="5dp"
                         android:layout_gravity="start|top"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
                         android:orientation="horizontal">
                         <ImageView
                             android:layout_width="wrap_content"
@@ -112,6 +119,8 @@
                     <LinearLayout
                         android:paddingTop="2dp"
                         android:layout_gravity="start|top"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
                         android:orientation="horizontal">
                         <ImageView
                             android:layout_width="wrap_content"
@@ -126,6 +135,8 @@
                     </LinearLayout>
                     <LinearLayout
                         android:paddingTop="2dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
                         android:orientation="horizontal">
                         <ImageView
                             android:layout_width="wrap_content"
