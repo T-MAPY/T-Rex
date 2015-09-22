@@ -69,7 +69,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private Boolean mKeepScreenOn;
     //members for state saving
     private Boolean mLocalizationIsRunning = false;
-    private String mLastLocationTime;
+    private Long mStartTime;
+    private Long mLastLocationTime;
+    private String mLastLocationTimeString;
     private String mAccuracy;
     private String mLastLocationAlt;
     private String mLastLocationSpeed;
@@ -451,12 +453,15 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
      */
     public void ReloadLastPosition() {
 
-        mLastLocationTime = new SimpleDateFormat("HH:mm:ss").format(sharedPref.getLong(Const.LOCATION_TIME, 0));
+        mStartTime = sharedPref.getLong(Const.START_TIME, 0);
+        mLastLocationTime = sharedPref.getLong(Const.LAST_LOCATION_TIME, 0);
+
+        mLastLocationTimeString = new SimpleDateFormat("HH:mm:ss").format(mLastLocationTime);
         mLastLocationAlt = String.format("%.0f", Double.longBitsToDouble(sharedPref.getLong(Const.ALTITUDE, 0))); //http://stackoverflow.com/questions/16319237/cant-put-double-sharedpreferences
         mLastLocationSpeed = String.format("%.0f", (sharedPref.getFloat(Const.SPEED, 0) / 1000) * 3600);
         mAccuracy = String.format("%.1f", sharedPref.getFloat(Const.ACCURACY, 0));
 
-        Long d = sharedPref.getLong(Const.DURATION, 0l) / 1000;
+        Long d = (System.currentTimeMillis() - mStartTime) / 1000;
         mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
 
         mDistance = String.format("%.2f", (sharedPref.getFloat(Const.DISTANCE, 0.0f) / 1000));
@@ -521,7 +526,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private void UpdateGUI() {
 
         TextView dateText = (TextView) findViewById(R.id.text_position_date);
-        dateText.setText(mLastLocationTime);
+        dateText.setText(mLastLocationTimeString);
 
         if (mDuration != null) {
             TextView durationText = (TextView) findViewById(R.id.text_duration);
@@ -579,7 +584,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             Location location = (Location) intent.getExtras().get(Const.POSITION);
             if (location != null) {
                 //2014-06-28T15:07:59
-                mLastLocationTime = new SimpleDateFormat("HH:mm:ss").format(location.getTime());
+                mLastLocationTimeString = new SimpleDateFormat("HH:mm:ss").format(location.getTime());
                 mLastLocationAlt = String.format("%.0f", location.getAltitude());
                 mLastLocationSpeed = String.format("%.0f", (location.getSpeed() / 1000) * 3600);
                 mAccuracy = String.format("%.1f", location.getAccuracy());
@@ -590,8 +595,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                     mAddress = adr;
             }
 
-            if (intent.hasExtra(Const.DURATION)) {
-                Long d = intent.getLongExtra(Const.DURATION, 0l) / 1000;
+            if (intent.hasExtra(Const.START_TIME)) {
+                mStartTime = intent.getLongExtra(Const.START_TIME, 0l);
+                Long d = (System.currentTimeMillis() - mStartTime) / 1000;
                 mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
             }
 
@@ -619,7 +625,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 trackDob.setMaxAlt(intent.getDoubleExtra(Const.MAX_ALT, 0d));
                 trackDob.setElevDiffUp(intent.getDoubleExtra(Const.ELEV_DIFF_UP, 0d));
                 trackDob.setElevDiffDown(intent.getDoubleExtra(Const.ELEV_DIFF_DOWN, 0d));
-                trackDob.setNote(mLastLocationTime);
+                trackDob.setNote(mLastLocationTimeString);
 
                 SaveTrack(trackDob);
                 reloadTracks();
