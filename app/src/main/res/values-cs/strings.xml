@@ -42,7 +42,7 @@
     <string name="drawer_close">Zavřít hlavní nabídku</string>
     <string name="app_version">Verze</string>
     <string name="app_credits">T-MAPY spol. s r.o.\nApache License 2.0\nhttps://github.com/T-MAPY/T-Rex</string>
-    <string name="pref_kalman_mps">Obvyklá rychlost (m/sek)</string>
+    <string name="pref_kalman_mps">Obvyklá rychlost (m/s)</string>
     <string name="pref_kalman_mps_sum">Nastavte filtrování pozic GPS pomocí obvyklé rychlosti v metrech za sekundu (0 - vypnuto, 3 - chůze, 8 - kolo, 15 - vozidlo ve městě)</string>
     <string name="test_exception">Testovací výjimka</string>
     <string name="test_exception_message">Potvrzením dialogu vyvoláte testovací výjimku.</string>
