@@ -17,6 +17,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     /**
      * Version of data model
+     * http://stackoverflow.com/questions/8133597/android-upgrading-db-version-and-adding-new-table
      * 4 - renamed some columns
      * 3 - initial version
      */
