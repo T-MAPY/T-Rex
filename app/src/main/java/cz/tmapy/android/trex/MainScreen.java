@@ -140,7 +140,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
         mLocalizationIsRunning = isServiceRunning(BackgroundLocationService.class);
         if (mLocalizationIsRunning) {
-            RestoreGUIFromPreferences();
+            ReloadLastPosition();
             startButton.setImageResource(R.drawable.ic_pause_white_36dp);
         }
 
@@ -569,8 +569,36 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mPositionReceiver = new NewPositionReceiver();
         // Registers the mPositionReceiver and its intent filters
         LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
+
+        if (mLocalizationIsRunning) {
+            ReloadLastPosition();
+        }
     }
 
+    /**
+     * Load last state from preferences
+     */
+    public void ReloadLastPosition() {
+
+        mLastLocationTime = new SimpleDateFormat("HH:mm:ss").format(sharedPref.getLong(Const.LOCATION_TIME, 0));
+        mLastLocationAlt = String.format("%.0f", Double.longBitsToDouble(sharedPref.getLong(Const.ALTITUDE, 0))); //http://stackoverflow.com/questions/16319237/cant-put-double-sharedpreferences
+        mLastLocationSpeed = String.format("%.0f", (sharedPref.getFloat(Const.SPEED, 0) / 1000) * 3600);
+        mAccuracy = String.format("%.1f", sharedPref.getFloat(Const.ACCURACY, 0));
+
+        Long d = sharedPref.getLong(Const.DURATION, 0l) / 1000;
+        mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
+
+        mDistance = String.format("%.2f", (sharedPref.getFloat(Const.DISTANCE, 0.0f) / 1000));
+
+        mAddress = sharedPref.getString(Const.ADDRESS, "");
+        mLastServerResponse = sharedPref.getString(Const.SERVER_RESPONSE, "");
+
+        UpdateGUI();
+    }
+
+    /**
+     * Load tracks form database
+     */
     private void reloadTracks() {
         if (null != mTrackDataCursorAdapter) {
             mTrackDataCursorAdapter.swapCursor(mTrackDataSource.getAllTracksCursor());
