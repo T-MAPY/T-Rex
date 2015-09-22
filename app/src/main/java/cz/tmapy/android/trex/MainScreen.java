@@ -77,6 +77,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private String mLastServerResponse;
     private String mDistance;
     private String mDuration;
+    private Integer mKeepNumberOfTracks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +113,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         sharedPref.registerOnSharedPreferenceChangeListener(this); //to get pref changes to onSharePreferenceChanged
         mDeviceId = sharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
         mTargetServerURL = sharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
+        mKeepNumberOfTracks = Integer.valueOf(sharedPref.getString(Const.PREF_KEY_KEEP_NUMBER_OF_TRACKS, "30"));
+
         mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
         HandleKeepScreenOn();
 
@@ -314,6 +317,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             case Const.PREF_KEY_TARGET_SERVUER_URL:
                 mTargetServerURL = prefs.getString(key, "");
                 break;
+            case Const.PREF_KEY_KEEP_NUMBER_OF_TRACKS:
+                mKeepNumberOfTracks = Integer.valueOf(prefs.getString(Const.PREF_KEY_KEEP_NUMBER_OF_TRACKS, "30"));
+                break;
             case Const.PREF_KEY_KEEP_SCREEN_ON:
                 mKeepScreenOn = prefs.getBoolean(key, false);
                 HandleKeepScreenOn();
@@ -473,6 +479,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
     /**
      * Save track info into db
+     *
      * @param t
      */
     private void SaveTrack(TrackDob t) {
@@ -480,9 +487,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         Cursor cursor = mTrackDataSource.getAllTracksCursor();
         int count = cursor.getCount();
         cursor.close();
-        if (count > 30)
-        {
-
+        if (count > mKeepNumberOfTracks) {
+            mTrackDataSource.keepOnlyLastTracks(mKeepNumberOfTracks);
         }
     }
 
