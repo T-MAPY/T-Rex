@@ -63,7 +63,7 @@ public class BackgroundLocationService extends Service implements
         LocationListener {
 
     private static final String TAG = BackgroundLocationService.class.getName();
-    private final int MAX_BUFFER_SIZE = 3; //1 day when send every 20sec
+    private final int MAX_BUFFER_SIZE = 5000; //1 day when send every 20sec
     private final int CONNECTION_TIMEOUT = 3000;
     private final int READ_TIMEOUT = 3000;
 
