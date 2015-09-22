@@ -6,13 +6,13 @@ package cz.tmapy.android.trex.database.dobs;
 public class TrackDob {
     private Long id;
     private Long startTime;
-    private Double startLat;
-    private Double startLon;
-    private String startAddress;
+    private Double firstLat;
+    private Double firstLon;
+    private String firstAddress;
     private Long finishTime;
-    private Double finishLat;
-    private Double finishLon;
-    private String finishAddress;
+    private Double lastLat;
+    private Double lastLon;
+    private String lastAddress;
     private Float distance;
     private Float maxSpeed;
     private Float aveSpeed;
@@ -25,15 +25,15 @@ public class TrackDob {
 
     public TrackDob(){};
 
-    public TrackDob(Long startTime, Double startLat, Double startLon, String startAddress, Long finishTime, Double finishLat, Double finishLon, String finishAddress, Float distance, Float maxSpeed, Float aveSpeed, Double minAlt, Double maxAlt, Double elevDiffUp, Double elevDiffDown, String note) {
+    public TrackDob(Long startTime, Double firstLat, Double firstLon, String firstAddress, Long finishTime, Double lastLat, Double lastLon, String lastAddress, Float distance, Float maxSpeed, Float aveSpeed, Double minAlt, Double maxAlt, Double elevDiffUp, Double elevDiffDown, String note) {
         this.startTime = startTime;
-        this.startLat = startLat;
-        this.startLon = startLon;
-        this.startAddress = startAddress;
+        this.firstLat = firstLat;
+        this.firstLon = firstLon;
+        this.firstAddress = firstAddress;
         this.finishTime = finishTime;
-        this.finishLat = finishLat;
-        this.finishLon = finishLon;
-        this.finishAddress = finishAddress;
+        this.lastLat = lastLat;
+        this.lastLon = lastLon;
+        this.lastAddress = lastAddress;
         this.distance = distance;
         this.maxSpeed = maxSpeed;
         this.aveSpeed = aveSpeed;
@@ -60,28 +60,28 @@ public class TrackDob {
         this.startTime = startTime;
     }
 
-    public Double getStartLat() {
-        return startLat;
+    public Double getFirstLat() {
+        return firstLat;
     }
 
-    public void setStartLat(Double startLat) {
-        this.startLat = startLat;
+    public void setFirstLat(Double firstLat) {
+        this.firstLat = firstLat;
     }
 
-    public Double getStartLon() {
-        return startLon;
+    public Double getFirstLon() {
+        return firstLon;
     }
 
-    public void setStartLon(Double startLon) {
-        this.startLon = startLon;
+    public void setFirstLon(Double firstLon) {
+        this.firstLon = firstLon;
     }
 
-    public String getStartAddress() {
-        return startAddress;
+    public String getFirstAddress() {
+        return firstAddress;
     }
 
-    public void setStartAddress(String startAddress) {
-        this.startAddress = startAddress;
+    public void setFirstAddress(String firstAddress) {
+        this.firstAddress = firstAddress;
     }
 
     public Long getFinishTime() {
@@ -92,28 +92,28 @@ public class TrackDob {
         this.finishTime = finishTime;
     }
 
-    public Double getFinishLat() {
-        return finishLat;
+    public Double getLastLat() {
+        return lastLat;
     }
 
-    public void setFinishLat(Double finishLat) {
-        this.finishLat = finishLat;
+    public void setLastLat(Double finishLat) {
+        this.lastLat = finishLat;
     }
 
-    public Double getFinishLon() {
-        return finishLon;
+    public Double getLastLon() {
+        return lastLon;
     }
 
-    public void setFinishLon(Double finishLon) {
-        this.finishLon = finishLon;
+    public void setLastLon(Double lastLon) {
+        this.lastLon = lastLon;
     }
 
-    public String getFinishAddress() {
-        return finishAddress;
+    public String getLastAddress() {
+        return lastAddress;
     }
 
-    public void setFinishAddress(String finishAddress) {
-        this.finishAddress = finishAddress;
+    public void setLastAddress(String lastAddress) {
+        this.lastAddress = lastAddress;
     }
 
     public Float getDistance() {
