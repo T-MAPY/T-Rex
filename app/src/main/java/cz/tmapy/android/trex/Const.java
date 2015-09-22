@@ -39,13 +39,13 @@ public final class Const {
     public static final String SERVER_RESPONSE = "cz.tmapy.android.trex.SERVER_RESPONSE";
 
     public static final String START_TIME = "cz.tmapy.android.trex.COL_START_TIME";
-    public static final String START_LAT = "cz.tmapy.android.trex.COL_START_LAT";
-    public static final String START_LON = "cz.tmapy.android.trex.COL_START_LON";
-    public static final String START_ADDRESS = "cz.tmapy.android.trex.COL_START_ADDRESS";
+    public static final String FIRST_LAT = "cz.tmapy.android.trex.COL_START_LAT";
+    public static final String FIRST_LON = "cz.tmapy.android.trex.COL_START_LON";
+    public static final String FIRST_ADDRESS = "cz.tmapy.android.trex.COL_START_ADDRESS";
     public static final String FINISH_TIME = "cz.tmapy.android.trex.COL_FINISH_TIME";
-    public static final String FINISH_LAT = "cz.tmapy.android.trex.COL_FINISH_LAT";
-    public static final String FINISH_LON = "cz.tmapy.android.trex.COL_FINISH_LON";
-    public static final String FINISH_ADDRESS = "cz.tmapy.android.trex.COL_FINISH_ADDRESS";
+    public static final String LAST_LAT = "cz.tmapy.android.trex.COL_FINISH_LAT";
+    public static final String LAST_LON = "cz.tmapy.android.trex.COL_FINISH_LON";
+    public static final String LAST_ADDRESS = "cz.tmapy.android.trex.COL_FINISH_ADDRESS";
     public static final String DISTANCE = "cz.tmapy.android.trex.COL_DISTANCE";
     public static final String MAX_SPEED = "cz.tmapy.android.trex.COL_MAX_SPEED";
     public static final String AVE_SPEED = "cz.tmapy.android.trex.COL_AVE_SPEED";

@@ -610,16 +610,16 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             UpdateGUI();
 
             //if this is final broadcast
-            if (intent.hasExtra(Const.FINISH_TIME)) {
+            if (intent.hasExtra(Const.LAST_LAT)) {
                 TrackDob trackDob = new TrackDob();
                 trackDob.setStartTime(intent.getLongExtra(Const.START_TIME, 0l));
-                trackDob.setStartLat(intent.getDoubleExtra(Const.START_LAT, 0d));
-                trackDob.setStartLon(intent.getDoubleExtra(Const.START_LON, 0d));
-                trackDob.setStartAddress(intent.getStringExtra(Const.START_ADDRESS));
-                trackDob.setFinishTime(intent.getLongExtra(Const.FINISH_TIME, 0l));
-                trackDob.setFinishLat(intent.getDoubleExtra(Const.FINISH_LAT, 0d));
-                trackDob.setFinishLon(intent.getDoubleExtra(Const.FINISH_LON, 0d));
-                trackDob.setFinishAddress(intent.getStringExtra(Const.FINISH_ADDRESS));
+                trackDob.setFirstLat(intent.getDoubleExtra(Const.FIRST_LAT, 0d));
+                trackDob.setFirstLon(intent.getDoubleExtra(Const.FIRST_LON, 0d));
+                trackDob.setFirstAddress(intent.getStringExtra(Const.FIRST_ADDRESS));
+                trackDob.setFinishTime(mCurrentTime);
+                trackDob.setLastLat(intent.getDoubleExtra(Const.LAST_LAT, 0d));
+                trackDob.setLastLon(intent.getDoubleExtra(Const.LAST_LON, 0d));
+                trackDob.setLastAddress(intent.getStringExtra(Const.LAST_ADDRESS));
                 trackDob.setDistance(intent.getFloatExtra(Const.DISTANCE, 0f));
                 trackDob.setMaxSpeed(intent.getFloatExtra(Const.MAX_SPEED, 0f));
                 trackDob.setAveSpeed(intent.getFloatExtra(Const.AVE_SPEED, 0f));
