@@ -42,6 +42,7 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -391,10 +392,10 @@ public class BackgroundLocationService extends Service implements
 
     /**
      * Store position info preferences - it is used by main acitivity when it is resumed
+     *
      * @param loc
      */
-    private void StorePositionToPrefs(LocationWrapper loc)
-    {
+    private void StorePositionToPrefs(LocationWrapper loc) {
         mSharedPref.edit().putLong(Const.START_TIME, mStartTime).apply();
         mSharedPref.edit().putLong(Const.LAST_LOCATION_TIME, loc.getLocation().getTime()).apply();
         mSharedPref.edit().putFloat(Const.ACCURACY, loc.getLocation().getAccuracy()).apply();
@@ -465,7 +466,7 @@ public class BackgroundLocationService extends Service implements
         localIntent.putExtra(Const.LAST_ADDRESS, mLastAcceptedLocation.getAddress());
         localIntent.putExtra(Const.DISTANCE, mDistance);
         localIntent.putExtra(Const.MAX_SPEED, mMaxSpeed);
-        localIntent.putExtra(Const.AVE_SPEED, mSpeedLocationsCount > 0 ? mSpeedSum / mSpeedLocationsCount : 0f );
+        localIntent.putExtra(Const.AVE_SPEED, mSpeedLocationsCount > 0 ? mSpeedSum / mSpeedLocationsCount : 0f);
         localIntent.putExtra(Const.MIN_ALT, mMinAltitude);
         localIntent.putExtra(Const.MAX_ALT, mMaxAltitude);
         localIntent.putExtra(Const.ELEV_DIFF_UP, mElevDiffUp);
@@ -513,6 +514,8 @@ public class BackgroundLocationService extends Service implements
      */
     private class NetworkTask extends AsyncTask<List<LocationWrapper>, Void, String> {
 
+        private final int CONNECTION_TIMEOUT = 3000;
+        private final int READ_TIMEOUT = 3000;
         private URL mTargetUrl;
         private String mDeviceId;
 
@@ -525,11 +528,13 @@ public class BackgroundLocationService extends Service implements
         protected String doInBackground(List<LocationWrapper>... locations) {
             String lastResponse = "";
             try {
-                for (LocationWrapper wrapper : locations[0]) {
+                for (Iterator<LocationWrapper> iterator = locations[0].iterator(); iterator.hasNext();) {
+                    LocationWrapper wrapper = iterator.next();
+
                     lastResponse = ""; //reset last response for each location
                     HttpURLConnection conn = (HttpURLConnection) mTargetUrl.openConnection();
-                    conn.setReadTimeout((mLocFrequency - 1) * 1000);
-                    conn.setConnectTimeout((mLocFrequency - 1) * 1000);
+                    conn.setConnectTimeout(CONNECTION_TIMEOUT);
+                    conn.setReadTimeout(READ_TIMEOUT);
                     conn.setRequestMethod("POST");
                     conn.setDoInput(true);
                     conn.setDoOutput(true);
@@ -562,12 +567,17 @@ public class BackgroundLocationService extends Service implements
                         } else
                             lastResponse = "OK";
                     } else {
-                        lastResponse = "HTTP response: " + responseCode;
+                        lastResponse = getResources().getString(R.string.http_server_response) + ": " + responseCode;
                     }
                 }
-
+            } catch (java.net.SocketTimeoutException e) {
+                Log.e(TAG, "Connection timeout!", e);
+                lastResponse = getResources().getString(R.string.http_connection_timeout);
+            } catch (java.io.IOException e) {
+                Log.e(TAG, "Cannot read server response", e);
+                lastResponse = getResources().getString(R.string.http_cannot_read_output);
             } catch (Exception e) {
-                Log.e(TAG, "Network connection error:", e);
+                Log.e(TAG, "HTTP connection error", e);
                 lastResponse = e.getLocalizedMessage();
             }
 

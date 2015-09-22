@@ -55,4 +55,7 @@
     <string name="dialog_delete_message">Opravdu smazat záznam o trase?</string>
     <string name="pref_count_of_stored_tracks">Počet uložených záznamů</string>
     <string name="pref_count_of_stored_tracks_sum">Maximální počet záznamů o trase, které se ukládají v zařízení</string>
+    <string name="http_connection_timeout">Nelze navázat spojení se serverem</string>
+    <string name="http_cannot_read_output">Nelze přečíst odpověd serveru</string>
+    <string name="http_server_response">Odpověď serveru</string>
 </resources>
