@@ -69,7 +69,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private Boolean mKeepScreenOn;
     //members for state saving
     private Boolean mLocalizationIsRunning = false;
-    private String mLastLocationTime;
+    private Long mStartTime;
+    private Long mLastLocationTime;
+    private String mLastLocationTimeString;
     private String mAccuracy;
     private String mLastLocationAlt;
     private String mLastLocationSpeed;
@@ -77,6 +79,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private String mLastServerResponse;
     private String mDistance;
     private String mDuration;
+    private Integer mKeepNumberOfTracks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +115,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         sharedPref.registerOnSharedPreferenceChangeListener(this); //to get pref changes to onSharePreferenceChanged
         mDeviceId = sharedPref.getString(Const.PREF_KEY_DEVICE_ID, "");
         mTargetServerURL = sharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, "");
+        mKeepNumberOfTracks = Integer.valueOf(sharedPref.getString(Const.PREF_KEY_KEEP_NUMBER_OF_TRACKS, "30"));
+
         mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
         HandleKeepScreenOn();
 
@@ -159,6 +164,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
     /**
      * Check for google play services availability
+     *
      * @return
      */
     private boolean checkPlayServices() {
@@ -313,6 +319,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             case Const.PREF_KEY_TARGET_SERVUER_URL:
                 mTargetServerURL = prefs.getString(key, "");
                 break;
+            case Const.PREF_KEY_KEEP_NUMBER_OF_TRACKS:
+                mKeepNumberOfTracks = Integer.valueOf(prefs.getString(Const.PREF_KEY_KEEP_NUMBER_OF_TRACKS, "30"));
+                break;
             case Const.PREF_KEY_KEEP_SCREEN_ON:
                 mKeepScreenOn = prefs.getBoolean(key, false);
                 HandleKeepScreenOn();
@@ -375,6 +384,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                     if (null != service) {
                         resetGUI();
                         mLocalizationIsRunning = true;
+                        mStartTime = System.currentTimeMillis();
                         return true;
                     }
 
@@ -411,6 +421,83 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mLocalizationIsRunning = false;
     }
 
+    @Override
+    protected void onPause() {
+        mTracksListView.setAdapter(null);
+        mTrackDataCursorAdapter = null;
+        DatabaseManager.deactivate();
+        // Musí se odregistrovat receiver, jinak se bude volat vícekrát (podle počtu, kolikrát přešel do pause a zpět)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mPositionReceiver);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DatabaseManager.init(this);
+        mTrackDataCursorAdapter = new TrackDataCursorAdapter(MainScreen.this, mTrackDataSource.getAllTracksCursor(), 0);
+        mTracksListView.setAdapter(mTrackDataCursorAdapter);
+
+        //Registrace broadcastreceiveru komunikaci se sluzbou (musi byt tady, aby fungoval i po nove inicializaci aplikace z notifikace
+        mIntentFilter = new IntentFilter(Const.LOCATION_BROADCAST);
+        mPositionReceiver = new NewPositionReceiver();
+        // Registers the mPositionReceiver and its intent filters
+        LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
+
+        if (mLocalizationIsRunning) {
+            ReloadLastPosition();
+        }
+    }
+
+    /**
+     * Load last state from preferences
+     */
+    public void ReloadLastPosition() {
+
+        mStartTime = sharedPref.getLong(Const.START_TIME, 0);
+        mLastLocationTime = sharedPref.getLong(Const.LAST_LOCATION_TIME, 0);
+
+        mLastLocationTimeString = new SimpleDateFormat("HH:mm:ss").format(mLastLocationTime);
+        mLastLocationAlt = String.format("%.0f", Double.longBitsToDouble(sharedPref.getLong(Const.ALTITUDE, 0))); //http://stackoverflow.com/questions/16319237/cant-put-double-sharedpreferences
+        mLastLocationSpeed = String.format("%.0f", (sharedPref.getFloat(Const.SPEED, 0) / 1000) * 3600);
+        mAccuracy = String.format("%.1f", sharedPref.getFloat(Const.ACCURACY, 0));
+
+        Long d = (System.currentTimeMillis() - mStartTime) / 1000;
+        mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
+
+        mDistance = String.format("%.2f", (sharedPref.getFloat(Const.DISTANCE, 0.0f) / 1000));
+
+        mAddress = sharedPref.getString(Const.ADDRESS, "");
+        mLastServerResponse = sharedPref.getString(Const.SERVER_RESPONSE, "");
+
+        UpdateGUI();
+    }
+
+    /**
+     * Load tracks form database
+     */
+    private void reloadTracks() {
+        if (null != mTrackDataCursorAdapter) {
+            mTrackDataCursorAdapter.swapCursor(mTrackDataSource.getAllTracksCursor());
+            mTrackDataCursorAdapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * Save track info into db
+     *
+     * @param t
+     */
+    private void SaveTrack(TrackDob t) {
+        mTrackDataSource.saveTrack(t);
+        Cursor cursor = mTrackDataSource.getAllTracksCursor();
+        int count = cursor.getCount();
+        cursor.close();
+        if (count > mKeepNumberOfTracks) {
+            mTrackDataSource.keepOnlyLastTracks(mKeepNumberOfTracks);
+        }
+    }
+
     private void resetGUI() {
         TextView dateText = (TextView) findViewById(R.id.text_position_date);
         dateText.setText(null);
@@ -440,7 +527,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private void UpdateGUI() {
 
         TextView dateText = (TextView) findViewById(R.id.text_position_date);
-        dateText.setText(mLastLocationTime);
+        dateText.setText(mLastLocationTimeString);
 
         if (mDuration != null) {
             TextView durationText = (TextView) findViewById(R.id.text_duration);
@@ -477,65 +564,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         }
     }
 
-    @Override
-    protected void onPause() {
-        mTracksListView.setAdapter(null);
-        mTrackDataCursorAdapter = null;
-        DatabaseManager.deactivate();
-        // Musí se odregistrovat receiver, jinak se bude volat vícekrát (podle počtu, kolikrát přešel do pause a zpět)
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mPositionReceiver);
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        DatabaseManager.init(this);
-        mTrackDataCursorAdapter = new TrackDataCursorAdapter(MainScreen.this, mTrackDataSource.getAllTracksCursor(), 0);
-        mTracksListView.setAdapter(mTrackDataCursorAdapter);
-
-        //Registrace broadcastreceiveru komunikaci se sluzbou (musi byt tady, aby fungoval i po nove inicializaci aplikace z notifikace
-        mIntentFilter = new IntentFilter(Const.LOCATION_BROADCAST);
-        mPositionReceiver = new NewPositionReceiver();
-        // Registers the mPositionReceiver and its intent filters
-        LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
-
-        if (mLocalizationIsRunning) {
-            ReloadLastPosition();
-        }
-    }
-
-    /**
-     * Load last state from preferences
-     */
-    public void ReloadLastPosition() {
-
-        mLastLocationTime = new SimpleDateFormat("HH:mm:ss").format(sharedPref.getLong(Const.LOCATION_TIME, 0));
-        mLastLocationAlt = String.format("%.0f", Double.longBitsToDouble(sharedPref.getLong(Const.ALTITUDE, 0))); //http://stackoverflow.com/questions/16319237/cant-put-double-sharedpreferences
-        mLastLocationSpeed = String.format("%.0f", (sharedPref.getFloat(Const.SPEED, 0) / 1000) * 3600);
-        mAccuracy = String.format("%.1f", sharedPref.getFloat(Const.ACCURACY, 0));
-
-        Long d = sharedPref.getLong(Const.DURATION, 0l) / 1000;
-        mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
-
-        mDistance = String.format("%.2f", (sharedPref.getFloat(Const.DISTANCE, 0.0f) / 1000));
-
-        mAddress = sharedPref.getString(Const.ADDRESS, "");
-        mLastServerResponse = sharedPref.getString(Const.SERVER_RESPONSE, "");
-
-        UpdateGUI();
-    }
-
-    /**
-     * Load tracks form database
-     */
-    private void reloadTracks() {
-        if (null != mTrackDataCursorAdapter) {
-            mTrackDataCursorAdapter.swapCursor(mTrackDataSource.getAllTracksCursor());
-            mTrackDataCursorAdapter.notifyDataSetChanged();
-        }
-    }
-
     /**
      * This class uses the BroadcastReceiver framework to detect and handle new postition messages from
      * the service
@@ -554,10 +582,11 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
          */
         @Override
         public void onReceive(Context context, Intent intent) {
+            Long mCurrentTime = System.currentTimeMillis();
             Location location = (Location) intent.getExtras().get(Const.POSITION);
             if (location != null) {
                 //2014-06-28T15:07:59
-                mLastLocationTime = new SimpleDateFormat("HH:mm:ss").format(location.getTime());
+                mLastLocationTimeString = new SimpleDateFormat("HH:mm:ss").format(location.getTime());
                 mLastLocationAlt = String.format("%.0f", location.getAltitude());
                 mLastLocationSpeed = String.format("%.0f", (location.getSpeed() / 1000) * 3600);
                 mAccuracy = String.format("%.1f", location.getAccuracy());
@@ -568,8 +597,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                     mAddress = adr;
             }
 
-            if (intent.hasExtra(Const.DURATION)) {
-                Long d = intent.getLongExtra(Const.DURATION, 0l) / 1000;
+            if (intent.hasExtra(Const.START_TIME)) {
+                mStartTime = intent.getLongExtra(Const.START_TIME, 0l);
+                Long d = (mCurrentTime - mStartTime) / 1000;
                 mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
             }
 
@@ -580,16 +610,16 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             UpdateGUI();
 
             //if this is final broadcast
-            if (intent.hasExtra(Const.FINISH_TIME)) {
+            if (intent.hasExtra(Const.LAST_LAT)) {
                 TrackDob trackDob = new TrackDob();
                 trackDob.setStartTime(intent.getLongExtra(Const.START_TIME, 0l));
-                trackDob.setStartLat(intent.getDoubleExtra(Const.START_LAT, 0d));
-                trackDob.setStartLon(intent.getDoubleExtra(Const.START_LON, 0d));
-                trackDob.setStartAddress(intent.getStringExtra(Const.START_ADDRESS));
-                trackDob.setFinishTime(intent.getLongExtra(Const.FINISH_TIME, 0l));
-                trackDob.setFinishLat(intent.getDoubleExtra(Const.FINISH_LAT, 0d));
-                trackDob.setFinishLon(intent.getDoubleExtra(Const.FINISH_LON, 0d));
-                trackDob.setFinishAddress(intent.getStringExtra(Const.FINISH_ADDRESS));
+                trackDob.setFirstLat(intent.getDoubleExtra(Const.FIRST_LAT, 0d));
+                trackDob.setFirstLon(intent.getDoubleExtra(Const.FIRST_LON, 0d));
+                trackDob.setFirstAddress(intent.getStringExtra(Const.FIRST_ADDRESS));
+                trackDob.setFinishTime(mCurrentTime);
+                trackDob.setLastLat(intent.getDoubleExtra(Const.LAST_LAT, 0d));
+                trackDob.setLastLon(intent.getDoubleExtra(Const.LAST_LON, 0d));
+                trackDob.setLastAddress(intent.getStringExtra(Const.LAST_ADDRESS));
                 trackDob.setDistance(intent.getFloatExtra(Const.DISTANCE, 0f));
                 trackDob.setMaxSpeed(intent.getFloatExtra(Const.MAX_SPEED, 0f));
                 trackDob.setAveSpeed(intent.getFloatExtra(Const.AVE_SPEED, 0f));
@@ -597,9 +627,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 trackDob.setMaxAlt(intent.getDoubleExtra(Const.MAX_ALT, 0d));
                 trackDob.setElevDiffUp(intent.getDoubleExtra(Const.ELEV_DIFF_UP, 0d));
                 trackDob.setElevDiffDown(intent.getDoubleExtra(Const.ELEV_DIFF_DOWN, 0d));
-                trackDob.setNote(mLastLocationTime);
+                trackDob.setNote(mLastLocationTimeString);
 
-                mTrackDataSource.saveTrack(trackDob);
+                SaveTrack(trackDob);
                 reloadTracks();
             }
         }

@@ -78,12 +78,11 @@ public class BackgroundLocationService extends Service implements
     private Integer mSendInterval;
     private Integer mKalmanMPS;
     private Boolean mGeocoding;
-    private Long mLocationStart; //start of location
     private LocationWrapper mFirstLocation; //first accepted location
     private LocationWrapper mLastAcceptedLocation; //last accepted location, filtered by Mr. Kalman
     private List<LocationWrapper> locationsToSend = new ArrayList<LocationWrapper>(); //cach of locations to send
 
-    private Long mDuration = 0l;
+    private Long mStartTime = 0l;
     private Float mDistance = 0f;
     private Float mMaxSpeed = 0f;
     private Float mSpeedSum = 0f;
@@ -172,7 +171,7 @@ public class BackgroundLocationService extends Service implements
 
             startForeground(NOTIFICATION, notification); //spuštění služby s vyšší prioritou na popředí - http://developer.android.com/reference/android/app/Service.html
 
-            mLocationStart = System.currentTimeMillis();
+            mStartTime = System.currentTimeMillis();
 
             if (Const.LOG_ENHANCED) Log.i(TAG, "Localization Started");
             Toast.makeText(this, R.string.localiz_started, Toast.LENGTH_SHORT).show();
@@ -278,7 +277,6 @@ public class BackgroundLocationService extends Service implements
 
                 if ((diffSeconds >= mSendInterval) || dist >= mMinDistance) {
                     mDistance += dist;
-                    mDuration = location.getTime() - mLocationStart;
 
                     if (location.hasSpeed()) //rise number of positions with speed only when it is > 0
                     {
@@ -397,13 +395,13 @@ public class BackgroundLocationService extends Service implements
      */
     private void StorePositionToPrefs(LocationWrapper loc)
     {
-        mSharedPref.edit().putLong(Const.LOCATION_TIME, loc.getLocation().getTime()).apply();
+        mSharedPref.edit().putLong(Const.START_TIME, mStartTime).apply();
+        mSharedPref.edit().putLong(Const.LAST_LOCATION_TIME, loc.getLocation().getTime()).apply();
         mSharedPref.edit().putFloat(Const.ACCURACY, loc.getLocation().getAccuracy()).apply();
         //convert double into long - //http://stackoverflow.com/questions/16319237/cant-put-double-sharedpreferences
         mSharedPref.edit().putLong(Const.ALTITUDE, Double.doubleToRawLongBits(loc.getLocation().getAltitude()));
         mSharedPref.edit().putFloat(Const.SPEED, loc.getLocation().getSpeed()).apply();
         mSharedPref.edit().putFloat(Const.DISTANCE, mDistance).apply();
-        mSharedPref.edit().putLong(Const.DURATION, mDuration).apply();
     }
 
     /**
@@ -416,7 +414,7 @@ public class BackgroundLocationService extends Service implements
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
         localIntent.putExtra(Const.POSITION, location.getLocation());
         localIntent.putExtra(Const.DISTANCE, mDistance);
-        localIntent.putExtra(Const.DURATION, mDuration);
+        localIntent.putExtra(Const.START_TIME, mStartTime);
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }
 
@@ -458,14 +456,13 @@ public class BackgroundLocationService extends Service implements
     private void SendFinalBroadcast() {
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
 
-        localIntent.putExtra(Const.START_TIME, mFirstLocation.getLocation().getTime());
-        localIntent.putExtra(Const.START_LAT, mFirstLocation.getLocation().getLatitude());
-        localIntent.putExtra(Const.START_LON, mFirstLocation.getLocation().getLongitude());
-        localIntent.putExtra(Const.START_ADDRESS, mFirstLocation.getAddress());
-        localIntent.putExtra(Const.FINISH_TIME, mLastAcceptedLocation.getLocation().getTime());
-        localIntent.putExtra(Const.FINISH_LAT, mLastAcceptedLocation.getLocation().getLatitude());
-        localIntent.putExtra(Const.FINISH_LON, mLastAcceptedLocation.getLocation().getLongitude());
-        localIntent.putExtra(Const.FINISH_ADDRESS, mLastAcceptedLocation.getAddress());
+        localIntent.putExtra(Const.START_TIME, mStartTime);
+        localIntent.putExtra(Const.FIRST_LAT, mFirstLocation.getLocation().getLatitude());
+        localIntent.putExtra(Const.FIRST_LON, mFirstLocation.getLocation().getLongitude());
+        localIntent.putExtra(Const.FIRST_ADDRESS, mFirstLocation.getAddress());
+        localIntent.putExtra(Const.LAST_LAT, mLastAcceptedLocation.getLocation().getLatitude());
+        localIntent.putExtra(Const.LAST_LON, mLastAcceptedLocation.getLocation().getLongitude());
+        localIntent.putExtra(Const.LAST_ADDRESS, mLastAcceptedLocation.getAddress());
         localIntent.putExtra(Const.DISTANCE, mDistance);
         localIntent.putExtra(Const.MAX_SPEED, mMaxSpeed);
         localIntent.putExtra(Const.AVE_SPEED, mSpeedLocationsCount > 0 ? mSpeedSum / mSpeedLocationsCount : 0f );

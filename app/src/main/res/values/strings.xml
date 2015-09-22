@@ -53,4 +53,6 @@
     <string name="pref_geocoding_summ">Try to find address of current location</string>
     <string name="dialog_delete_title">Delete?</string>
     <string name="dialog_delete_message">Are you sure you want to delete the track?</string>
+    <string name="pref_count_of_stored_tracks">Keep tracks</string>
+    <string name="pref_count_of_stored_tracks_sum">Count of tracks stored in device</string>
 </resources>

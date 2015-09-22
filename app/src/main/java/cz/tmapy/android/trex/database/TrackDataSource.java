@@ -87,13 +87,13 @@ public class TrackDataSource {
         try {
             ContentValues values = new ContentValues();
             values.put(COL_START_TIME, trackDob.getStartTime());
-            values.put(COL_START_LAT, trackDob.getStartLat());
-            values.put(COL_START_LON, trackDob.getStartLon());
-            values.put(COL_START_ADDRESS, trackDob.getStartAddress());
+            values.put(COL_START_LAT, trackDob.getFirstLat());
+            values.put(COL_START_LON, trackDob.getFirstLon());
+            values.put(COL_START_ADDRESS, trackDob.getFirstAddress());
             values.put(COL_FINISH_TIME, trackDob.getFinishTime());
-            values.put(COL_FINISH_LAT, trackDob.getFinishLat());
-            values.put(COL_FINISH_LON, trackDob.getFinishLon());
-            values.put(COL_FINISH_ADDRESS, trackDob.getFinishAddress());
+            values.put(COL_FINISH_LAT, trackDob.getLastLat());
+            values.put(COL_FINISH_LON, trackDob.getLastLon());
+            values.put(COL_FINISH_ADDRESS, trackDob.getLastAddress());
             values.put(COL_DISTANCE, trackDob.getDistance());
             values.put(COL_MAX_SPEED, trackDob.getMaxSpeed());
             values.put(COL_AVE_SPEED, trackDob.getAveSpeed());
@@ -143,17 +143,27 @@ public class TrackDataSource {
         return locations;
     }
 
+    /**
+     * Delete track, keep only last N number
+     *
+     * @param keepOnlyTracks
+     */
+    public Boolean keepOnlyLastTracks(Integer keepOnlyTracks) {
+        return DatabaseManager.getDb().delete(TABLE_NAME, COL_ID +
+                " NOT IN (SELECT " + COL_ID + " FROM " + TABLE_NAME + " ORDER BY " + COL_ID + " DESC LIMIT ?)", new String[]{String.valueOf(keepOnlyTracks)}) > 0;
+    }
+
     private TrackDob cursorToLocation(Cursor cursor) {
         TrackDob trackDob = new TrackDob();
         trackDob.setId(cursor.getLong(0));
         trackDob.setStartTime(cursor.getLong(1));
-        trackDob.setStartLat(cursor.getDouble(2));
-        trackDob.setStartLon(cursor.getDouble(3));
-        trackDob.setStartAddress(cursor.getString(4));
+        trackDob.setFirstLat(cursor.getDouble(2));
+        trackDob.setFirstLon(cursor.getDouble(3));
+        trackDob.setFirstAddress(cursor.getString(4));
         trackDob.setFinishTime(cursor.getLong(5));
-        trackDob.setFinishLat(cursor.getDouble(6));
-        trackDob.setFinishLon(cursor.getDouble(7));
-        trackDob.setFinishAddress(cursor.getString(8));
+        trackDob.setLastLat(cursor.getDouble(6));
+        trackDob.setLastLon(cursor.getDouble(7));
+        trackDob.setLastAddress(cursor.getString(8));
         trackDob.setDistance(cursor.getFloat(9));
         trackDob.setMaxSpeed(cursor.getFloat(10));
         trackDob.setAveSpeed(cursor.getFloat(11));
@@ -165,4 +175,5 @@ public class TrackDataSource {
         trackDob.setUpdateTime(cursor.getLong(17));
         return trackDob;
     }
+
 }
