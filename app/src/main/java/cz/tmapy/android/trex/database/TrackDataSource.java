@@ -143,6 +143,16 @@ public class TrackDataSource {
         return locations;
     }
 
+    /**
+     * Delete track, keep only last N number
+     *
+     * @param keepOnlyTracks
+     */
+    public Boolean keepOnlyLastTracks(Integer keepOnlyTracks) {
+        return DatabaseManager.getDb().delete(TABLE_NAME, COL_ID +
+                " NOT IN (SELECT " + COL_ID + " FROM " + TABLE_NAME + " ORDER BY " + COL_ID + " DESC LIMIT ?)", new String[]{String.valueOf(keepOnlyTracks)}) > 0;
+    }
+
     private TrackDob cursorToLocation(Cursor cursor) {
         TrackDob trackDob = new TrackDob();
         trackDob.setId(cursor.getLong(0));
@@ -165,4 +175,5 @@ public class TrackDataSource {
         trackDob.setUpdateTime(cursor.getLong(17));
         return trackDob;
     }
+
 }
