@@ -332,8 +332,8 @@ public class BackgroundLocationService extends Service implements
             new GeocodingTask().execute(location);
         }
 
-        SendAcceptedLocationBroadcast(loc);
-        SendPosition(loc);
+        StoreAndSendAcceptedLocationBroadcast(loc);
+        SendPositionToServer(loc);
     }
 
     /**
@@ -354,7 +354,7 @@ public class BackgroundLocationService extends Service implements
      *
      * @param location
      */
-    private void SendPosition(LocationWrapper location) {
+    private void SendPositionToServer(LocationWrapper location) {
 
         if (mTargetServerURL != null && !mTargetServerURL.isEmpty()) {
             locationsToSend.add(location);
@@ -392,9 +392,27 @@ public class BackgroundLocationService extends Service implements
     }
 
     /**
-     * Broadcasts the Intent with location
+     * Store position info preferences - it is used by main acitivity when it is resumed
+     * @param loc
      */
-    private void SendAcceptedLocationBroadcast(LocationWrapper location) {
+    private void StorePositionToPrefs(LocationWrapper loc)
+    {
+        mSharedPref.edit().putLong(Const.LOCATION_TIME, loc.getLocation().getTime()).apply();
+        mSharedPref.edit().putFloat(Const.ACCURACY, loc.getLocation().getAccuracy()).apply();
+        //convert double into long - //http://stackoverflow.com/questions/16319237/cant-put-double-sharedpreferences
+        mSharedPref.edit().putLong(Const.ALTITUDE, Double.doubleToRawLongBits(loc.getLocation().getAltitude()));
+        mSharedPref.edit().putFloat(Const.SPEED, loc.getLocation().getSpeed()).apply();
+        mSharedPref.edit().putFloat(Const.DISTANCE, mDistance).apply();
+        mSharedPref.edit().putLong(Const.DURATION, mDuration).apply();
+    }
+
+    /**
+     * Stores position to preferences and
+     * broadcasts the Intent with location
+     */
+    private void StoreAndSendAcceptedLocationBroadcast(LocationWrapper location) {
+        StorePositionToPrefs(location);
+
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
         localIntent.putExtra(Const.POSITION, location.getLocation());
         localIntent.putExtra(Const.DISTANCE, mDistance);
@@ -410,6 +428,8 @@ public class BackgroundLocationService extends Service implements
             mFirstLocation.setServerResponse(serverResponse);
         mLastAcceptedLocation.setServerResponse(serverResponse);
 
+        mSharedPref.edit().putString(Const.SERVER_RESPONSE, serverResponse).apply();
+
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
         localIntent.putExtra(Const.SERVER_RESPONSE, serverResponse);
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
@@ -424,6 +444,8 @@ public class BackgroundLocationService extends Service implements
         if (mFirstLocation.getAddress() == null)
             mFirstLocation.setAddress(result);
         mLastAcceptedLocation.setAddress(result);
+
+        mSharedPref.edit().putString(Const.ADDRESS, result).apply();
 
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
         localIntent.putExtra(Const.ADDRESS, result);
