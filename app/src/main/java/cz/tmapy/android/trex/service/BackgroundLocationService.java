@@ -456,14 +456,13 @@ public class BackgroundLocationService extends Service implements
     private void SendFinalBroadcast() {
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
 
-        localIntent.putExtra(Const.START_TIME, mFirstLocation.getLocation().getTime());
         localIntent.putExtra(Const.START_LAT, mFirstLocation.getLocation().getLatitude());
         localIntent.putExtra(Const.START_LON, mFirstLocation.getLocation().getLongitude());
         localIntent.putExtra(Const.START_ADDRESS, mFirstLocation.getAddress());
-        localIntent.putExtra(Const.FINISH_TIME, mLastAcceptedLocation.getLocation().getTime());
         localIntent.putExtra(Const.FINISH_LAT, mLastAcceptedLocation.getLocation().getLatitude());
         localIntent.putExtra(Const.FINISH_LON, mLastAcceptedLocation.getLocation().getLongitude());
         localIntent.putExtra(Const.FINISH_ADDRESS, mLastAcceptedLocation.getAddress());
+        localIntent.putExtra(Const.START_TIME, mStartTime);
         localIntent.putExtra(Const.DISTANCE, mDistance);
         localIntent.putExtra(Const.MAX_SPEED, mMaxSpeed);
         localIntent.putExtra(Const.AVE_SPEED, mSpeedLocationsCount > 0 ? mSpeedSum / mSpeedLocationsCount : 0f );

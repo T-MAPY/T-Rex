@@ -384,6 +384,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                     if (null != service) {
                         resetGUI();
                         mLocalizationIsRunning = true;
+                        mStartTime = System.currentTimeMillis();
                         return true;
                     }
 
@@ -581,6 +582,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
          */
         @Override
         public void onReceive(Context context, Intent intent) {
+            Long mCurrentTime = System.currentTimeMillis();
             Location location = (Location) intent.getExtras().get(Const.POSITION);
             if (location != null) {
                 //2014-06-28T15:07:59
@@ -597,7 +599,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
             if (intent.hasExtra(Const.START_TIME)) {
                 mStartTime = intent.getLongExtra(Const.START_TIME, 0l);
-                Long d = (System.currentTimeMillis() - mStartTime) / 1000;
+                Long d = (mCurrentTime - mStartTime) / 1000;
                 mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
             }
 
