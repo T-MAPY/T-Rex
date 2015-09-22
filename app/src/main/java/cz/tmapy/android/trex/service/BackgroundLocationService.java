@@ -63,7 +63,10 @@ public class BackgroundLocationService extends Service implements
         LocationListener {
 
     private static final String TAG = BackgroundLocationService.class.getName();
-    private final int MAX_BUFFER_SIZE = 5000; //1 day when send every 20sec
+    private final int MAX_BUFFER_SIZE = 3; //1 day when send every 20sec
+    private final int CONNECTION_TIMEOUT = 3000;
+    private final int READ_TIMEOUT = 3000;
+
     IBinder mBinder = new LocalBinder();
     SharedPreferences mSharedPref;
     KalmanLatLong mKalman;
@@ -357,8 +360,13 @@ public class BackgroundLocationService extends Service implements
 
         if (mTargetServerURL != null && !mTargetServerURL.isEmpty()) {
             locationsToSend.add(location);
-            if (locationsToSend.size() > MAX_BUFFER_SIZE)
-                locationsToSend.remove(0); //if buffer overfill, remove first in list
+            //if buffer overfill, remove first in list
+            if (locationsToSend.size() > MAX_BUFFER_SIZE) {
+                //use iterator to remove (it is save)
+                Iterator<LocationWrapper> iterator = locationsToSend.iterator();
+                iterator.next();
+                iterator.remove();
+            }
             if (isNetworkOnline()) {
                 URL url = null;
                 try {
@@ -371,16 +379,9 @@ public class BackgroundLocationService extends Service implements
 
                 new NetworkTask(url, mDeviceIdentifier).execute(locationsToSend);
 
-                if (locationsToSend.size() > 1)
-                    Toast.makeText(this, R.string.buffered_locations_sent, Toast.LENGTH_SHORT).show();
-
-                locationsToSend = new ArrayList<LocationWrapper>(); //Clean buffer
-
-                if (Const.LOG_ENHANCED)
-                    Log.i(TAG, "Position sent to server - lat: " + location.getLocation().getLatitude() + ", lon: " + location.getLocation().getLongitude());
             } else {
                 Toast.makeText(this, R.string.cannot_connect_to_server, Toast.LENGTH_SHORT).show();
-                if (Const.LOG_BASIC)
+                if (Const.LOG_ENHANCED)
                     Log.w(TAG, "Cannot connect to server: '" + mTargetServerURL + "'");
             }
 
@@ -514,8 +515,6 @@ public class BackgroundLocationService extends Service implements
      */
     private class NetworkTask extends AsyncTask<List<LocationWrapper>, Void, String> {
 
-        private final int CONNECTION_TIMEOUT = 3000;
-        private final int READ_TIMEOUT = 3000;
         private URL mTargetUrl;
         private String mDeviceId;
 
@@ -528,7 +527,7 @@ public class BackgroundLocationService extends Service implements
         protected String doInBackground(List<LocationWrapper>... locations) {
             String lastResponse = "";
             try {
-                for (Iterator<LocationWrapper> iterator = locations[0].iterator(); iterator.hasNext();) {
+                for (Iterator<LocationWrapper> iterator = locations[0].iterator(); iterator.hasNext(); ) {
                     LocationWrapper wrapper = iterator.next();
 
                     lastResponse = ""; //reset last response for each location
@@ -558,6 +557,7 @@ public class BackgroundLocationService extends Service implements
                     int responseCode = conn.getResponseCode();
 
                     if (responseCode == HttpsURLConnection.HTTP_OK) {
+                        iterator.remove(); //remove the position from list
                         if (Const.LOG_ENHANCED) {
                             String line;
                             BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -566,7 +566,12 @@ public class BackgroundLocationService extends Service implements
                             }
                         } else
                             lastResponse = "OK";
+
+                        if (Const.LOG_ENHANCED)
+                            Log.i(TAG, "Position sent to server - lat: " + wrapper.getLocation().getLatitude() + ", lon: " + wrapper.getLocation().getLongitude());
                     } else {
+                        if (Const.LOG_ENHANCED)
+                            Log.w(TAG, "Server response: " + responseCode);
                         lastResponse = getResources().getString(R.string.http_server_response) + ": " + responseCode;
                     }
                 }
