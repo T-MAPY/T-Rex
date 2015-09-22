@@ -53,4 +53,6 @@
     <string name="pref_geocoding_summ">Pokusit se vyhledat adresu aktuální polohy</string>
     <string name="dialog_delete_title">Smazat záznam?</string>
     <string name="dialog_delete_message">Opravdu smazat záznam o trase?</string>
+    <string name="pref_count_of_stored_tracks">Uložených tras</string>
+    <string name="pref_count_of_stored_tracks_sum">Maximální počet záznamů o trase, které se ukládají v zařízení</string>
 </resources>

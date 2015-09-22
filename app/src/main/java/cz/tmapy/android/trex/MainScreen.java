@@ -159,6 +159,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
     /**
      * Check for google play services availability
+     *
      * @return
      */
     private boolean checkPlayServices() {
@@ -411,6 +412,80 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mLocalizationIsRunning = false;
     }
 
+    @Override
+    protected void onPause() {
+        mTracksListView.setAdapter(null);
+        mTrackDataCursorAdapter = null;
+        DatabaseManager.deactivate();
+        // Musí se odregistrovat receiver, jinak se bude volat vícekrát (podle počtu, kolikrát přešel do pause a zpět)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mPositionReceiver);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DatabaseManager.init(this);
+        mTrackDataCursorAdapter = new TrackDataCursorAdapter(MainScreen.this, mTrackDataSource.getAllTracksCursor(), 0);
+        mTracksListView.setAdapter(mTrackDataCursorAdapter);
+
+        //Registrace broadcastreceiveru komunikaci se sluzbou (musi byt tady, aby fungoval i po nove inicializaci aplikace z notifikace
+        mIntentFilter = new IntentFilter(Const.LOCATION_BROADCAST);
+        mPositionReceiver = new NewPositionReceiver();
+        // Registers the mPositionReceiver and its intent filters
+        LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
+
+        if (mLocalizationIsRunning) {
+            ReloadLastPosition();
+        }
+    }
+
+    /**
+     * Load last state from preferences
+     */
+    public void ReloadLastPosition() {
+
+        mLastLocationTime = new SimpleDateFormat("HH:mm:ss").format(sharedPref.getLong(Const.LOCATION_TIME, 0));
+        mLastLocationAlt = String.format("%.0f", Double.longBitsToDouble(sharedPref.getLong(Const.ALTITUDE, 0))); //http://stackoverflow.com/questions/16319237/cant-put-double-sharedpreferences
+        mLastLocationSpeed = String.format("%.0f", (sharedPref.getFloat(Const.SPEED, 0) / 1000) * 3600);
+        mAccuracy = String.format("%.1f", sharedPref.getFloat(Const.ACCURACY, 0));
+
+        Long d = sharedPref.getLong(Const.DURATION, 0l) / 1000;
+        mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
+
+        mDistance = String.format("%.2f", (sharedPref.getFloat(Const.DISTANCE, 0.0f) / 1000));
+
+        mAddress = sharedPref.getString(Const.ADDRESS, "");
+        mLastServerResponse = sharedPref.getString(Const.SERVER_RESPONSE, "");
+
+        UpdateGUI();
+    }
+
+    /**
+     * Load tracks form database
+     */
+    private void reloadTracks() {
+        if (null != mTrackDataCursorAdapter) {
+            mTrackDataCursorAdapter.swapCursor(mTrackDataSource.getAllTracksCursor());
+            mTrackDataCursorAdapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * Save track info into db
+     * @param t
+     */
+    private void SaveTrack(TrackDob t) {
+        mTrackDataSource.saveTrack(t);
+        Cursor cursor = mTrackDataSource.getAllTracksCursor();
+        int count = cursor.getCount();
+        cursor.close();
+        if (count > 30)
+        {
+
+        }
+    }
+
     private void resetGUI() {
         TextView dateText = (TextView) findViewById(R.id.text_position_date);
         dateText.setText(null);
@@ -477,65 +552,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         }
     }
 
-    @Override
-    protected void onPause() {
-        mTracksListView.setAdapter(null);
-        mTrackDataCursorAdapter = null;
-        DatabaseManager.deactivate();
-        // Musí se odregistrovat receiver, jinak se bude volat vícekrát (podle počtu, kolikrát přešel do pause a zpět)
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mPositionReceiver);
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        DatabaseManager.init(this);
-        mTrackDataCursorAdapter = new TrackDataCursorAdapter(MainScreen.this, mTrackDataSource.getAllTracksCursor(), 0);
-        mTracksListView.setAdapter(mTrackDataCursorAdapter);
-
-        //Registrace broadcastreceiveru komunikaci se sluzbou (musi byt tady, aby fungoval i po nove inicializaci aplikace z notifikace
-        mIntentFilter = new IntentFilter(Const.LOCATION_BROADCAST);
-        mPositionReceiver = new NewPositionReceiver();
-        // Registers the mPositionReceiver and its intent filters
-        LocalBroadcastManager.getInstance(this).registerReceiver(mPositionReceiver, mIntentFilter);
-
-        if (mLocalizationIsRunning) {
-            ReloadLastPosition();
-        }
-    }
-
-    /**
-     * Load last state from preferences
-     */
-    public void ReloadLastPosition() {
-
-        mLastLocationTime = new SimpleDateFormat("HH:mm:ss").format(sharedPref.getLong(Const.LOCATION_TIME, 0));
-        mLastLocationAlt = String.format("%.0f", Double.longBitsToDouble(sharedPref.getLong(Const.ALTITUDE, 0))); //http://stackoverflow.com/questions/16319237/cant-put-double-sharedpreferences
-        mLastLocationSpeed = String.format("%.0f", (sharedPref.getFloat(Const.SPEED, 0) / 1000) * 3600);
-        mAccuracy = String.format("%.1f", sharedPref.getFloat(Const.ACCURACY, 0));
-
-        Long d = sharedPref.getLong(Const.DURATION, 0l) / 1000;
-        mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
-
-        mDistance = String.format("%.2f", (sharedPref.getFloat(Const.DISTANCE, 0.0f) / 1000));
-
-        mAddress = sharedPref.getString(Const.ADDRESS, "");
-        mLastServerResponse = sharedPref.getString(Const.SERVER_RESPONSE, "");
-
-        UpdateGUI();
-    }
-
-    /**
-     * Load tracks form database
-     */
-    private void reloadTracks() {
-        if (null != mTrackDataCursorAdapter) {
-            mTrackDataCursorAdapter.swapCursor(mTrackDataSource.getAllTracksCursor());
-            mTrackDataCursorAdapter.notifyDataSetChanged();
-        }
-    }
-
     /**
      * This class uses the BroadcastReceiver framework to detect and handle new postition messages from
      * the service
@@ -599,7 +615,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 trackDob.setElevDiffDown(intent.getDoubleExtra(Const.ELEV_DIFF_DOWN, 0d));
                 trackDob.setNote(mLastLocationTime);
 
-                mTrackDataSource.saveTrack(trackDob);
+                SaveTrack(trackDob);
                 reloadTracks();
             }
         }

@@ -43,6 +43,11 @@
     </PreferenceCategory>
     <PreferenceCategory android:key="pref_other_category"
         android:title="@string/pref_other">
+        <EditTextPreference android:key="pref_count_of_stored_tracks"
+            android:inputType="number"
+            android:defaultValue="30"
+            android:title="@string/pref_count_of_stored_tracks"
+            android:summary="@string/pref_count_of_stored_tracks_sum"/>
         <CheckBoxPreference
             android:key="pref_geocoding"
             android:title="@string/pref_geocoding"
