@@ -18,13 +18,13 @@ public class TrackDataSource {
     public static final String TABLE_NAME = "tracks";
     public static final String COL_ID = "_id"; //The database tables should use the identifier _id for the primary key of the table. Several Android functions rely on this standard.
     public static final String COL_START_TIME = "start_time";
-    public static final String COL_START_LAT = "start_lat";
-    public static final String COL_START_LON = "start_lon";
-    public static final String COL_START_ADDRESS = "start_address";
+    public static final String COL_FIRST_LAT = "first_lat";
+    public static final String COL_FIRST_LON = "first_lon";
+    public static final String COL_FIRST_ADDRESS = "first_address";
     public static final String COL_FINISH_TIME = "finish_time";
-    public static final String COL_FINISH_LAT = "finish_lat";
-    public static final String COL_FINISH_LON = "finish_lon";
-    public static final String COL_FINISH_ADDRESS = "finish_address";
+    public static final String COL_LAST_LAT = "last_lat";
+    public static final String COL_LAST_LON = "last_lon";
+    public static final String COL_LAST_ADDRESS = "last_address";
     public static final String COL_DISTANCE = "distance";
     public static final String COL_MAX_SPEED = "max_speed";
     public static final String COL_AVE_SPEED = "ave_speed";
@@ -38,13 +38,13 @@ public class TrackDataSource {
     public static final String CREATE_TABLE_SQL = "CREATE TABLE " + TABLE_NAME + " (" +
             COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
             COL_START_TIME + " INTEGER," +
-            COL_START_LAT + " REAL," +
-            COL_START_LON + " REAL," +
-            COL_START_ADDRESS + " TEXT," +
+            COL_FIRST_LAT + " REAL," +
+            COL_FIRST_LON + " REAL," +
+            COL_FIRST_ADDRESS + " TEXT," +
             COL_FINISH_TIME + " INTEGER," +
-            COL_FINISH_LAT + " REAL," +
-            COL_FINISH_LON + " REAL," +
-            COL_FINISH_ADDRESS + " TEXT," +
+            COL_LAST_LAT + " REAL," +
+            COL_LAST_LON + " REAL," +
+            COL_LAST_ADDRESS + " TEXT," +
             COL_DISTANCE + " COL_DISTANCE," +
             COL_MAX_SPEED + " REAL," +
             COL_AVE_SPEED + " REAL," +
@@ -60,7 +60,7 @@ public class TrackDataSource {
 
     // Database fields
     private DatabaseManager dbMan;
-    private String[] allColumns = {COL_ID, COL_START_TIME, COL_START_LAT, COL_START_LON, COL_START_ADDRESS, COL_FINISH_TIME, COL_FINISH_LAT, COL_FINISH_LON, COL_FINISH_ADDRESS, COL_DISTANCE, COL_MAX_SPEED, COL_AVE_SPEED, COL_MAX_ALT, COL_MIN_ALT, COL_ELEV_DIFF_UP, COL_ELEV_DIFF_DOWN, COL_NOTE, COL_UPDATE_TIME};
+    private String[] allColumns = {COL_ID, COL_START_TIME, COL_FIRST_LAT, COL_FIRST_LON, COL_FIRST_ADDRESS, COL_FINISH_TIME, COL_LAST_LAT, COL_LAST_LON, COL_LAST_ADDRESS, COL_DISTANCE, COL_MAX_SPEED, COL_AVE_SPEED, COL_MAX_ALT, COL_MIN_ALT, COL_ELEV_DIFF_UP, COL_ELEV_DIFF_DOWN, COL_NOTE, COL_UPDATE_TIME};
 
     /**
      * Static method to create table
@@ -87,13 +87,13 @@ public class TrackDataSource {
         try {
             ContentValues values = new ContentValues();
             values.put(COL_START_TIME, trackDob.getStartTime());
-            values.put(COL_START_LAT, trackDob.getFirstLat());
-            values.put(COL_START_LON, trackDob.getFirstLon());
-            values.put(COL_START_ADDRESS, trackDob.getFirstAddress());
+            values.put(COL_FIRST_LAT, trackDob.getFirstLat());
+            values.put(COL_FIRST_LON, trackDob.getFirstLon());
+            values.put(COL_FIRST_ADDRESS, trackDob.getFirstAddress());
             values.put(COL_FINISH_TIME, trackDob.getFinishTime());
-            values.put(COL_FINISH_LAT, trackDob.getLastLat());
-            values.put(COL_FINISH_LON, trackDob.getLastLon());
-            values.put(COL_FINISH_ADDRESS, trackDob.getLastAddress());
+            values.put(COL_LAST_LAT, trackDob.getLastLat());
+            values.put(COL_LAST_LON, trackDob.getLastLon());
+            values.put(COL_LAST_ADDRESS, trackDob.getLastAddress());
             values.put(COL_DISTANCE, trackDob.getDistance());
             values.put(COL_MAX_SPEED, trackDob.getMaxSpeed());
             values.put(COL_AVE_SPEED, trackDob.getAveSpeed());

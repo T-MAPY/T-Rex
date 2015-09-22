@@ -15,7 +15,12 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     private static final String TAG = DatabaseManager.class.getName();
 
-    private static final int DATABASE_VERSION = 3;
+    /**
+     * Version of data model
+     * 4 - renamed some columns
+     * 3 - initial version
+     */
+    private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "trex.db3";
 
     static DatabaseManager instance = null;
