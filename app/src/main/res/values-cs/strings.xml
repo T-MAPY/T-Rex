@@ -10,11 +10,11 @@
     <string name="pref_location_category">Zjišťování a odesílání polohy</string>
     <string name="pref_strategy">Způsob lokalizace</string>
     <string name="pref_strategy_sum">Způsob lokalizace, ovlivňující přesnost, ale i spotřebu energie</string>
-    <string name="pref_frequency">Frekvence lokalizace (sek)</string>
+    <string name="pref_frequency">Frekvence lokalizace (s)</string>
     <string name="pref_frequency_summ">Frekvence, v jaké aplikace zjišťuje polohu zařízení (ve vteřinách)</string>
     <string name="pref_min_dist">Vzdálenost, vyvolávající odeslání (m)</string>
     <string name="pref_min_dist_summ">Vzdálenost nové pozice od staré (v metrech), vyvolávající odeslání pozice na server</string>
-    <string name="pref_max_interval">Frekvence odesílání (sek)</string>
+    <string name="pref_max_interval">Frekvence odesílání (s)</string>
     <string name="pref_max_interval_sum">Maximální doba, po které bude odeslána pozice na server (pokud odeslání nezpůsobila změna vzdálenosti) - měla by být stejná, nebo delší, než frekvence zjišťování polohy</string>
     <string name="pref_other">Další nastavení</string>
     <string name="pref_keep_screen_on">Nevypínat obrazovku</string>
@@ -42,7 +42,7 @@
     <string name="drawer_close">Zavřít hlavní nabídku</string>
     <string name="app_version">Verze</string>
     <string name="app_credits">T-MAPY spol. s r.o.\nApache License 2.0\nhttps://github.com/T-MAPY/T-Rex</string>
-    <string name="pref_kalman_mps">Obvyklá rychlost (m/sek)</string>
+    <string name="pref_kalman_mps">Obvyklá rychlost (m/s)</string>
     <string name="pref_kalman_mps_sum">Nastavte filtrování pozic GPS pomocí obvyklé rychlosti v metrech za sekundu (0 - vypnuto, 3 - chůze, 8 - kolo, 15 - vozidlo ve městě)</string>
     <string name="test_exception">Testovací výjimka</string>
     <string name="test_exception_message">Potvrzením dialogu vyvoláte testovací výjimku.</string>
@@ -55,4 +55,7 @@
     <string name="dialog_delete_message">Opravdu smazat záznam o trase?</string>
     <string name="pref_count_of_stored_tracks">Počet uložených záznamů</string>
     <string name="pref_count_of_stored_tracks_sum">Maximální počet záznamů o trase, které se ukládají v zařízení</string>
+    <string name="http_connection_timeout">Nelze navázat spojení se serverem</string>
+    <string name="http_cannot_read_output">Nelze přečíst odpověd serveru</string>
+    <string name="http_server_response">Odpověď serveru</string>
 </resources>

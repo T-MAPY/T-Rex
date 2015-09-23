@@ -10,11 +10,11 @@
     <string name="pref_location_category">Localization settings</string>
     <string name="pref_strategy">Localization strategy</string>
     <string name="pref_strategy_sum">Accuracy and localization strategy</string>
-    <string name="pref_frequency">Frequency of localization (sec)</string>
+    <string name="pref_frequency">Frequency of localization (s)</string>
     <string name="pref_frequency_summ">Frequency of localization in seconds</string>
     <string name="pref_min_dist">Distance evoking sending (m)</string>
     <string name="pref_min_dist_summ">Distance between positions, evoking sending position to server (in meters)</string>
-    <string name="pref_max_interval">Frequency of sending (sec)</string>
+    <string name="pref_max_interval">Frequency of sending (s)</string>
     <string name="pref_max_interval_sum">Maximal time of sending new position to server (in seconds) - should be equal to or longer then localization frequency</string>
     <string name="pref_other">Other settings</string>
     <string name="pref_keep_screen_on">Keep screen on</string>
@@ -55,4 +55,7 @@
     <string name="dialog_delete_message">Are you sure you want to delete the track?</string>
     <string name="pref_count_of_stored_tracks">Keep tracks</string>
     <string name="pref_count_of_stored_tracks_sum">Count of tracks stored in device</string>
+    <string name="http_connection_timeout">Can\'t connect server</string>
+    <string name="http_cannot_read_output">Can\'t read server response</string>
+    <string name="http_server_response">Server response</string>
 </resources>
