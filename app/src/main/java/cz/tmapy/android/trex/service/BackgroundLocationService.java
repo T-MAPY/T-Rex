@@ -191,12 +191,12 @@ public class BackgroundLocationService extends Service implements
      */
     @Override
     public void onConnected(Bundle bundle) {
-        Location loc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+/*        Location loc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (loc != null) {
             //Kalman initiation
             mKalman.SetState(loc.getLatitude(), loc.getLongitude(), loc.getAccuracy(), loc.getTime());
             processLocation(loc);
-        }
+        }*/
 
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(mLocFrequency * 1000);
@@ -401,7 +401,7 @@ public class BackgroundLocationService extends Service implements
         mSharedPref.edit().putLong(Const.LAST_LOCATION_TIME, loc.getLocation().getTime()).apply();
         mSharedPref.edit().putFloat(Const.ACCURACY, loc.getLocation().getAccuracy()).apply();
         //convert double into long - //http://stackoverflow.com/questions/16319237/cant-put-double-sharedpreferences
-        mSharedPref.edit().putLong(Const.ALTITUDE, Double.doubleToRawLongBits(loc.getLocation().getAltitude()));
+        mSharedPref.edit().putLong(Const.ALTITUDE, Double.doubleToRawLongBits(loc.getLocation().getAltitude())).apply();
         mSharedPref.edit().putFloat(Const.SPEED, loc.getLocation().getSpeed()).apply();
         mSharedPref.edit().putFloat(Const.DISTANCE, mDistance).apply();
     }

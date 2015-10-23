@@ -72,13 +72,13 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private Long mStartTime;
     private Long mLastLocationTime;
     private String mLastLocationTimeString;
-    private String mAccuracy;
-    private String mLastLocationAlt;
-    private String mLastLocationSpeed;
-    private String mAddress;
-    private String mLastServerResponse;
-    private String mDistance;
-    private String mDuration;
+    private String mAccuracyString;
+    private String mLastLocationAltString;
+    private String mLastLocationSpeedString;
+    private String mAddressString;
+    private String mLastServerResponseString;
+    private String mDistanceString;
+    private String mDurationString;
     private Integer mKeepNumberOfTracks;
 
     @Override
@@ -382,7 +382,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                     ComponentName service = getApplicationContext().startService(new Intent().setComponent(comp));
 
                     if (null != service) {
-                        resetGUI();
+                        clearLastState();
+                        UpdateGUI();
                         mLocalizationIsRunning = true;
                         mStartTime = System.currentTimeMillis();
                         return true;
@@ -458,17 +459,17 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mLastLocationTime = sharedPref.getLong(Const.LAST_LOCATION_TIME, 0);
 
         mLastLocationTimeString = new SimpleDateFormat("HH:mm:ss").format(mLastLocationTime);
-        mLastLocationAlt = String.format("%.0f", Double.longBitsToDouble(sharedPref.getLong(Const.ALTITUDE, 0))); //http://stackoverflow.com/questions/16319237/cant-put-double-sharedpreferences
-        mLastLocationSpeed = String.format("%.0f", (sharedPref.getFloat(Const.SPEED, 0) / 1000) * 3600);
-        mAccuracy = String.format("%.1f", sharedPref.getFloat(Const.ACCURACY, 0));
+        mLastLocationAltString = String.format("%.0f", Double.longBitsToDouble(sharedPref.getLong(Const.ALTITUDE, 0))); //http://stackoverflow.com/questions/16319237/cant-put-double-sharedpreferences
+        mLastLocationSpeedString = String.format("%.0f", (sharedPref.getFloat(Const.SPEED, 0) / 1000) * 3600);
+        mAccuracyString = String.format("%.1f", sharedPref.getFloat(Const.ACCURACY, 0));
 
         Long d = (System.currentTimeMillis() - mStartTime) / 1000;
-        mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
+        mDurationString = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
 
-        mDistance = String.format("%.2f", (sharedPref.getFloat(Const.DISTANCE, 0.0f) / 1000));
+        mDistanceString = String.format("%.2f", (sharedPref.getFloat(Const.DISTANCE, 0.0f) / 1000));
 
-        mAddress = sharedPref.getString(Const.ADDRESS, "");
-        mLastServerResponse = sharedPref.getString(Const.SERVER_RESPONSE, "");
+        mAddressString = sharedPref.getString(Const.ADDRESS, "");
+        mLastServerResponseString = sharedPref.getString(Const.SERVER_RESPONSE, "");
 
         UpdateGUI();
     }
@@ -498,30 +499,34 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         }
     }
 
-    private void resetGUI() {
-        TextView dateText = (TextView) findViewById(R.id.text_position_date);
-        dateText.setText(null);
+    /**
+     * Clear last state in preferences
+     */
+    public void clearLastState() {
 
-        TextView durationText = (TextView) findViewById(R.id.text_duration);
-        durationText.setText(null);
+        mStartTime = Long.valueOf(0);
+        sharedPref.edit().putLong(Const.START_TIME, mStartTime).apply();
 
-        TextView accuText = (TextView) findViewById(R.id.text_position_accuracy);
-        accuText.setText(null);
+        mLastLocationTimeString = getResources().getString(R.string.text_position_date_empty);
+        sharedPref.edit().putLong(Const.LAST_LOCATION_TIME, 0).apply();
 
-        TextView distText = (TextView) findViewById(R.id.text_distance);
-        distText.setText(null);
+        mAccuracyString = "0";
+        sharedPref.edit().putFloat(Const.ACCURACY, 0).apply();
 
-        TextView altText = (TextView) findViewById(R.id.text_position_alt);
-        altText.setText(null);
+        mLastLocationAltString = "0";
+        sharedPref.edit().putLong(Const.ALTITUDE, 0).apply();
 
-        TextView speedText = (TextView) findViewById(R.id.text_position_speed);
-        speedText.setText(null);
+        mLastLocationSpeedString = "0";
+        sharedPref.edit().putFloat(Const.SPEED, 0).apply();
 
-        TextView addressText = (TextView) findViewById(R.id.text_address);
-        addressText.setText(null);
+        mDistanceString = "0,00";
+        sharedPref.edit().putFloat(Const.DISTANCE, 0).apply();
 
-        TextView respText = (TextView) findViewById(R.id.text_http_response);
-        respText.setText(null);
+        mAddressString = getResources().getString(R.string.text_address_empty);
+        sharedPref.edit().putString(Const.ADDRESS, mAddressString).apply();
+
+        mLastServerResponseString = getResources().getString(R.string.text_http_response_empty);
+        sharedPref.edit().putString(Const.SERVER_RESPONSE, mLastServerResponseString).apply();
     }
 
     private void UpdateGUI() {
@@ -529,38 +534,38 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         TextView dateText = (TextView) findViewById(R.id.text_position_date);
         dateText.setText(mLastLocationTimeString);
 
-        if (mDuration != null) {
+        if (mDurationString != null) {
             TextView durationText = (TextView) findViewById(R.id.text_duration);
-            durationText.setText(mDuration);
+            durationText.setText(mDurationString);
         }
 
-        if (mAccuracy != null) {
+        if (mAccuracyString != null) {
             TextView accuracy = (TextView) findViewById(R.id.text_position_accuracy);
-            accuracy.setText(mAccuracy + " m");
+            accuracy.setText(mAccuracyString + " m");
         }
 
-        if (mDistance != null) {
+        if (mDistanceString != null) {
             TextView estDist = (TextView) findViewById(R.id.text_distance);
-            estDist.setText(mDistance + " km");
+            estDist.setText(mDistanceString + " km");
         }
 
-        if (mLastLocationSpeed != null) {
+        if (mLastLocationSpeedString != null) {
             TextView speedText = (TextView) findViewById(R.id.text_position_speed);
-            speedText.setText(mLastLocationSpeed + " km/h");
+            speedText.setText(mLastLocationSpeedString + " km/h");
         }
 
-        if (mLastLocationAlt != null) {
+        if (mLastLocationAltString != null) {
             TextView altText = (TextView) findViewById(R.id.text_position_alt);
-            altText.setText(mLastLocationAlt + " m");
+            altText.setText(mLastLocationAltString + " m");
         }
 
-        if (mAddress != null) {
+        if (mAddressString != null) {
             TextView address = (TextView) findViewById(R.id.text_address);
-            address.setText(mAddress);
+            address.setText(mAddressString);
         }
-        if (mLastServerResponse != null) {
+        if (mLastServerResponseString != null) {
             TextView httpRespText = (TextView) findViewById(R.id.text_http_response);
-            httpRespText.setText(mLastServerResponse);
+            httpRespText.setText(mLastServerResponseString);
         }
     }
 
@@ -587,26 +592,26 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             if (location != null) {
                 //2014-06-28T15:07:59
                 mLastLocationTimeString = new SimpleDateFormat("HH:mm:ss").format(location.getTime());
-                mLastLocationAlt = String.format("%.0f", location.getAltitude());
-                mLastLocationSpeed = String.format("%.0f", (location.getSpeed() / 1000) * 3600);
-                mAccuracy = String.format("%.1f", location.getAccuracy());
+                mLastLocationAltString = String.format("%.0f", location.getAltitude());
+                mLastLocationSpeedString = String.format("%.0f", (location.getSpeed() / 1000) * 3600);
+                mAccuracyString = String.format("%.1f", location.getAccuracy());
             }
             if (intent.hasExtra(Const.ADDRESS)) {
                 String adr = intent.getStringExtra(Const.ADDRESS);
                 if (adr != null)
-                    mAddress = adr;
+                    mAddressString = adr;
             }
 
             if (intent.hasExtra(Const.START_TIME)) {
                 mStartTime = intent.getLongExtra(Const.START_TIME, 0l);
                 Long d = (mCurrentTime - mStartTime) / 1000;
-                mDuration = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
+                mDurationString = String.format("%d:%02d:%02d", d / 3600, (d % 3600) / 60, (d % 60));
             }
 
             if (intent.hasExtra(Const.DISTANCE))
-                mDistance = String.format("%.2f", (intent.getFloatExtra(Const.DISTANCE, 0.0f) / 1000));
+                mDistanceString = String.format("%.2f", (intent.getFloatExtra(Const.DISTANCE, 0.0f) / 1000));
 
-            mLastServerResponse = intent.getStringExtra(Const.SERVER_RESPONSE);
+            mLastServerResponseString = intent.getStringExtra(Const.SERVER_RESPONSE);
             UpdateGUI();
 
             //if this is final broadcast
@@ -635,4 +640,3 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         }
     }
 }
-

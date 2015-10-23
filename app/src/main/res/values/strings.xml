@@ -58,4 +58,12 @@
     <string name="http_connection_timeout">Can\'t connect server</string>
     <string name="http_cannot_read_output">Can\'t read server response</string>
     <string name="http_server_response">Server response</string>
+    <string name="text_duration_empty">0:00:00</string>
+    <string name="text_position_speed_empty">0 km/h</string>
+    <string name="text_position_accuracy">0 m</string>
+    <string name="text_http_response_empty">\?</string>
+    <string name="text_distance_empty">0,00 km</string>
+    <string name="text_position_alt_empty">0 m</string>
+    <string name="text_position_date_empty">0:00:00</string>
+    <string name="text_address_empty">...</string>
 </resources>
