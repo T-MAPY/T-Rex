@@ -84,7 +84,7 @@
                             android:id="@+id/text_http_response"
                             android:text="@string/text_http_response_empty"
                             style="@style/LastPositionTextViewStyle"
-                            android:singleLine="true" />
+                            android:singleLine="false" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -147,7 +147,7 @@
                         <TextView
                             android:id="@+id/text_address"
                             android:text="@string/text_address_empty"
-                            android:singleLine="true"
+                            android:singleLine="false"
                             style="@style/LastPositionTextViewStyle"/>
                     </LinearLayout>
                 </LinearLayout>
