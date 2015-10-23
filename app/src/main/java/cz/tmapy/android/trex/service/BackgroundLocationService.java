@@ -556,7 +556,8 @@ public class BackgroundLocationService extends Service implements
 
                     int responseCode = conn.getResponseCode();
 
-                    if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    //accept all Successful 2xx responses
+                    if (responseCode >= HttpsURLConnection.HTTP_OK && responseCode <= HttpsURLConnection.HTTP_PARTIAL) {
                         iterator.remove(); //remove the position from list
                         if (Const.LOG_ENHANCED) {
                             String line;
