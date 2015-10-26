@@ -46,6 +46,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.zip.CRC32;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -548,6 +549,15 @@ public class BackgroundLocationService extends Service implements
                     postDataParams.put("l", Double.toString(wrapper.getLocation().getAltitude()));
                     postDataParams.put("s", Float.toString(wrapper.getLocation().getSpeed()));
                     postDataParams.put("b", Float.toString(wrapper.getLocation().getBearing()));
+
+                    //calculate CRC
+                    String CRCInput = mDeviceId + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(wrapper.getLocation().getTime()) + Double.toString(wrapper.getLocation().getLatitude())
+                            + Double.toString(wrapper.getLocation().getLongitude()) + Double.toString(wrapper.getLocation().getAltitude()) + Float.toString(wrapper.getLocation().getSpeed())
+                            + Float.toString(wrapper.getLocation().getBearing()) + "DtP1lwGK5chELlupbxJR4gnZ";
+                    CRC32 crc = new CRC32();
+                    crc.update(CRCInput.getBytes());
+                    String enc = String.format("%08X", crc.getValue());
+                    postDataParams.put("c", enc);
 
                     OutputStream os = conn.getOutputStream();
                     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
