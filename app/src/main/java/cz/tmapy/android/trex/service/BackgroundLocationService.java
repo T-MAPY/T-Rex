@@ -557,6 +557,13 @@ public class BackgroundLocationService extends Service implements
                     CRC32 crc = new CRC32();
                     crc.update(CRCInput.getBytes());
                     String enc = String.format("%08X", crc.getValue());
+                    postDataParams.put("c", enc);                    //calculate CRC
+                    String CRCInput = mDeviceId + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(wrapper.getLocation().getTime()) + Double.toString(wrapper.getLocation().getLatitude())
+                            + Double.toString(wrapper.getLocation().getLongitude()) + Double.toString(wrapper.getLocation().getAltitude()) + Float.toString(wrapper.getLocation().getSpeed())
+                            + Float.toString(wrapper.getLocation().getBearing()) + "DtP1lwGK5chELlupbxJR4gnZ";
+                    CRC32 crc = new CRC32();
+                    crc.update(CRCInput.getBytes());
+                    String enc = String.format("%08X", crc.getValue());
                     postDataParams.put("c", enc);
 
                     OutputStream os = conn.getOutputStream();
