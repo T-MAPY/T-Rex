@@ -381,6 +381,8 @@ public class BackgroundLocationService extends Service implements
 
             } else {
                 Toast.makeText(this, R.string.cannot_connect_to_server, Toast.LENGTH_SHORT).show();
+                SendServerResponseBroadcast(getResources().getString(R.string.cannot_connect_to_server));
+
                 if (Const.LOG_ENHANCED)
                     Log.w(TAG, "Cannot connect to server: '" + mTargetServerURL + "'");
             }
