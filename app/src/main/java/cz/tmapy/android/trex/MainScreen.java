@@ -1,5 +1,6 @@
 package cz.tmapy.android.trex;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -18,6 +19,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -80,6 +83,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private String mDistanceString;
     private String mDurationString;
     private Integer mKeepNumberOfTracks;
+
+    private static final int REQUEST_INTERNET_CHECK_FOR_UPDATES = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,13 +158,45 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         // 2) savedInstanceState is null - it is not change of device orientation (saved bundle doesn't exists)
         // 3) automatic check for update is enabled
         if (!mLocalizationIsRunning && savedInstanceState == null && sharedPref.getBoolean("pref_check4update", true))
-            new Updater(MainScreen.this).execute();
+        {
+            if (android.os.Build.VERSION.SDK_INT < 23) {
+                new Updater(MainScreen.this).execute();
+            } else if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED) {
+                new Updater(MainScreen.this).execute();
+            } else {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.INTERNET)) {
+                    Toast.makeText(this, "Persmission is needed to check for updates", Toast.LENGTH_LONG).show();
+                }
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET}, REQUEST_INTERNET_CHECK_FOR_UPDATES);
+            }
+        }
 
         //ACRA.getErrorReporter().putCustomData("myKey", "myValue");
         //ACRA.getErrorReporter().handleException(new Exception("Test exception"));
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permission, int[] grantResults) {
+        if (grantResults != null && grantResults.length > 0)
+            try {
+                switch (requestCode) {
+                    case REQUEST_INTERNET_CHECK_FOR_UPDATES:
+                        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                            new Updater(MainScreen.this).execute();
+                        } else {
+                            Toast.makeText(this, "Permission was not granted", Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                    default:
+                        super.onRequestPermissionsResult(requestCode, permission, grantResults);
+                        break;
+                }
+            } catch (SecurityException e) {
+                Log.e(TAG, e.getLocalizedMessage(), e);
+            }
     }
 
     /**
@@ -178,7 +215,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             api.showErrorDialogFragment(this, errorCheck, 1111);
             //stop our activity initialization code
         }
-        Log.e(TAG, "Google play services not available");
+        Log.e(TAG, "Google Play Services not available");
+        Toast.makeText(MainScreen.this, "Google Play Services not available", Toast.LENGTH_LONG).show();
         return false;
     }
 
