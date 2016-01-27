@@ -2,12 +2,11 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.0 rc3"
-
+    buildToolsVersion '23.0.2'
     defaultConfig {
         applicationId "cz.tmapy.android.trex"
         minSdkVersion 16
-        targetSdkVersion 22
+        targetSdkVersion 23
     }
     buildTypes {
         release {
@@ -15,13 +14,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.1.0'
-    compile 'com.android.support:support-v4:23.1.0'
-    compile 'com.android.support:design:23.1.0'
-    compile 'com.google.android.gms:play-services-location:7.5.0'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:support-v4:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+    compile 'com.google.android.gms:play-services-location:8.4.0'
     compile 'ch.acra:acra:4.6.2'
 }
