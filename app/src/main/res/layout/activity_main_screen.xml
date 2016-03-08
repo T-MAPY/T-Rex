@@ -31,7 +31,7 @@
                         android:layout_gravity="start|top"
                         android:id="@+id/text_duration"
                         style="@style/LastPositionTextViewStyle"
-                        android:text="0:00:00"
+                        android:text="@string/text_duration_empty"
                         android:textSize="32sp" />
 
                     <LinearLayout
@@ -49,7 +49,7 @@
                         <TextView
                             android:id="@+id/text_position_speed"
                             style="@style/LastPositionTextViewStyle"
-                            android:text="0 km/h" />
+                            android:text="@string/text_position_speed_empty" />
                     </LinearLayout>
                     <LinearLayout
                         android:paddingTop="2dp"
@@ -66,7 +66,7 @@
                         <TextView
                             android:id="@+id/text_position_accuracy"
                             style="@style/LastPositionTextViewStyle"
-                            android:text="0 m" />
+                            android:text="@string/text_position_accuracy" />
                     </LinearLayout>
                     <LinearLayout
                         android:paddingTop="2dp"
@@ -82,9 +82,9 @@
                             android:src="@drawable/ic_import_export_white_24dp" />
                         <TextView
                             android:id="@+id/text_http_response"
-                            android:text="\?"
+                            android:text="@string/text_http_response_empty"
                             style="@style/LastPositionTextViewStyle"
-                            android:singleLine="true" />
+                            android:singleLine="false" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -97,7 +97,7 @@
                         android:layout_gravity="start|top"
                         android:id="@+id/text_distance"
                         style="@style/LastPositionTextViewStyle"
-                        android:text="0,00 km"
+                        android:text="@string/text_distance_empty"
                         android:textSize="32sp" />
                     <LinearLayout
                         android:paddingTop="5dp"
@@ -114,7 +114,7 @@
                         <TextView
                             android:id="@+id/text_position_alt"
                             style="@style/LastPositionTextViewStyle"
-                            android:text="0 m" />
+                            android:text="@string/text_position_alt_empty" />
                     </LinearLayout>
                     <LinearLayout
                         android:paddingTop="2dp"
@@ -131,7 +131,7 @@
                         <TextView
                             android:id="@+id/text_position_date"
                             style="@style/LastPositionTextViewStyle"
-                            android:text="0:00:00" />
+                            android:text="@string/text_position_date_empty" />
                     </LinearLayout>
                     <LinearLayout
                         android:paddingTop="2dp"
@@ -146,8 +146,8 @@
                             android:src="@drawable/ic_location_city_white_24dp" />
                         <TextView
                             android:id="@+id/text_address"
-                            android:text="..."
-                            android:singleLine="true"
+                            android:text="@string/text_address_empty"
+                            android:singleLine="false"
                             style="@style/LastPositionTextViewStyle"/>
                     </LinearLayout>
                 </LinearLayout>

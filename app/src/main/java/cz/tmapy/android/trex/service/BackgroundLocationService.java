@@ -1,5 +1,6 @@
 package cz.tmapy.android.trex.service;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -7,6 +8,7 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -18,7 +20,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -84,7 +88,7 @@ public class BackgroundLocationService extends Service implements
     private Boolean mGeocoding;
     private LocationWrapper mFirstLocation; //first accepted location
     private LocationWrapper mLastAcceptedLocation; //last accepted location, filtered by Mr. Kalman
-    private List<LocationWrapper> locationsToSend = new ArrayList<LocationWrapper>(); //cach of locations to send
+    private List<LocationWrapper> mAcceptedLocations = new ArrayList<LocationWrapper>(); //cache of accepted locations to send
 
     private Long mStartTime = 0l;
     private Float mDistance = 0f;
@@ -191,12 +195,12 @@ public class BackgroundLocationService extends Service implements
      */
     @Override
     public void onConnected(Bundle bundle) {
-        Location loc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+/*        Location loc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (loc != null) {
             //Kalman initiation
             mKalman.SetState(loc.getLatitude(), loc.getLongitude(), loc.getAccuracy(), loc.getTime());
-            processLocation(loc);
-        }
+            processAcceptedLocation(loc);
+        }*/
 
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(mLocFrequency * 1000);
@@ -204,20 +208,22 @@ public class BackgroundLocationService extends Service implements
 
         switch (mListPrefs) {
             case "PRIORITY_BALANCED_POWER_ACCURACY":
-                mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
                 break;
             case "PRIORITY_LOW_POWER":
-                mLocationRequest.setPriority(LocationRequest.PRIORITY_LOW_POWER);
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
                 break;
             case "PRIORITY_NO_POWER":
-                mLocationRequest.setPriority(LocationRequest.PRIORITY_NO_POWER);
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
                 break;
             default:
                 mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
                 break;
         }
 
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
     @Override
@@ -246,15 +252,15 @@ public class BackgroundLocationService extends Service implements
      */
     @Override
     public void onLocationChanged(Location location) {
-        processLocation(location);
+        evaluateNewLocation(location);
     }
 
     /**
-     * Process new location
+     * Evaluate new location
      *
      * @param location
      */
-    private void processLocation(Location location) {
+    private void evaluateNewLocation(Location location) {
         if (location != null) {
             try {
                 //If Kalman MPS settings > 0 apply Kalman filter
@@ -334,8 +340,13 @@ public class BackgroundLocationService extends Service implements
             new GeocodingTask().execute(location);
         }
 
-        StoreAndSendAcceptedLocationBroadcast(loc);
-        SendPositionToServer(loc);
+        //add location to list of accepted
+        mAcceptedLocations.add(loc);
+
+        storePositionToPrefs(loc);
+
+        sendPositionToServer(loc);
+        sendAcceptedLocationBroadcast(loc);
     }
 
     /**
@@ -356,37 +367,41 @@ public class BackgroundLocationService extends Service implements
      *
      * @param location
      */
-    private void SendPositionToServer(LocationWrapper location) {
-
+    private void sendPositionToServer(LocationWrapper location) {
         if (mTargetServerURL != null && !mTargetServerURL.isEmpty()) {
-            locationsToSend.add(location);
-            //if buffer overfill, remove first in list
-            if (locationsToSend.size() > MAX_BUFFER_SIZE) {
-                //use iterator to remove (it is save)
-                Iterator<LocationWrapper> iterator = locationsToSend.iterator();
-                iterator.next();
-                iterator.remove();
-            }
-            if (isNetworkOnline()) {
-                URL url = null;
-                try {
-                    url = new URL(mTargetServerURL);
-                } catch (Exception e) {
-                    Toast.makeText(this, "Bad URL: '" + mTargetServerURL + "'", Toast.LENGTH_LONG).show();
-                    Log.e(TAG, "Bad URL", e);
-                    return;
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED) {
+                //if buffer overfill, remove first in list
+                if (mAcceptedLocations.size() > MAX_BUFFER_SIZE) {
+                    //use iterator to remove (it is save)
+                    Iterator<LocationWrapper> iterator = mAcceptedLocations.iterator();
+                    iterator.next();
+                    iterator.remove();
                 }
+                if (isNetworkOnline()) {
+                    URL url = null;
+                    try {
+                        url = new URL(mTargetServerURL);
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Bad URL: '" + mTargetServerURL + "'", Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "Bad URL", e);
+                        return;
+                    }
 
-                new NetworkTask(url, mDeviceIdentifier).execute(locationsToSend);
+                    new NetworkTask(url, mDeviceIdentifier).execute(mAcceptedLocations);
 
+                } else {
+                    Toast.makeText(this, R.string.cannot_connect_to_server, Toast.LENGTH_SHORT).show();
+                    sendServerResponseBroadcast(getResources().getString(R.string.cannot_connect_to_server));
+
+                    if (Const.LOG_ENHANCED)
+                        Log.w(TAG, "Cannot connect to server: '" + mTargetServerURL + "'");
+                }
             } else {
-                Toast.makeText(this, R.string.cannot_connect_to_server, Toast.LENGTH_SHORT).show();
-                if (Const.LOG_ENHANCED)
-                    Log.w(TAG, "Cannot connect to server: '" + mTargetServerURL + "'");
+                Toast.makeText(this, getResources().getString(R.string.perm_internet_for_send_location_not_granted), Toast.LENGTH_LONG).show();
             }
-
         } else {
-            Toast.makeText(this, "Missing target server URL", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.set_target_url, Toast.LENGTH_LONG).show();
             if (Const.LOG_BASIC) Log.e(TAG, "Missing target server URL");
         }
     }
@@ -396,23 +411,20 @@ public class BackgroundLocationService extends Service implements
      *
      * @param loc
      */
-    private void StorePositionToPrefs(LocationWrapper loc) {
+    private void storePositionToPrefs(LocationWrapper loc) {
         mSharedPref.edit().putLong(Const.START_TIME, mStartTime).apply();
         mSharedPref.edit().putLong(Const.LAST_LOCATION_TIME, loc.getLocation().getTime()).apply();
         mSharedPref.edit().putFloat(Const.ACCURACY, loc.getLocation().getAccuracy()).apply();
         //convert double into long - //http://stackoverflow.com/questions/16319237/cant-put-double-sharedpreferences
-        mSharedPref.edit().putLong(Const.ALTITUDE, Double.doubleToRawLongBits(loc.getLocation().getAltitude()));
+        mSharedPref.edit().putLong(Const.ALTITUDE, Double.doubleToRawLongBits(loc.getLocation().getAltitude())).apply();
         mSharedPref.edit().putFloat(Const.SPEED, loc.getLocation().getSpeed()).apply();
         mSharedPref.edit().putFloat(Const.DISTANCE, mDistance).apply();
     }
 
     /**
-     * Stores position to preferences and
-     * broadcasts the Intent with location
+     * Sends broadcasts with location
      */
-    private void StoreAndSendAcceptedLocationBroadcast(LocationWrapper location) {
-        StorePositionToPrefs(location);
-
+    private void sendAcceptedLocationBroadcast(LocationWrapper location) {
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
         localIntent.putExtra(Const.POSITION, location.getLocation());
         localIntent.putExtra(Const.DISTANCE, mDistance);
@@ -423,7 +435,7 @@ public class BackgroundLocationService extends Service implements
     /**
      * Broadcasts the Intent with server response
      */
-    private void SendServerResponseBroadcast(String serverResponse) {
+    private void sendServerResponseBroadcast(String serverResponse) {
         if (mFirstLocation.getServerResponse() == null)
             mFirstLocation.setServerResponse(serverResponse);
         mLastAcceptedLocation.setServerResponse(serverResponse);
@@ -440,7 +452,7 @@ public class BackgroundLocationService extends Service implements
      *
      * @param result
      */
-    private void SendAddressBroadcast(String result) {
+    private void sendAddressBroadcast(String result) {
         if (mFirstLocation.getAddress() == null)
             mFirstLocation.setAddress(result);
         mLastAcceptedLocation.setAddress(result);
@@ -455,7 +467,7 @@ public class BackgroundLocationService extends Service implements
     /**
      * Final broadcast
      */
-    private void SendFinalBroadcast() {
+    private void sendFinalBroadcast() {
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
 
         localIntent.putExtra(Const.START_TIME, mStartTime);
@@ -479,7 +491,7 @@ public class BackgroundLocationService extends Service implements
     @Override
     public void onDestroy() {
 
-        SendFinalBroadcast();
+        sendFinalBroadcast();
 
         stopForeground(true); //http://developer.android.com/reference/android/app/Service.html
 
@@ -556,7 +568,8 @@ public class BackgroundLocationService extends Service implements
 
                     int responseCode = conn.getResponseCode();
 
-                    if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    //accept all Successful 2xx responses
+                    if (responseCode >= HttpsURLConnection.HTTP_OK && responseCode <= HttpsURLConnection.HTTP_PARTIAL) {
                         iterator.remove(); //remove the position from list
                         if (Const.LOG_ENHANCED) {
                             String line;
@@ -612,7 +625,7 @@ public class BackgroundLocationService extends Service implements
          */
         @Override
         protected void onPostExecute(String result) {
-            SendServerResponseBroadcast(result);
+            sendServerResponseBroadcast(result);
         }
     }
 
@@ -653,7 +666,7 @@ public class BackgroundLocationService extends Service implements
         @Override
         protected void onPostExecute(String result) {
             if (result != null && result.length() > 0)
-                SendAddressBroadcast(result);
+                sendAddressBroadcast(result);
         }
     }
 
