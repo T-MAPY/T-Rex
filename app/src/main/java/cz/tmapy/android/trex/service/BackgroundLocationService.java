@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -44,12 +43,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -68,8 +70,8 @@ public class BackgroundLocationService extends Service implements
 
     private static final String TAG = BackgroundLocationService.class.getName();
     private final int MAX_BUFFER_SIZE = 5000; //1 day when send every 20sec
-    private final int CONNECTION_TIMEOUT = 3000;
-    private final int READ_TIMEOUT = 3000;
+    private final int CONNECTION_TIMEOUT = 10000;
+    private final int READ_TIMEOUT = 10000;
 
     IBinder mBinder = new LocalBinder();
     SharedPreferences mSharedPref;
@@ -88,7 +90,9 @@ public class BackgroundLocationService extends Service implements
     private Boolean mGeocoding;
     private LocationWrapper mFirstLocation; //first accepted location
     private LocationWrapper mLastAcceptedLocation; //last accepted location, filtered by Mr. Kalman
-    private List<LocationWrapper> mAcceptedLocations = new ArrayList<LocationWrapper>(); //cache of accepted locations to send
+
+    //thread-safe cache of accepted locations to send
+    ConcurrentLinkedQueue<LocationWrapper> mAcceptedLocations = new ConcurrentLinkedQueue<>();
 
     private Long mStartTime = 0l;
     private Float mDistance = 0f;
@@ -342,10 +346,9 @@ public class BackgroundLocationService extends Service implements
 
         //add location to list of accepted
         mAcceptedLocations.add(loc);
+        sendPositionsToServer();
 
         storePositionToPrefs(loc);
-
-        sendPositionToServer(loc);
         sendAcceptedLocationBroadcast(loc);
     }
 
@@ -364,39 +367,30 @@ public class BackgroundLocationService extends Service implements
 
     /**
      * Send location to the server
-     *
-     * @param location
      */
-    private void sendPositionToServer(LocationWrapper location) {
+    private void sendPositionsToServer() {
         if (mTargetServerURL != null && !mTargetServerURL.isEmpty()) {
+            URL url = null;
+            try {
+                url = new URL(mTargetServerURL);
+            } catch (Exception e) {
+                Toast.makeText(this, "Bad URL: '" + mTargetServerURL + "'", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "Bad URL", e);
+                return;
+            }
+
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED) {
-                //if buffer overfill, remove first in list
+                //if buffer overfill, remove first in queue
                 if (mAcceptedLocations.size() > MAX_BUFFER_SIZE) {
-                    //use iterator to remove (it is save)
-                    Iterator<LocationWrapper> iterator = mAcceptedLocations.iterator();
-                    iterator.next();
-                    iterator.remove();
+                    mAcceptedLocations.remove();
+//                    Iterator<LocationWrapper> iterator = mAcceptedLocations.iterator();
+//                    iterator.next();
+//                    iterator.remove();
                 }
-                if (isNetworkOnline()) {
-                    URL url = null;
-                    try {
-                        url = new URL(mTargetServerURL);
-                    } catch (Exception e) {
-                        Toast.makeText(this, "Bad URL: '" + mTargetServerURL + "'", Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "Bad URL", e);
-                        return;
-                    }
 
-                    new NetworkTask(url, mDeviceIdentifier).execute(mAcceptedLocations);
+                new NetworkTask(url, mDeviceIdentifier).execute(mAcceptedLocations);
 
-                } else {
-                    Toast.makeText(this, R.string.cannot_connect_to_server, Toast.LENGTH_SHORT).show();
-                    sendServerResponseBroadcast(getResources().getString(R.string.cannot_connect_to_server));
-
-                    if (Const.LOG_ENHANCED)
-                        Log.w(TAG, "Cannot connect to server: '" + mTargetServerURL + "'");
-                }
             } else {
                 Toast.makeText(this, getResources().getString(R.string.perm_internet_for_send_location_not_granted), Toast.LENGTH_LONG).show();
             }
@@ -525,7 +519,7 @@ public class BackgroundLocationService extends Service implements
     /**
      * Private class for sending data
      */
-    private class NetworkTask extends AsyncTask<List<LocationWrapper>, Void, String> {
+    private class NetworkTask extends AsyncTask<ConcurrentLinkedQueue<LocationWrapper>, Void, String> {
 
         private URL mTargetUrl;
         private String mDeviceId;
@@ -536,56 +530,64 @@ public class BackgroundLocationService extends Service implements
         }
 
         @Override
-        protected String doInBackground(List<LocationWrapper>... locations) {
+        protected String doInBackground(ConcurrentLinkedQueue<LocationWrapper>... locations) {
             String lastResponse = "";
             try {
-                for (Iterator<LocationWrapper> iterator = locations[0].iterator(); iterator.hasNext(); ) {
-                    LocationWrapper wrapper = iterator.next();
+                for (LocationWrapper wrapper: locations[0]) {
+                    if (isNetworkOnline()) { //check network for each locations - if offline exist sending cycle
+                        lastResponse = ""; //reset last response for each location
+                        HttpURLConnection conn = (HttpURLConnection) mTargetUrl.openConnection();
+                        conn.setConnectTimeout(CONNECTION_TIMEOUT);
+                        conn.setReadTimeout(READ_TIMEOUT);
+                        conn.setRequestMethod("POST");
+                        conn.setDoInput(true);
+                        conn.setDoOutput(true);
 
-                    lastResponse = ""; //reset last response for each location
-                    HttpURLConnection conn = (HttpURLConnection) mTargetUrl.openConnection();
-                    conn.setConnectTimeout(CONNECTION_TIMEOUT);
-                    conn.setReadTimeout(READ_TIMEOUT);
-                    conn.setRequestMethod("POST");
-                    conn.setDoInput(true);
-                    conn.setDoOutput(true);
+                        HashMap<String, String> postDataParams = new HashMap<>();
+                        postDataParams.put("i", mDeviceId);
+                        postDataParams.put("t", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(wrapper.getLocation().getTime()));//2014-06-28T15:07:59
+                        postDataParams.put("a", Double.toString(wrapper.getLocation().getLatitude()));
+                        postDataParams.put("o", Double.toString(wrapper.getLocation().getLongitude()));
+                        postDataParams.put("l", Double.toString(wrapper.getLocation().getAltitude()));
+                        postDataParams.put("s", Float.toString(wrapper.getLocation().getSpeed()));
+                        postDataParams.put("b", Float.toString(wrapper.getLocation().getBearing()));
 
-                    HashMap<String, String> postDataParams = new HashMap<>();
-                    postDataParams.put("i", mDeviceId);
-                    postDataParams.put("t", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(wrapper.getLocation().getTime()));//2014-06-28T15:07:59
-                    postDataParams.put("a", Double.toString(wrapper.getLocation().getLatitude()));
-                    postDataParams.put("o", Double.toString(wrapper.getLocation().getLongitude()));
-                    postDataParams.put("l", Double.toString(wrapper.getLocation().getAltitude()));
-                    postDataParams.put("s", Float.toString(wrapper.getLocation().getSpeed()));
-                    postDataParams.put("b", Float.toString(wrapper.getLocation().getBearing()));
+                        OutputStream os = conn.getOutputStream();
+                        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+                        writer.write(getPostDataString(postDataParams));
+                        writer.flush();
+                        writer.close();
+                        os.close();
 
-                    OutputStream os = conn.getOutputStream();
-                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-                    writer.write(getPostDataString(postDataParams));
-                    writer.flush();
-                    writer.close();
-                    os.close();
+                        int responseCode = conn.getResponseCode();
 
-                    int responseCode = conn.getResponseCode();
+                        //accept all Successful 2xx responses
+                        if (responseCode >= HttpsURLConnection.HTTP_OK && responseCode <= HttpsURLConnection.HTTP_PARTIAL) {
+                            locations[0].remove();
+                            if (Const.LOG_ENHANCED) {
+                                String line;
+                                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                                while ((line = br.readLine()) != null) {
+                                    lastResponse += line;
+                                }
+                            } else
+                                lastResponse = "OK";
 
-                    //accept all Successful 2xx responses
-                    if (responseCode >= HttpsURLConnection.HTTP_OK && responseCode <= HttpsURLConnection.HTTP_PARTIAL) {
-                        iterator.remove(); //remove the position from list
-                        if (Const.LOG_ENHANCED) {
-                            String line;
-                            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                            while ((line = br.readLine()) != null) {
-                                lastResponse += line;
-                            }
-                        } else
-                            lastResponse = "OK";
-
-                        if (Const.LOG_ENHANCED)
-                            Log.i(TAG, "Position sent to server - lat: " + wrapper.getLocation().getLatitude() + ", lon: " + wrapper.getLocation().getLongitude());
+                            if (Const.LOG_ENHANCED)
+                                Log.i(TAG, "Position lat: " + wrapper.getLocation().getLatitude() + ", lon: " + wrapper.getLocation().getLongitude() + ", from: " + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(wrapper.getLocation().getTime()) + " sent to server");
+                        } else {
+                            if (Const.LOG_ENHANCED)
+                                Log.w(TAG, "Server response: " + responseCode);
+                            lastResponse = getResources().getString(R.string.http_server_response) + ": " + responseCode;
+                        }
                     } else {
+                        Toast.makeText(getApplicationContext(), R.string.cannot_connect_to_server, Toast.LENGTH_SHORT).show();
+                        sendServerResponseBroadcast(getResources().getString(R.string.cannot_connect_to_server));
+
                         if (Const.LOG_ENHANCED)
-                            Log.w(TAG, "Server response: " + responseCode);
-                        lastResponse = getResources().getString(R.string.http_server_response) + ": " + responseCode;
+                            Log.w(TAG, "Cannot connect to server: '" + mTargetServerURL + "'");
+
+                        break; //exit sending loop - try it again with next position
                     }
                 }
             } catch (java.net.SocketTimeoutException e) {
