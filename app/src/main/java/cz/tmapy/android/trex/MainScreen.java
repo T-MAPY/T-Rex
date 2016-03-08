@@ -178,6 +178,58 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         getSupportActionBar().setHomeButtonEnabled(true);
     }
 
+    public Boolean startSending() {
+
+        if (!mTargetServerURL.isEmpty()) {
+            if (!mDeviceId.isEmpty()) {
+                if (!mLocalizationIsRunning) {
+
+                    if (ContextCompat.checkSelfPermission(MainScreen.this,
+                            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        //Nastartovani sluzby
+                        ComponentName comp = new ComponentName(getApplicationContext().getPackageName(), BackgroundLocationService.class.getName());
+                        ComponentName service = getApplicationContext().startService(new Intent().setComponent(comp));
+
+                        if (null != service) {
+                            clearLastState();
+                            UpdateGUI();
+                            mLocalizationIsRunning = true;
+                            mStartTime = System.currentTimeMillis();
+                            return true;
+                        }
+
+                        // something really wrong here
+                        Toast.makeText(this, R.string.localiz_could_not_start, Toast.LENGTH_SHORT).show();
+                        if (Const.LOG_BASIC)
+                            Log.e(TAG, "Could not start localization service " + comp.toString());
+                    } else {
+                        // Should we show an explanation?
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(MainScreen.this,
+                                Manifest.permission.ACCESS_FINE_LOCATION)) {
+                            Toast.makeText(MainScreen.this, getResources().getString(R.string.localiz_right_needed), Toast.LENGTH_LONG).show();
+                            ActivityCompat.requestPermissions(MainScreen.this,
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                        } else {
+                            ActivityCompat.requestPermissions(MainScreen.this,
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                        }
+                    }
+                } else {
+                    Toast.makeText(this, R.string.localiz_run, Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, R.string.set_device_id, Toast.LENGTH_LONG).show();
+                if (Const.LOG_BASIC) Log.e(TAG, "Device identifier is not setted");
+            }
+        } else {
+            Toast.makeText(this, R.string.set_target_url, Toast.LENGTH_LONG).show();
+            if (Const.LOG_BASIC) Log.e(TAG, "Target server URL is not setted");
+        }
+        mLocalizationIsRunning = false;
+        return false;
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permission, int[] grantResults) {
         if (grantResults != null && grantResults.length > 0)
