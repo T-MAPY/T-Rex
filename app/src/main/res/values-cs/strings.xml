@@ -65,4 +65,10 @@
     <string name="text_position_alt_empty">0 m</string>
     <string name="text_position_date_empty">0:00:00</string>
     <string name="text_address_empty">...</string>
+    <string name="perm_localiz_right_needed">Právo lokalizace zařízení je nezbytné ke spuštění sledování polohy zařízení</string>
+    <string name="perm_internet_for_updates_not_granted">Není možné zkontrolovat aktualizace - nedostatečná oprávnění</string>
+    <string name="perm_localiz_not_granted">Nebylo možné spustit lokalizaci - nedostatečná oprávnění</string>
+    <string name="perm_internet_check_for_update_needed">Právo pro přístup na internet je nutné ke kontrole aktualizací</string>
+    <string name="text_http_response_empty">\?</string>
+    <string name="perm_internet_for_send_location_not_granted">Není možné odeslat pozici na server - nedostatečná oprávnění</string>
 </resources>

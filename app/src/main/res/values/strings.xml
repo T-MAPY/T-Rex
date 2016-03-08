@@ -66,4 +66,9 @@
     <string name="text_position_alt_empty">0 m</string>
     <string name="text_position_date_empty">0:00:00</string>
     <string name="text_address_empty">...</string>
+    <string name="perm_localiz_right_needed">Localization permission is necessary to run localization</string>
+    <string name="perm_localiz_not_granted">Can\'t perform localization - permission was not granted</string>
+    <string name="perm_internet_for_updates_not_granted">Can\'t check for updates - permission was not granted</string>
+    <string name="perm_internet_check_for_update_needed">Internet permission is necessary to check for updates</string>
+    <string name="perm_internet_for_send_location_not_granted" >Can\'t send position to server - permission was not granted</string>
 </resources>
