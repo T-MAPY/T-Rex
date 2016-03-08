@@ -13,7 +13,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.graphics.Region;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -82,9 +81,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private String mDurationString;
     private Integer mKeepNumberOfTracks;
 
-    private static final int REQUEST_INTERNET_CHECK_FOR_UPDATES = 1;
     //Permissions
-    private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,16 +156,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         // 2) savedInstanceState is null - it is not change of device orientation (saved bundle doesn't exists)
         // 3) automatic check for update is enabled
         if (!mLocalizationIsRunning && savedInstanceState == null && sharedPref.getBoolean("pref_check4update", true)) {
-            if (android.os.Build.VERSION.SDK_INT < 23) {
-                new Updater(MainScreen.this).execute();
-            } else if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED) {
-                new Updater(MainScreen.this).execute();
-            } else {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.INTERNET)) {
-                    Toast.makeText(this, "Persmission is needed to check for updates", Toast.LENGTH_LONG).show();
-                }
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET}, REQUEST_INTERNET_CHECK_FOR_UPDATES);
-            }
+            new Updater(MainScreen.this).execute();
         }
 
         //ACRA.getErrorReporter().putCustomData("myKey", "myValue");
@@ -181,13 +170,10 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
      * Start localizing and sending
      */
     public Boolean startSending() {
-
         if (!mTargetServerURL.isEmpty()) {
             if (!mDeviceId.isEmpty()) {
                 if (!mLocalizationIsRunning) {
-
-                    if (ContextCompat.checkSelfPermission(MainScreen.this,
-                            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(MainScreen.this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                         //Nastartovani sluzby
                         ComponentName comp = new ComponentName(getApplicationContext().getPackageName(), BackgroundLocationService.class.getName());
                         ComponentName service = getApplicationContext().startService(new Intent().setComponent(comp));
@@ -206,17 +192,11 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                             Log.e(TAG, "Could not start localization service " + comp.toString());
                     } else {
                         // Should we show an explanation?
-                        if (ActivityCompat.shouldShowRequestPermissionRationale(MainScreen.this,
-                                Manifest.permission.ACCESS_FINE_LOCATION)) {
-                            Toast.makeText(MainScreen.this, getResources().getString(R.string.localiz_right_needed), Toast.LENGTH_LONG).show();
-                            ActivityCompat.requestPermissions(MainScreen.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-                        } else {
-                            ActivityCompat.requestPermissions(MainScreen.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-                        }
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(MainScreen.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                            Toast.makeText(MainScreen.this, getResources().getString(R.string.perm_localiz_right_needed), Toast.LENGTH_LONG).show();
+                            ActivityCompat.requestPermissions(MainScreen.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_FINE_LOCATION);
+                        } else
+                            ActivityCompat.requestPermissions(MainScreen.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.INTERNET}, MY_PERMISSIONS_REQUEST_FINE_LOCATION);
                     }
                 } else {
                     Toast.makeText(this, R.string.localiz_run, Toast.LENGTH_SHORT).show();
@@ -306,13 +286,16 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         if (grantResults != null && grantResults.length > 0)
             try {
                 switch (requestCode) {
-                    case REQUEST_INTERNET_CHECK_FOR_UPDATES:
+                    case MY_PERMISSIONS_REQUEST_FINE_LOCATION:
                         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                            new Updater(MainScreen.this).execute();
+                            Boolean startSuccess = startSending();
+                            if (startSuccess) {
+                                final FloatingActionButton startButton = (FloatingActionButton) findViewById(R.id.start_button);
+                                startButton.setImageResource(R.drawable.ic_pause_white_36dp);
+                            }
                         } else {
-                            Toast.makeText(this, "Permission was not granted", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, getResources().getString(R.string.perm_localiz_not_granted), Toast.LENGTH_SHORT).show();
                         }
-                        break;
                     default:
                         super.onRequestPermissionsResult(requestCode, permission, grantResults);
                         break;
