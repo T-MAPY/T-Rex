@@ -8,7 +8,7 @@ import android.text.StaticLayout;
 public final class Const {
 
     //http://stackoverflow.com/questions/2018263/how-do-i-enable-disable-log-levels-in-android
-    private static int LOGLEVEL = 1;
+    private static int LOGLEVEL = 2;
     public static boolean LOG_BASIC = LOGLEVEL >= 1;
     public static boolean LOG_ENHANCED = LOGLEVEL >= 2;
 
