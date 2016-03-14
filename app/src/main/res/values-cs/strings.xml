@@ -70,4 +70,10 @@
     <string name="perm_internet_check_for_update_needed">Právo pro přístup na internet je nutné ke kontrole aktualizací</string>
     <string name="text_http_response_empty">\?</string>
     <string name="perm_internet_for_send_location_not_granted">Není možné odeslat pozici na server - nedostatečná oprávnění</string>
+    <string name="menu_title">Hlavní nabídka</string>
+    <string name="menu_about">O aplikaci</string>
+    <string name="menu_help">Nápověda</string>
+    <string name="menu_settings">Nastavení</string>
+    <string name="menu_update">Aktualizace</string>
+    <string name="app_description">Android Tracking Solution</string>
 </resources>

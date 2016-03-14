@@ -18,12 +18,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,8 +42,6 @@ import java.text.SimpleDateFormat;
 import cz.tmapy.android.trex.database.DatabaseManager;
 import cz.tmapy.android.trex.database.TrackDataSource;
 import cz.tmapy.android.trex.database.dobs.TrackDob;
-import cz.tmapy.android.trex.drawer.DrawerItemCustomAdapter;
-import cz.tmapy.android.trex.drawer.ObjectDrawerItem;
 import cz.tmapy.android.trex.layout.TrackDataCursorAdapter;
 import cz.tmapy.android.trex.service.BackgroundLocationService;
 import cz.tmapy.android.trex.service.ServiceHelper;
@@ -51,6 +51,12 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
     private static final String TAG = MainScreen.class.getName();
 
+    //https://guides.codepath.com/android/Fragment-Navigation-Drawer
+    private DrawerLayout mDrawer;
+    private Toolbar toolbar;
+    private NavigationView nvDrawer;
+    private ActionBarDrawerToggle drawerToggle;
+
     private IntentFilter mIntentFilter;
     private NewPositionReceiver mPositionReceiver;
 
@@ -59,11 +65,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private ListView mTracksListView;
 
     private SharedPreferences sharedPref;
-    private String[] mNavigationDrawerItemTitles;
-    private ListView mNavigationDrawerList;
-    private DrawerLayout mNavigationDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private String mActivityTitle;
+
     private String mTargetServerURL;
     private String mDeviceId;
     private Boolean mKeepScreenOn;
@@ -87,7 +89,26 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_screen);
+        setContentView(R.layout.activity_main);
+
+        // Set a Toolbar to replace the ActionBar. In order to slide our navigation drawer over the ActionBar,
+        // we need to use the new Toolbar widget as defined in the AppCompat v21 library.
+        // The Toolbar can be embedded into your view hierarchy
+        // which makes sure that the drawer slides over the ActionBar.
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // Find our drawer view
+        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        // Find our drawer view
+        nvDrawer = (NavigationView) findViewById(R.id.nvView);
+        // Setup drawer view
+        setupDrawerContent(nvDrawer);
+
+        drawerToggle = new ActionBarDrawerToggle(this, mDrawer, toolbar, R.string.drawer_open, R.string.drawer_close);
+        // Tie DrawerLayout events to the ActionBarToggle
+        mDrawer.setDrawerListener(drawerToggle);
+
 
         if (!ServiceHelper.checkPlayServices(MainScreen.this)) return;
 
@@ -122,14 +143,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
         mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
         HandleKeepScreenOn();
-
-        mNavigationDrawerItemTitles = getResources().getStringArray(R.array.drawer_menu);
-        mNavigationDrawerList = (ListView) findViewById(R.id.navList);
-        mNavigationDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mActivityTitle = getTitle().toString();
-
-        addDrawerItems();
-        setupDrawer();
 
         final FloatingActionButton startButton = (FloatingActionButton) findViewById(R.id.start_button);
         startButton.setOnClickListener(new View.OnClickListener() {
@@ -438,56 +451,41 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
     //region *********** GUI ************
 
-
-    private void addDrawerItems() {
-
-        ObjectDrawerItem[] drawerItem = new ObjectDrawerItem[4];
-
-        drawerItem[0] = new ObjectDrawerItem(R.drawable.ic_settings_black_24dp, mNavigationDrawerItemTitles[0]);
-        drawerItem[1] = new ObjectDrawerItem(R.drawable.ic_autorenew_black_24dp, mNavigationDrawerItemTitles[1]);
-        drawerItem[2] = new ObjectDrawerItem(R.drawable.ic_help_outline_black_24dp, mNavigationDrawerItemTitles[2]);
-        drawerItem[3] = new ObjectDrawerItem(R.drawable.ic_info_outline_black_24dp, mNavigationDrawerItemTitles[3]);
-
-        DrawerItemCustomAdapter adapter = new DrawerItemCustomAdapter(this, R.layout.menu_listview_row, drawerItem);
-        mNavigationDrawerList.setAdapter(adapter);
-
-        mNavigationDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Highlight the selected item
-                mNavigationDrawerList.setItemChecked(position, true);
-                DrawerItemClick(position);
-                mNavigationDrawerList.setSelection(position);
-                //and close the drawer
-                mNavigationDrawerLayout.closeDrawer(mNavigationDrawerList);
-            }
-        });
-    }
-
     /**
-     * Handle clik on navigation drawer item
+     * Nastavení reakcí na nabídky v navigation drawer
      *
-     * @param position
+     * @param navigationView
      */
-    private void DrawerItemClick(int position) {
-        switch (position) {
-            case 0:
-                Intent intent = new Intent(getApplicationContext(), Settings.class);
-                startActivity(intent);
-                break;
-            case 1:
-                new Updater(MainScreen.this).execute();
-                break;
-            case 2:
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Const.HELP_SITE_URL)));
-                break;
-            case 3:
-                showAbout();
-                break;
-            default:
-                Toast.makeText(MainScreen.this, "I'm sorry - not implemented!", Toast.LENGTH_SHORT).show();
-                break;
-        }
+    private void setupDrawerContent(NavigationView navigationView) {
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        switch (menuItem.getItemId()) {
+                            case R.id.settings_menu_item:
+                                Intent intent = new Intent(getApplicationContext(), Settings.class);
+                                startActivity(intent);
+                                break;
+                            case R.id.reload_menu_item:
+                                new Updater(MainScreen.this).execute();
+                                break;
+                            case R.id.help_item:
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Const.HELP_SITE_URL)));
+                                break;
+                            case R.id.about_item:
+                                showAbout();
+                                break;
+                            default:
+                                //Toast.makeText(MainActivity.this, "not implemented", Toast.LENGTH_SHORT).show();
+                        }
+
+                        // Highlight the selected item, update the title, and close the drawer
+                        menuItem.setChecked(true);
+                        //setTitle(menuItem.getTitle());
+                        mDrawer.closeDrawers();
+                        return true;
+                    }
+                });
     }
 
     /**
@@ -528,28 +526,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         }
     }
 
-    private void setupDrawer() {
-        mDrawerToggle = new ActionBarDrawerToggle(this, mNavigationDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
-
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                getSupportActionBar().setTitle(R.string.drawer_title);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-                getSupportActionBar().setTitle(mActivityTitle);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-        };
-
-        mDrawerToggle.setDrawerIndicatorEnabled(true);
-        mNavigationDrawerLayout.setDrawerListener(mDrawerToggle);
-    }
-
     /**
      * Handle "keep screen on" flag
      */
@@ -563,14 +539,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        // Pass the event to ActionBarDrawerToggle, if it returns
-        // true, then it has handled the app icon touch event
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
+        if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -579,14 +548,15 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        // Sync the drawer toggle state after onRestoreInstanceState has occurred.
-        mDrawerToggle.syncState();
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        drawerToggle.syncState();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
+        // Pass any configuration change to the drawer toggles
+        drawerToggle.onConfigurationChanged(newConfig);
     }
 
     private void UpdateGUI() {

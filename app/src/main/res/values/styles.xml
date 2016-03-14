@@ -86,22 +86,19 @@
     <color name="icons">#FFFFFF</color>
     <color name="divider">#B6B6B6</color>-->
 
-    <style name="TRexTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!--it has to be here twice!!! https://developer.android.com/training/basics/actionbar/styling.html-->
-        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/ActionBarStyle</item>
-        <item name="actionBarStyle">@style/ActionBarStyle</item>
+    <style name="TRexTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+
         <item name="android:textColor">@color/primary_text</item>
         <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
         <item name="android:buttonStyle">@style/RobotoButtonStyle</item>
-    </style>
 
-    <!-- ActionBar styles see: http://stackoverflow.com/questions/23155637/change-background-color-of-the-action-bar-using-appcompat-->
-    <style name="ActionBarStyle" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <!--it has to be here twice!!! https://developer.android.com/training/basics/actionbar/styling.html-->
-        <item name="android:background" tools:ignore="NewApi">@color/primary</item>
-        <item name="background">@color/primary</item>
     </style>
 
     <style name="RobotoTextViewStyle" parent="android:Widget.TextView">
@@ -111,7 +108,13 @@
     <style name="RobotoButtonStyle" parent="android:Widget.Button">
         <item name="android:fontFamily">sans-serif-light</item>
     </style>
-<!--Style for last position text views-->
+
+    <style name="NavigationDrawerItemStyle">
+        <item name="android:textSize">16sp</item><!-- text size in menu-->
+        <item name="android:textColor">@color/primary_dark</item>
+    </style>
+
+    <!--Style for last position text views-->
     <style name="LastPositionTextViewStyle" parent="android:Widget.TextView">
         <item name="android:textColor">@color/primary_light</item>
         <item name="android:fontFamily">ans-serif-light</item>
@@ -120,4 +123,5 @@
 
     <style name="Theme.Dialog" parent="@android:style/Theme.Dialog" />
     <!-- For ACRA crash report dialog -->
+
 </resources>

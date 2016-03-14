@@ -12,10 +12,4 @@
         <item>PRIORITY_LOW_POWER</item>
         <item>PRIORITY_NO_POWER</item>
     </string-array>
-    <string-array name="drawer_menu">
-        <item>Settings</item>
-        <item>Check for update</item>
-        <item>Help</item>
-        <item>About</item>
-    </string-array>
 </resources>
