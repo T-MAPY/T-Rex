@@ -78,6 +78,6 @@
     <string name="app_description">Android Tracking Solution</string>
     <string name="pref_securityString">Security string</string>
     <string name="pref_securityString_summ">Insert string used by server to check data</string>
-    <string name="pref_startOnStartup">Start on system startup</string>
-    <string name="pref_startOnStartup_summ">Automaticaly start localization on system startup</string>
+    <string name="pref_startOnStartup">Start localization on system startup</string>
+    <string name="pref_startOnStartup_summ">Automatically start localization on system startup</string>
 </resources>
