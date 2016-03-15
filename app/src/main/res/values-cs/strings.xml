@@ -76,4 +76,6 @@
     <string name="menu_settings">Nastavení</string>
     <string name="menu_update">Aktualizace</string>
     <string name="app_description">Android Tracking Solution</string>
+    <string name="pref_securityString">Bezpečnostní řetězec</string>
+    <string name="pref_securityString_summ">Zadejte řetězec, který použije server k ověření dat</string>
 </resources>
