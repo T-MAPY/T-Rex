@@ -78,4 +78,6 @@
     <string name="app_description">Android Tracking Solution</string>
     <string name="pref_securityString">Bezpečnostní řetězec</string>
     <string name="pref_securityString_summ">Zadejte řetězec, který použije server k ověření dat</string>
+    <string name="pref_startOnStartup">Spustit lokalizaci po startu systému</string>
+    <string name="pref_startOnStartup_summ">Automaticky spustit lokalizaci po nastartování systému</string>
 </resources>

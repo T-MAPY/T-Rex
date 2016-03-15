@@ -63,6 +63,11 @@
             android:summary="@string/pref_keep_screen_on_summ"
             android:defaultValue="false"/>
         <CheckBoxPreference
+            android:key="pref_startOnStartup"
+            android:defaultValue="false"
+            android:title="@string/pref_startOnStartup"
+            android:summary="@string/pref_startOnStartup_summ"/>
+        <CheckBoxPreference
             android:key="pref_check4update"
             android:title="@string/pref_check4update"
             android:summary="@string/pref_check4update_summ"

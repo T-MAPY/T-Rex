@@ -6,6 +6,7 @@
     <!--Dangerous-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <!--Non-dangerous-->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
@@ -17,6 +18,11 @@
         android:label="@string/app_name"
         android:theme="@style/TRexTheme" >
 
+        <receiver android:name=".service.SystemStartupBroadcastReceiver" android:enabled="true" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
         <service android:enabled="true" android:name=".service.BackgroundLocationService" android:exported="false"/>
         <activity
             android:name=".MainScreen"
