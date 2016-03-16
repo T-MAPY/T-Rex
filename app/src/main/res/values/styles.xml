@@ -114,8 +114,20 @@
         <item name="android:textColor">@color/primary_dark</item>
     </style>
 
-    <!--Style for last position text views-->
+    <!--Style for current (last) position text views-->
     <style name="LastPositionTextViewStyle" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/primary_light</item>
+        <item name="android:fontFamily">ans-serif-light</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    <!--Style for current (last) position button-->
+    <style name="LastPositionButtonStyle" parent="android:Widget.Button">
+        <item name="android:textColor">@color/primary_dark</item>
+        <item name="android:fontFamily">ans-serif-light</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    <!--Style for current (last) position edit text-->
+    <style name="LastPositionEditTextStyle" parent="android:Widget.EditText">
         <item name="android:textColor">@color/primary_light</item>
         <item name="android:fontFamily">ans-serif-light</item>
         <item name="android:textSize">16sp</item>

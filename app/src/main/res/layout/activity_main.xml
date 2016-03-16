@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
-    tools:context="cz.tmapy.android.trex.MainScreen"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context="cz.tmapy.android.trex.MainScreen">
 
 
     <!-- This LinearLayout represents the contents of the screen  -->
@@ -34,156 +34,186 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/primary"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:padding="20dp">
-
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/text_duration"
-                            style="@style/LastPositionTextViewStyle"
-                            android:layout_gravity="start|top"
-                            android:text="@string/text_duration_empty"
-                            android:textSize="32sp" />
+                        android:orientation="horizontal">
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="start|top"
-                            android:orientation="horizontal"
-                            android:paddingTop="5dp">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginRight="6dp"
-                                android:alpha="0.7"
-                                android:src="@drawable/ic_directions_run_white_24dp" />
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
                             <TextView
-                                android:id="@+id/text_position_speed"
+                                android:id="@+id/text_duration"
                                 style="@style/LastPositionTextViewStyle"
-                                android:text="@string/text_position_speed_empty" />
+                                android:layout_gravity="start|top"
+                                android:text="@string/text_duration_empty"
+                                android:textSize="32sp" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="start|top"
+                                android:orientation="horizontal"
+                                android:paddingTop="5dp">
+
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"
+                                    android:alpha="0.7"
+                                    android:src="@drawable/ic_directions_run_white_24dp" />
+
+                                <TextView
+                                    android:id="@+id/text_position_speed"
+                                    style="@style/LastPositionTextViewStyle"
+                                    android:text="@string/text_position_speed_empty" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="left|top"
+                                android:orientation="horizontal"
+                                android:paddingTop="2dp">
+
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"
+                                    android:alpha="0.7"
+                                    android:src="@drawable/ic_gps_fixed_white_24dp" />
+
+                                <TextView
+                                    android:id="@+id/text_position_accuracy"
+                                    style="@style/LastPositionTextViewStyle"
+                                    android:text="@string/text_position_accuracy" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="start|top"
+                                android:orientation="horizontal"
+                                android:paddingTop="2dp">
+
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"
+                                    android:alpha="0.7"
+                                    android:src="@drawable/ic_import_export_white_24dp" />
+
+                                <TextView
+                                    android:id="@+id/text_http_response"
+                                    style="@style/LastPositionTextViewStyle"
+                                    android:singleLine="false"
+                                    android:text="@string/text_http_response_empty" />
+                            </LinearLayout>
                         </LinearLayout>
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="left|top"
-                            android:orientation="horizontal"
-                            android:paddingTop="2dp">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginRight="6dp"
-                                android:alpha="0.7"
-                                android:src="@drawable/ic_gps_fixed_white_24dp" />
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
                             <TextView
-                                android:id="@+id/text_position_accuracy"
+                                android:id="@+id/text_distance"
                                 style="@style/LastPositionTextViewStyle"
-                                android:text="@string/text_position_accuracy" />
-                        </LinearLayout>
+                                android:layout_gravity="start|top"
+                                android:text="@string/text_distance_empty"
+                                android:textSize="32sp" />
 
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="start|top"
-                            android:orientation="horizontal"
-                            android:paddingTop="2dp">
-
-                            <ImageView
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginRight="6dp"
-                                android:alpha="0.7"
-                                android:src="@drawable/ic_import_export_white_24dp" />
+                                android:layout_gravity="start|top"
+                                android:orientation="horizontal"
+                                android:paddingTop="5dp">
 
-                            <TextView
-                                android:id="@+id/text_http_response"
-                                style="@style/LastPositionTextViewStyle"
-                                android:singleLine="false"
-                                android:text="@string/text_http_response_empty" />
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"
+                                    android:alpha="0.7"
+                                    android:src="@drawable/ic_terrain_white_24dp" />
+
+                                <TextView
+                                    android:id="@+id/text_position_alt"
+                                    style="@style/LastPositionTextViewStyle"
+                                    android:text="@string/text_position_alt_empty" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="start|top"
+                                android:orientation="horizontal"
+                                android:paddingTop="2dp">
+
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"
+                                    android:alpha="0.7"
+                                    android:src="@drawable/ic_timelapse_white_24dp" />
+
+                                <TextView
+                                    android:id="@+id/text_position_date"
+                                    style="@style/LastPositionTextViewStyle"
+                                    android:text="@string/text_position_date_empty" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingTop="2dp">
+
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"
+                                    android:alpha="0.7"
+                                    android:src="@drawable/ic_location_city_white_24dp" />
+
+                                <TextView
+                                    android:id="@+id/text_address"
+                                    style="@style/LastPositionTextViewStyle"
+                                    android:singleLine="false"
+                                    android:text="@string/text_address_empty" />
+                            </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
-
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/text_distance"
-                            style="@style/LastPositionTextViewStyle"
-                            android:layout_gravity="start|top"
-                            android:text="@string/text_distance_empty"
-                            android:textSize="32sp" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="start|top"
-                            android:orientation="horizontal"
-                            android:paddingTop="5dp">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginRight="6dp"
-                                android:alpha="0.7"
-                                android:src="@drawable/ic_terrain_white_24dp" />
-
-                            <TextView
-                                android:id="@+id/text_position_alt"
-                                style="@style/LastPositionTextViewStyle"
-                                android:text="@string/text_position_alt_empty" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="start|top"
-                            android:orientation="horizontal"
-                            android:paddingTop="2dp">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginRight="6dp"
-                                android:alpha="0.7"
-                                android:src="@drawable/ic_timelapse_white_24dp" />
-
-                            <TextView
-                                android:id="@+id/text_position_date"
-                                style="@style/LastPositionTextViewStyle"
-                                android:text="@string/text_position_date_empty" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingTop="2dp">
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginRight="6dp"
-                                android:alpha="0.7"
-                                android:src="@drawable/ic_location_city_white_24dp" />
-
-                            <TextView
-                                android:id="@+id/text_address"
-                                style="@style/LastPositionTextViewStyle"
-                                android:singleLine="false"
-                                android:text="@string/text_address_empty" />
-                        </LinearLayout>
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="10dp"
+                        android:orientation="horizontal"
+                        android:focusableInTouchMode="true"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <Button
+                            android:text="výjezd"
+                            style="@style/LastPositionButtonStyle"
+                            android:background="@drawable/round_shape_button"
+                            android:layout_width="0dp"
+                            android:layout_weight=".30"
+                            android:padding="10dp"
+                            android:layout_height="wrap_content" />
+                        <EditText
+                            android:id="@+id/track_desc"
+                            android:nextFocusUp="@id/track_desc"
+                            android:nextFocusLeft="@id/track_desc"
+                            android:layout_marginLeft="5dp"
+                            style="@style/LastPositionEditTextStyle"
+                            android:layout_width="0dp"
+                            android:layout_weight=".70"
+                            android:layout_height="wrap_content" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -191,6 +221,7 @@
                     android:id="@+id/list_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
+
             </LinearLayout>
 
             <android.support.design.widget.FloatingActionButton
