@@ -80,4 +80,10 @@
     <string name="pref_securityString_summ">Insert string used by server to check data</string>
     <string name="pref_startOnStartup">Start localization on system startup</string>
     <string name="pref_startOnStartup_summ">Automatically start localization on system startup</string>
+    <string name="cannot_start_localization">Can\'t start localization</string>
+    <string name="Cancel">Cancel</string>
+    <string name="gps_network_not_enabled">GPS is not enabled</string>
+    <string name="gps_open_location_settings">Open location settings</string>
+    <string name="airplane_mode_enabled">Airplane mode is enabled</string>
+    <string name="airplane_open_settings">Open settings</string>
 </resources>

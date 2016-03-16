@@ -2,6 +2,7 @@ package cz.tmapy.android.trex;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,7 +15,9 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -186,23 +189,25 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         if (!mTargetServerURL.isEmpty()) {
             if (!mDeviceId.isEmpty()) {
                 if (!mLocalizationIsRunning) {
-                    if (ContextCompat.checkSelfPermission(MainScreen.this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        //Nastartovani sluzby
-                        ComponentName comp = new ComponentName(getApplicationContext().getPackageName(), BackgroundLocationService.class.getName());
-                        ComponentName service = getApplicationContext().startService(new Intent().setComponent(comp));
+                    if (ContextCompat.checkSelfPermission(MainScreen.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        if (CheckProviders()) {
+                            //Nastartovani sluzby
+                            ComponentName comp = new ComponentName(getApplicationContext().getPackageName(), BackgroundLocationService.class.getName());
+                            ComponentName service = getApplicationContext().startService(new Intent().setComponent(comp));
 
-                        if (null != service) {
-                            clearLastState();
-                            UpdateGUI();
-                            mLocalizationIsRunning = true;
-                            mStartTime = System.currentTimeMillis();
-                            return true;
+                            if (null != service) {
+                                clearLastState();
+                                UpdateGUI();
+                                mLocalizationIsRunning = true;
+                                mStartTime = System.currentTimeMillis();
+                                return true;
+                            }
+
+                            // something really wrong here
+                            Toast.makeText(this, R.string.localiz_could_not_start, Toast.LENGTH_SHORT).show();
+                            if (Const.LOG_BASIC)
+                                Log.e(TAG, "Could not start localization service " + comp.toString());
                         }
-
-                        // something really wrong here
-                        Toast.makeText(this, R.string.localiz_could_not_start, Toast.LENGTH_SHORT).show();
-                        if (Const.LOG_BASIC)
-                            Log.e(TAG, "Could not start localization service " + comp.toString());
                     } else {
                         // Should we show an explanation?
                         if (ActivityCompat.shouldShowRequestPermissionRationale(MainScreen.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -237,6 +242,88 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             Toast.makeText(this, R.string.localiz_not_run, Toast.LENGTH_SHORT).show();
 
         mLocalizationIsRunning = false;
+    }
+
+    /**
+     * Check the location provider is enabled and airplane mode disabled
+     *
+     * @return
+     */
+    protected boolean CheckProviders() {
+        boolean airplane_mode = true;
+        LocationManager lm = (LocationManager) MainScreen.this.getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            airplane_mode = android.provider.Settings.System.getInt(MainScreen.this.getContentResolver(),
+                    android.provider.Settings.System.AIRPLANE_MODE_ON, 0) != 0;
+        } else {
+            airplane_mode = android.provider.Settings.Global.getInt(MainScreen.this.getContentResolver(),
+                    android.provider.Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
+        }
+
+        if (airplane_mode) {
+            // notify user
+            AlertDialog.Builder dialog = new AlertDialog.Builder(MainScreen.this);
+            dialog.setTitle(getResources().getString(R.string.cannot_start_localization));
+            //dialog.setIcon(getResources().getDrawable(R.drawable.ic_info_outline_black_24dp));
+            dialog.setMessage(getResources().getString(R.string.airplane_mode_enabled));
+            dialog.setPositiveButton(getResources().getString(R.string.airplane_open_settings), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        try {
+                            Intent intentAirplaneMode = new Intent(android.provider.Settings.ACTION_AIRPLANE_MODE_SETTINGS);
+                            intentAirplaneMode.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intentAirplaneMode);
+                        } catch (ActivityNotFoundException e) {
+                            Log.e(TAG, "ActivityNotFoundException", e);
+                        }
+                    } else {
+                        Intent intent1 = new Intent("android.settings.WIRELESS_SETTINGS");
+                        intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent1);
+                    }
+                }
+            });
+            dialog.setNegativeButton(MainScreen.this.getString(R.string.Cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Toast.makeText(MainScreen.this, getResources().getString(R.string.cannot_start_localization), Toast.LENGTH_SHORT).show();
+                }
+            });
+            dialog.show();
+            return false;
+        }
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+            Log.e(TAG, "Get GPS status exception", ex);
+        }
+
+        if (!gps_enabled) {
+            // notify user
+            AlertDialog.Builder dialog = new AlertDialog.Builder(MainScreen.this);
+            dialog.setTitle(getResources().getString(R.string.cannot_start_localization));
+            dialog.setMessage(getResources().getString(R.string.gps_network_not_enabled));
+            dialog.setPositiveButton(getResources().getString(R.string.gps_open_location_settings), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Intent myIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    MainScreen.this.startActivity(myIntent);
+                }
+            });
+            dialog.setNegativeButton(MainScreen.this.getString(R.string.Cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Toast.makeText(MainScreen.this, getResources().getString(R.string.cannot_start_localization), Toast.LENGTH_SHORT).show();
+                }
+            });
+            dialog.show();
+            return false;
+        }
+        return true;
     }
 
     //region ************ TRACKS AND POSITIONS ***********

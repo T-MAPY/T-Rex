@@ -349,7 +349,8 @@ public class BackgroundLocationService extends Service implements
             new GeocodingTask().execute(location);
         }
 
-        if (Const.LOG_ENHANCED) Log.d(TAG, "New position at: " + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(loc.getLocation().getTime())+ " (" + loc.getLocation().getLatitude() + ", " + loc.getLocation().getLongitude() + ")");
+        if (Const.LOG_ENHANCED)
+            Log.d(TAG, "New position at: " + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(loc.getLocation().getTime()) + " (" + loc.getLocation().getLatitude() + ", " + loc.getLocation().getLongitude() + ")");
         //add location to list of accepted
         mAcceptedLocations.add(loc);
         sendPositionsToServer();
@@ -471,12 +472,17 @@ public class BackgroundLocationService extends Service implements
         Intent localIntent = new Intent(Const.LOCATION_BROADCAST);
 
         localIntent.putExtra(Const.START_TIME, mStartTime);
-        localIntent.putExtra(Const.FIRST_LAT, mFirstLocation.getLocation().getLatitude());
-        localIntent.putExtra(Const.FIRST_LON, mFirstLocation.getLocation().getLongitude());
-        localIntent.putExtra(Const.FIRST_ADDRESS, mFirstLocation.getAddress());
-        localIntent.putExtra(Const.LAST_LAT, mLastAcceptedLocation.getLocation().getLatitude());
-        localIntent.putExtra(Const.LAST_LON, mLastAcceptedLocation.getLocation().getLongitude());
-        localIntent.putExtra(Const.LAST_ADDRESS, mLastAcceptedLocation.getAddress());
+        if (mFirstLocation != null && mFirstLocation.getLocation() != null) {
+            localIntent.putExtra(Const.FIRST_LAT, mFirstLocation.getLocation().getLatitude());
+            localIntent.putExtra(Const.FIRST_LON, mFirstLocation.getLocation().getLongitude());
+            localIntent.putExtra(Const.FIRST_ADDRESS, mFirstLocation.getAddress());
+        }
+        if (mLastAcceptedLocation != null && mLastAcceptedLocation.getLocation() != null)
+        {
+            localIntent.putExtra(Const.LAST_LAT, mLastAcceptedLocation.getLocation().getLatitude());
+            localIntent.putExtra(Const.LAST_LON, mLastAcceptedLocation.getLocation().getLongitude());
+            localIntent.putExtra(Const.LAST_ADDRESS, mLastAcceptedLocation.getAddress());
+        }
         localIntent.putExtra(Const.DISTANCE, mDistance);
         localIntent.putExtra(Const.MAX_SPEED, mMaxSpeed);
         localIntent.putExtra(Const.AVE_SPEED, mSpeedLocationsCount > 0 ? mSpeedSum / mSpeedLocationsCount : 0f);
@@ -559,7 +565,8 @@ public class BackgroundLocationService extends Service implements
                         postDataParams.put("b", Float.toString(wrapper.getLocation().getBearing()));
                         postDataParams.put("c", SecurityHelper.GetMd5ForLocation(mDeviceIdentifier, new Date(wrapper.getLocation().getTime()), mSecurityString));
 
-                        if (Const.LOG_ENHANCED) Log.d(TAG, "Sending position: " + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(wrapper.getLocation().getTime()));
+                        if (Const.LOG_ENHANCED)
+                            Log.d(TAG, "Sending position: " + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(wrapper.getLocation().getTime()));
 
                         OutputStream os = conn.getOutputStream();
                         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));

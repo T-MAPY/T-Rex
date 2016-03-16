@@ -80,4 +80,10 @@
     <string name="pref_securityString_summ">Zadejte řetězec, který použije server k ověření dat</string>
     <string name="pref_startOnStartup">Spustit lokalizaci po startu systému</string>
     <string name="pref_startOnStartup_summ">Automaticky spustit lokalizaci po nastartování systému</string>
+    <string name="Cancel">Zrušit</string>
+    <string name="cannot_start_localization">Lokalizaci nelze spustit</string>
+    <string name="gps_network_not_enabled">Zjišťování polohy není povoleno</string>
+    <string name="gps_open_location_settings">Otevřít nastavení </string>
+    <string name="airplane_mode_enabled">Je zapnutý režim Letadlo</string>
+    <string name="airplane_open_settings">Otevřít nastavení </string>
 </resources>
