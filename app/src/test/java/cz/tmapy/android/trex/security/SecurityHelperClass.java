@@ -17,8 +17,8 @@ public class SecurityHelperClass {
     }
 
     @Test
-    public void testGetMd5ForLocationTest() throws Exception {
+    public void testGetSecurityStringTest() throws Exception {
         //tento test neprojde, protože používá Android knihovnu MD5 a ta se v testu nedá inicializovat
-        assertNotNull(SecurityHelper.GetMd5ForLocation("deviceId", new Date( ), "securityString"));
+        assertNotNull(SecurityHelper.GetSecurityString("deviceId", new Date(), "accessKey"));
     }
 }

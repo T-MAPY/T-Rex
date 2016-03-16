@@ -76,8 +76,8 @@
     <string name="menu_settings">Nastavení</string>
     <string name="menu_update">Aktualizace</string>
     <string name="app_description">Android Tracking Solution</string>
-    <string name="pref_securityString">Bezpečnostní řetězec</string>
-    <string name="pref_securityString_summ">Zadejte řetězec, který použije server k ověření dat</string>
+    <string name="pref_accessKey">Přístupový klíč</string>
+    <string name="pref_accessKey_summ">Zadejte přístupový klíč na definovaný server</string>
     <string name="pref_startOnStartup">Spustit lokalizaci po startu systému</string>
     <string name="pref_startOnStartup_summ">Automaticky spustit lokalizaci po nastartování systému</string>
     <string name="Cancel">Zrušit</string>

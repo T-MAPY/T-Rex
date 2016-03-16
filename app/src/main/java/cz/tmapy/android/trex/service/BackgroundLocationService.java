@@ -28,7 +28,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.internal.ValidateAccountRequest;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -46,14 +45,10 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -85,7 +80,7 @@ public class BackgroundLocationService extends Service implements
     private GoogleApiClient mGoogleApiClient;
     private String mTargetServerURL;
     private String mDeviceIdentifier;
-    private String mSecurityString;
+    private String mAccessKey;
     private String mListPrefs;
     private Integer mLocFrequency;
     private Integer mMinDistance;
@@ -121,7 +116,7 @@ public class BackgroundLocationService extends Service implements
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mTargetServerURL = mSharedPref.getString(Const.PREF_KEY_TARGET_SERVUER_URL, null);
         mDeviceIdentifier = mSharedPref.getString(Const.PREF_KEY_DEVICE_ID, null);
-        mSecurityString = mSharedPref.getString(Const.PREF_KEY_SECURITY_STRING, null);
+        mAccessKey = mSharedPref.getString(Const.PREF_KEY_ACCESS_KEY, null);
         mListPrefs = mSharedPref.getString(Const.PREF_LOC_STRATEGY, "PRIORITY_HIGH_ACCURACY");
         mLocFrequency = Integer.valueOf(mSharedPref.getString(Const.PREF_LOC_FREQUENCY, "20"));
         mMinDistance = Integer.valueOf(mSharedPref.getString(Const.PREF_MIN_DIST, "60"));
@@ -563,7 +558,7 @@ public class BackgroundLocationService extends Service implements
                         postDataParams.put("l", Double.toString(wrapper.getLocation().getAltitude()));
                         postDataParams.put("s", Float.toString(wrapper.getLocation().getSpeed()));
                         postDataParams.put("b", Float.toString(wrapper.getLocation().getBearing()));
-                        postDataParams.put("c", SecurityHelper.GetMd5ForLocation(mDeviceIdentifier, new Date(wrapper.getLocation().getTime()), mSecurityString));
+                        postDataParams.put("k", SecurityHelper.GetSecurityString(mDeviceIdentifier, new Date(wrapper.getLocation().getTime()), mAccessKey));
 
                         if (Const.LOG_ENHANCED)
                             Log.d(TAG, "Sending position: " + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(wrapper.getLocation().getTime()));

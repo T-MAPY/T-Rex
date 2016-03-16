@@ -42,19 +42,19 @@ public class SecurityHelper {
     }
 
     /**
-     * Returns MD5 hash based on security string, device identifier and location time
+     * Returns MD5 hash based on access key, device identifier and location time
      *
      * @param deviceId
      * @param dateTime
-     * @param mSecurityString
+     * @param mAccessKey
      * @return
      */
-    public static String GetMd5ForLocation(String deviceId, Date dateTime, String mSecurityString) {
+    public static String GetSecurityString(String deviceId, Date dateTime, String mAccessKey) {
         Format format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         String dateString = format.format(dateTime);
-        //Log.d(TAG,"Input string: " + deviceId + dateString + mSecurityString);
+        //Log.d(TAG,"Input string: " + deviceId + dateString + mAccessKey);
 
-        byte[] md5 = GetMd5Hash(deviceId + dateString + mSecurityString);
+        byte[] md5 = GetMd5Hash(deviceId + dateString + mAccessKey);
         String base64 = Base64.encodeToString(md5, Base64.NO_WRAP);
         //Log.d(TAG, "Result security string: " + base64);
         return base64;

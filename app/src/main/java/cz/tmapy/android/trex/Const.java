@@ -19,7 +19,7 @@ public final class Const {
     //Preferences keys
     public static final String PREF_KEY_DEVICE_ID = "pref_id";
     public static final String PREF_KEY_TARGET_SERVUER_URL = "pref_targetUrl";
-    public static final String PREF_KEY_SECURITY_STRING = "pref_securityString";
+    public static final String PREF_KEY_ACCESS_KEY = "pref_accessKey";
     public static final String PREF_KEY_KEEP_SCREEN_ON = "pref_screen_on";
     public static final String PREF_LOC_STRATEGY = "pref_loc_strategy";
     public static final String PREF_LOC_FREQUENCY = "pref_loc_frequency";

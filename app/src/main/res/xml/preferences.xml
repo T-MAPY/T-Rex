@@ -2,17 +2,17 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:key="pref_basic_category"
         android:title="@string/pref_basic_category">
-        <EditTextPreference android:key="pref_targetUrl"
-            android:title="@string/pref_targetUrl"
-            android:inputType="textUri"
-            android:summary="@string/pref_targetUrl_summ" />
         <EditTextPreference android:key="pref_id"
             android:title="@string/pref_id"
             android:inputType="text"
             android:summary="@string/pref_id_summ"/>
-        <EditTextPreference android:key="pref_securityString"
-            android:title="@string/pref_securityString"
-            android:summary="@string/pref_securityString_summ"
+        <EditTextPreference android:key="pref_targetUrl"
+            android:title="@string/pref_targetUrl"
+            android:inputType="textUri"
+            android:summary="@string/pref_targetUrl_summ" />
+        <EditTextPreference android:key="pref_accessKey"
+            android:title="@string/pref_accessKey"
+            android:summary="@string/pref_accessKey_summ"
             android:inputType="textPassword"/>
     </PreferenceCategory>
     <PreferenceCategory android:key="pref_location_category" android:title="@string/pref_location_category">

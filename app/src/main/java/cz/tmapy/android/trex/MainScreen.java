@@ -112,7 +112,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         // Tie DrawerLayout events to the ActionBarToggle
         mDrawer.setDrawerListener(drawerToggle);
 
-
         if (!ServiceHelper.checkPlayServices(MainScreen.this)) return;
 
         //google play services available, hooray
