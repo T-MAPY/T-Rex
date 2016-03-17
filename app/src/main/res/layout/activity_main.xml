@@ -197,13 +197,28 @@
                         android:focusableInTouchMode="true"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
+                        <TextView
+                            android:text="Akce:"
+                            style="@style/LastPositionTextViewStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
                         <Button
-                            android:text="výjezd"
+                            android:text="zásah"
                             style="@style/LastPositionButtonStyle"
-                            android:background="@drawable/round_shape_button"
+                            android:background="@drawable/animated_button"
                             android:layout_width="0dp"
                             android:layout_weight=".30"
-                            android:padding="10dp"
+                            android:paddingTop="5dp"
+                            android:paddingBottom="10dp"
+                            android:paddingLeft="5dp"
+                            android:paddingRight="10dp"
+                            android:layout_marginLeft="5dp"
+                            android:layout_height="wrap_content" />
+                        <TextView
+                            android:layout_marginLeft="10dp"
+                            android:text="Popis:"
+                            style="@style/LastPositionTextViewStyle"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                         <EditText
                             android:id="@+id/track_desc"

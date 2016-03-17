@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-
-</selector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:left="5dp"
+        android:top="5dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#00000000" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+    <item
+        android:right="5dp"
+        android:bottom="5dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/common_action_bar_splitter" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+</layer-list>
