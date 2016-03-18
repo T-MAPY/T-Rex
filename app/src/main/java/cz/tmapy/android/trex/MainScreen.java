@@ -75,8 +75,10 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private String mTargetServerURL;
     private String mDeviceId;
     private Boolean mKeepScreenOn;
+    private Boolean mSendTag;
     //members for state saving
     private Boolean mLocalizationIsRunning = false;
+    private String mTag;
     private Long mStartTime;
     private Long mLastLocationTime;
     private String mLastLocationTimeString;
@@ -149,14 +151,18 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
         HandleKeepScreenOn();
 
-        String tagButtonText = sharedPref.getString(Const.PREF_KEY_TAG, getString(R.string.default_tag));
+        mTag = sharedPref.getString(Const.PREF_KEY_TAG, getString(R.string.default_tag));
+        mSendTag = sharedPref.getBoolean(Const.PREF_KEY_SEND_TAG, false);
+        final int tagVisibility = mSendTag ? View.VISIBLE : View.GONE;
+        final TextView tagLabel = (TextView) findViewById(R.id.tag_label);
+        tagLabel.setVisibility(tagVisibility);
         final Button tagButton = (Button) findViewById(R.id.tag_button);
         if (tagButton != null) {
             tagButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainScreen.this);
-                    builder.setTitle("Insert tag name please");
+                    builder.setTitle("Vlastní typ trasy:");
                     String m_Text = "";
                     // Set up the input
                     final EditText input = new EditText(MainScreen.this);
@@ -168,8 +174,9 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                     builder.setPositiveButton(getString(R.string.Ok), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            tagButton.setText(input.getText().toString());
-                            sharedPref.edit().putString(Const.PREF_KEY_TAG, input.getText().toString()).apply();
+                            mTag = input.getText().toString();
+                            tagButton.setText(mTag);
+                            sharedPref.edit().putString(Const.PREF_KEY_TAG, mTag).apply();
                         }
                     });
                     builder.setNegativeButton(getString(R.string.Cancel), new DialogInterface.OnClickListener() {
@@ -181,7 +188,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                     builder.show();
                 }
             });
-            tagButton.setText(tagButtonText);
+            tagButton.setText(mTag);
+            tagButton.setVisibility(tagVisibility);
         }
 
         final FloatingActionButton startButton = (FloatingActionButton) findViewById(R.id.start_button);
@@ -463,6 +471,14 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 mKeepScreenOn = prefs.getBoolean(key, false);
                 HandleKeepScreenOn();
                 break;
+            case Const.PREF_KEY_SEND_TAG:
+                mSendTag = prefs.getBoolean(key, false);
+                final int tagVisibility = mSendTag ? View.VISIBLE : View.GONE;
+                final TextView tagLabel = (TextView) findViewById(R.id.tag_label);
+                tagLabel.setVisibility(tagVisibility);
+                final Button tagButton = (Button) findViewById(R.id.tag_button);
+                tagButton.setVisibility(tagVisibility);
+                break;
         }
     }
 
@@ -548,6 +564,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             //if this is final broadcast
             if (intent.hasExtra(Const.LAST_LAT)) {
                 TrackDob trackDob = new TrackDob();
+                if (mSendTag) trackDob.setTag(mTag);
                 trackDob.setStartTime(intent.getLongExtra(Const.START_TIME, 0l));
                 trackDob.setFirstLat(intent.getDoubleExtra(Const.FIRST_LAT, 0d));
                 trackDob.setFirstLon(intent.getDoubleExtra(Const.FIRST_LON, 0d));

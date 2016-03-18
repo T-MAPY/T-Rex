@@ -91,6 +91,7 @@ public class BackgroundLocationService extends Service implements
     private Integer mSendInterval;
     private Integer mKalmanMPS;
     private Boolean mGeocoding;
+    private Boolean mSendTag;
     private LocationWrapper mFirstLocation; //first accepted location
     private LocationWrapper mLastAcceptedLocation; //last accepted location, filtered by Mr. Kalman
 
@@ -128,7 +129,8 @@ public class BackgroundLocationService extends Service implements
         mSendInterval = Integer.valueOf(mSharedPref.getString(Const.PREF_SEND_INTERVAL, "120"));
         mKalmanMPS = Integer.valueOf(mSharedPref.getString(Const.PREF_KALMAN_MPS, "15"));
         mGeocoding = mSharedPref.getBoolean(Const.PREF_GEOCODING, false);
-        mTag = mSharedPref.getString(Const.PREF_KEY_TAG, null);
+        mSendTag = mSharedPref.getBoolean(Const.PREF_KEY_SEND_TAG, false);
+        mTag = mSharedPref.getString(Const.PREF_KEY_TAG, getString(R.string.default_tag));
         // Kalman filters generally work better when the accuracy decays a bit quicker than one might expect,
         // so for walking around with an Android phone I find that Q=3 metres per second works fine,
         // even though I generally walk slower than that.
@@ -350,7 +352,7 @@ public class BackgroundLocationService extends Service implements
         }
 
         if (Const.LOG_ENHANCED)
-            Log.d(TAG, ((mTag != null) ? mTag + ": " : "New position at: ") + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(loc.getLocation().getTime()) + " (" + loc.getLocation().getLatitude() + ", " + loc.getLocation().getLongitude() + ")");
+            Log.d(TAG, ((mSendTag && mTag != null) ? mTag + ": " : "New position at: ") + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(loc.getLocation().getTime()) + " (" + loc.getLocation().getLatitude() + ", " + loc.getLocation().getLongitude() + ")");
         //add location to list of accepted
         mAcceptedLocations.add(loc);
         sendPositionsToServer();
@@ -564,7 +566,7 @@ public class BackgroundLocationService extends Service implements
                         postDataParams.put("l", Double.toString(wrapper.getLocation().getAltitude()));
                         postDataParams.put("s", Float.toString(wrapper.getLocation().getSpeed()));
                         postDataParams.put("b", Float.toString(wrapper.getLocation().getBearing()));
-                        if (mTag != null && !mTag.isEmpty())
+                        if (mSendTag && mTag != null && !mTag.isEmpty())
                             postDataParams.put("g", SecurityHelper.GetBase64FromUTF8String(mTag));
                         postDataParams.put("k", SecurityHelper.GetSecurityString(mDeviceIdentifier, new Date(wrapper.getLocation().getTime()), mAccessKey));
 

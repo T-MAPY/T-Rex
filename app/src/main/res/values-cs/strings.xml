@@ -89,6 +89,8 @@
     <string name="cannot_start_localization_due_airplane">Nelze spustit lokalizaci - zapnutý režim Letadlo</string>
     <string name="cannot_start_localization_due_gps_settings">Nelze spustit lokalizaci - GPS vypnuta</string>
     <string name="Ok">OK</string>
-    <string name="tag_label">Typ akce:</string>
+    <string name="tag_label">Typ trasy:</string>
     <string name="default_tag">výjezd</string>
+    <string name="pref_send_tag">Typ trasy</string>
+    <string name="pref_send_tag_summ">Umožnit zadat a odesílat na server typ trasy</string>
 </resources>

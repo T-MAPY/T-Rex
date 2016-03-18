@@ -1,7 +1,9 @@
 package cz.tmapy.android.trex.layout;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,11 +12,12 @@ import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 
+import cz.tmapy.android.trex.Const;
 import cz.tmapy.android.trex.R;
 
 /**
  * Adapter for track list row
- * Created by kasvo on 16.9.2015.
+ * Created by Kamil Svoboda on 16.9.2015.
  */
 public class TrackDataCursorAdapter extends CursorAdapter {
     private LayoutInflater mInflater;
@@ -26,6 +29,12 @@ public class TrackDataCursorAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
+
+        TextView tagView = (TextView) view.findViewById(R.id.text_tracks_list_item_tag);
+        String tag = cursor.getString(1);
+        tagView.setText(tag);
+        tagView.setVisibility((tag != null && !tag.isEmpty()) ? View.VISIBLE : View.GONE);
+
         TextView lengthView = (TextView) view.findViewById(R.id.text_tracks_list_item_length);
         Long d = (cursor.getLong(5) - cursor.getLong(1)) / 1000;
         lengthView.setText(String.format("%.2f", (cursor.getFloat(9) / 1000)) + " km");

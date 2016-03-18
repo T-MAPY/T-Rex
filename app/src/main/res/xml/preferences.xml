@@ -44,6 +44,11 @@
             android:defaultValue="PRIORITY_HIGH_ACCURACY"
             android:summary="@string/pref_strategy_sum"
             android:title="@string/pref_strategy" />
+        <CheckBoxPreference
+            android:key="pref_send_tag"
+            android:title="@string/pref_send_tag"
+            android:summary="@string/pref_send_tag_summ"
+            android:defaultValue="false"/>
     </PreferenceCategory>
     <PreferenceCategory android:key="pref_other_category"
         android:title="@string/pref_other">

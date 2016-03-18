@@ -5,6 +5,7 @@ package cz.tmapy.android.trex.database.dobs;
  */
 public class TrackDob {
     private Long id;
+    private String tag;
     private Long startTime;
     private Double firstLat;
     private Double firstLon;
@@ -23,9 +24,11 @@ public class TrackDob {
     private String note;
     private Long updateTime;
 
-    public TrackDob(){};
+    public TrackDob() {
+    };
 
-    public TrackDob(Long startTime, Double firstLat, Double firstLon, String firstAddress, Long finishTime, Double lastLat, Double lastLon, String lastAddress, Float distance, Float maxSpeed, Float aveSpeed, Double minAlt, Double maxAlt, Double elevDiffUp, Double elevDiffDown, String note) {
+    public TrackDob(String tag, Long startTime, Double firstLat, Double firstLon, String firstAddress, Long finishTime, Double lastLat, Double lastLon, String lastAddress, Float distance, Float maxSpeed, Float aveSpeed, Double minAlt, Double maxAlt, Double elevDiffUp, Double elevDiffDown, String note) {
+        this.tag = tag;
         this.startTime = startTime;
         this.firstLat = firstLat;
         this.firstLon = firstLon;
@@ -51,6 +54,10 @@ public class TrackDob {
     public void setId(Long id) {
         this.id = id;
     }
+
+    public String getTag() {return tag;}
+
+    public void setTag(String tag){this.tag = tag;}
 
     public Long getStartTime() {
         return startTime;

@@ -89,6 +89,8 @@
     <string name="cannot_start_localization_due_airplane">Can\'t start localization - airplane mode enabled</string>
     <string name="cannot_start_localization_due_gps_settings">Can\'t start localization - GPS disabled</string>
     <string name="Ok">OK</string>
-    <string name="tag_label">Select type:</string>
+    <string name="tag_label">Track type:</string>
     <string name="default_tag">trip</string>
+    <string name="pref_send_tag">Send track type</string>
+    <string name="pref_send_tag_summ">Send user defined type of track to server</string>
 </resources>

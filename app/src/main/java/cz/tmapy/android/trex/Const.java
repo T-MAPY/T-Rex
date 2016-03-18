@@ -30,7 +30,7 @@ public final class Const {
     public static final String PREF_KEY_KEEP_NUMBER_OF_TRACKS = "pref_keep_number_of_tracks";
     public static final String PREF_KEY_STARTONSTARTUP = "pref_startOnStartup";
     public static final String PREF_KEY_TAG = "pref_tag";
-    public static final String PREF_KEY_DESC = "pref_desc";
+    public static final String PREF_KEY_SEND_TAG = "pref_send_tag";
 
     //STATE constants
     public static final String LOCATION_BROADCAST = "cz.tmapy.android.trex.LOCATION_BROADCAST";
