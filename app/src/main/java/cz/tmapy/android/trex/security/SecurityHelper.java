@@ -16,7 +16,7 @@ import java.util.Date;
  */
 public class SecurityHelper {
     private static final String TAG = SecurityHelper.class.getName();
-
+    protected static final String UTF8 = "UTF-8";
     /**
      * Generate MD5 hash from string
      *
@@ -26,7 +26,7 @@ public class SecurityHelper {
     public static byte[] GetMd5Hash(String inputString) {
 
         try {
-            byte[] bytesOfMessage = inputString.getBytes("UTF-8");
+            byte[] bytesOfMessage = inputString.getBytes(UTF8);
             MessageDigest md = null;
             md = MessageDigest.getInstance("MD5");
             byte[] thedigest = md.digest(bytesOfMessage);
@@ -55,8 +55,21 @@ public class SecurityHelper {
         //Log.d(TAG,"Input string: " + deviceId + dateString + mAccessKey);
 
         byte[] md5 = GetMd5Hash(deviceId + dateString + mAccessKey);
-        String base64 = Base64.encodeToString(md5, Base64.NO_WRAP);
+        String base64 = GetBase64String(md5);
         //Log.d(TAG, "Result security string: " + base64);
         return base64;
+    }
+
+    public static String GetBase64String(byte[] input) {
+        return Base64.encodeToString(input, Base64.NO_WRAP);
+    }
+
+    public static String GetBase64FromUTF8String(String inputString) {
+        try {
+            return Base64.encodeToString(inputString.getBytes(UTF8), Base64.NO_WRAP);
+        } catch (UnsupportedEncodingException e) {
+            Log.e(TAG, "Unsupported encoding", e);
+        }
+        return null;
     }
 }

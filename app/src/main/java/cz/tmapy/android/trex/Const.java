@@ -28,7 +28,9 @@ public final class Const {
     public static final String PREF_KALMAN_MPS = "pref_kalman_mps";
     public static final String PREF_GEOCODING = "pref_geocoding";
     public static final String PREF_KEY_KEEP_NUMBER_OF_TRACKS = "pref_keep_number_of_tracks";
-    public static final String PREF_STARTONSTARTUP = "pref_startOnStartup";
+    public static final String PREF_KEY_STARTONSTARTUP = "pref_startOnStartup";
+    public static final String PREF_KEY_TAG = "pref_tag";
+    public static final String PREF_KEY_DESC = "pref_desc";
 
     //STATE constants
     public static final String LOCATION_BROADCAST = "cz.tmapy.android.trex.LOCATION_BROADCAST";

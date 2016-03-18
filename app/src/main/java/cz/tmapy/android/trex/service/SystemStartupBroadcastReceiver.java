@@ -23,7 +23,7 @@ public class SystemStartupBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         SharedPreferences mSharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 
-        if (mSharedPref.getBoolean(Const.PREF_STARTONSTARTUP, false)) {
+        if (mSharedPref.getBoolean(Const.PREF_KEY_STARTONSTARTUP, false)) {
             if (CheckProviders(context)) {
                 Intent myIntent = new Intent(context, BackgroundLocationService.class);
                 context.startService(myIntent);

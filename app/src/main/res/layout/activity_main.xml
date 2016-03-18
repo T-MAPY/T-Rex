@@ -192,29 +192,28 @@
                     </LinearLayout>
                     <LinearLayout
                         android:layout_marginTop="20dp"
-                        android:layout_marginBottom="10dp"
                         android:orientation="horizontal"
                         android:focusableInTouchMode="true"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
                         <TextView
-                            android:text="Akce:"
+                            android:text="@string/tag_label"
                             style="@style/LastPositionTextViewStyle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                         <Button
-                            android:text="zásah"
+                            android:id="@+id/tag_button"
+                            android:text=""
                             style="@style/LastPositionButtonStyle"
                             android:background="@drawable/animated_button"
-                            android:layout_width="0dp"
-                            android:layout_weight=".30"
+                            android:layout_width="120dp"
                             android:paddingTop="5dp"
                             android:paddingBottom="10dp"
                             android:paddingLeft="5dp"
                             android:paddingRight="10dp"
-                            android:layout_marginLeft="5dp"
+                            android:layout_marginLeft="10dp"
                             android:layout_height="wrap_content" />
-                        <TextView
+<!--                        <TextView
                             android:layout_marginLeft="10dp"
                             android:text="Popis:"
                             style="@style/LastPositionTextViewStyle"
@@ -227,8 +226,8 @@
                             android:layout_marginLeft="5dp"
                             style="@style/LastPositionEditTextStyle"
                             android:layout_width="0dp"
-                            android:layout_weight=".70"
-                            android:layout_height="wrap_content" />
+                            android:layout_weight=".50"
+                            android:layout_height="wrap_content" />-->
                     </LinearLayout>
                 </LinearLayout>
 
