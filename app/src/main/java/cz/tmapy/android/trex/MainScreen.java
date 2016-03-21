@@ -2,6 +2,7 @@ package cz.tmapy.android.trex;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -29,12 +30,12 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.InputType;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -44,11 +45,14 @@ import android.widget.Toast;
 import org.acra.ACRA;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import cz.tmapy.android.trex.database.DatabaseManager;
 import cz.tmapy.android.trex.database.TrackDataSource;
 import cz.tmapy.android.trex.database.dobs.TrackDob;
 import cz.tmapy.android.trex.layout.TrackDataCursorAdapter;
+import cz.tmapy.android.trex.layout.TrackTypeArrayAdapter;
 import cz.tmapy.android.trex.service.BackgroundLocationService;
 import cz.tmapy.android.trex.service.ServiceHelper;
 import cz.tmapy.android.trex.update.Updater;
@@ -161,31 +165,46 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             tagButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainScreen.this);
-                    builder.setTitle("Vlastní typ trasy:");
-                    String m_Text = "";
-                    // Set up the input
-                    final EditText input = new EditText(MainScreen.this);
-                    // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                    input.setInputType(InputType.TYPE_CLASS_TEXT);
-                    builder.setView(input);
+                    // custom dialog
+                    final Dialog dialog = new Dialog(MainScreen.this);
+                    dialog.setContentView(R.layout.select_track_type_dialog);
+                    dialog.setTitle("Vyberte prosím typ trasy");
 
-                    // Set up the buttons
-                    builder.setPositiveButton(getString(R.string.Ok), new DialogInterface.OnClickListener() {
+                    final EditText editText = (EditText) dialog.findViewById(R.id.selectTrackTypeDialogText);
+
+                    Button dialogButton = (Button) dialog.findViewById(R.id.selectTrackTypeDialogButtonOK);
+                    // if button is clicked, close the custom dialog
+                    dialogButton.setOnClickListener(new View.OnClickListener() {
                         @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            mTag = input.getText().toString();
+                        public void onClick(View v) {
+                            mTag = editText.getText().toString();
                             tagButton.setText(mTag);
                             sharedPref.edit().putString(Const.PREF_KEY_TAG, mTag).apply();
+                            dialog.dismiss();
                         }
                     });
-                    builder.setNegativeButton(getString(R.string.Cancel), new DialogInterface.OnClickListener() {
+
+                    final ListView tagListView = (ListView) dialog.findViewById(R.id.selectTrackTypeList);
+                    final ArrayList<String> tagList = new ArrayList<String>();
+                    tagList.add("výlet");
+                    tagList.add("výjezd");
+                    tagList.add("cesta do práce");
+                    String[] mStringArray = new String[tagList.size()];
+                    mStringArray = tagList.toArray(mStringArray);
+
+                    final TrackTypeArrayAdapter adapter = new TrackTypeArrayAdapter(MainScreen.this, mStringArray);
+                    tagListView.setAdapter(adapter);
+                    tagListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            mTag = tagList.get(position).toString();  //Selected item in listview
+                            tagButton.setText(mTag);
+                            sharedPref.edit().putString(Const.PREF_KEY_TAG, mTag).apply();
+                            dialog.dismiss();
                         }
                     });
-                    builder.show();
+
+                    dialog.show();
                 }
             });
             tagButton.setText(mTag);
