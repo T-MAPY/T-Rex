@@ -44,11 +44,6 @@
             android:defaultValue="PRIORITY_HIGH_ACCURACY"
             android:summary="@string/pref_strategy_sum"
             android:title="@string/pref_strategy" />
-        <CheckBoxPreference
-            android:key="pref_send_tag"
-            android:title="@string/pref_send_tag"
-            android:summary="@string/pref_send_tag_summ"
-            android:defaultValue="false"/>
     </PreferenceCategory>
     <PreferenceCategory android:key="pref_other_category"
         android:title="@string/pref_other">
@@ -57,6 +52,11 @@
             android:defaultValue="30"
             android:title="@string/pref_count_of_stored_tracks"
             android:summary="@string/pref_count_of_stored_tracks_sum"/>
+        <CheckBoxPreference
+            android:key="pref_send_activity"
+            android:title="@string/pref_send_activity"
+            android:summary="@string/pref_send_activity_summ"
+            android:defaultValue="true"/>
         <CheckBoxPreference
             android:key="pref_geocoding"
             android:title="@string/pref_geocoding"

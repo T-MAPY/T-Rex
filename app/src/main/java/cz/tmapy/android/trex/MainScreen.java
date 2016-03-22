@@ -45,12 +45,15 @@ import org.acra.ACRA;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import cz.tmapy.android.trex.database.DatabaseManager;
 import cz.tmapy.android.trex.database.TrackDataSource;
 import cz.tmapy.android.trex.database.dobs.TrackDob;
 import cz.tmapy.android.trex.layout.TrackDataCursorAdapter;
-import cz.tmapy.android.trex.layout.TrackTypeArrayAdapter;
+import cz.tmapy.android.trex.layout.ActivityArrayAdapter;
 import cz.tmapy.android.trex.service.BackgroundLocationService;
 import cz.tmapy.android.trex.service.ServiceHelper;
 import cz.tmapy.android.trex.update.Updater;
@@ -79,10 +82,10 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private String mTargetServerURL;
     private String mDeviceId;
     private Boolean mKeepScreenOn;
-    private Boolean mSendTag;
+    private Boolean mSendActivity;
     //members for state saving
     private Boolean mLocalizationIsRunning = false;
-    private String mTag;
+    private String mSelectedActivity;
     private Long mStartTime;
     private Long mLastLocationTime;
     private String mLastLocationTimeString;
@@ -101,7 +104,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main_screen);
 
         // Set a Toolbar to replace the ActionBar. In order to slide our navigation drawer over the ActionBar,
         // we need to use the new Toolbar widget as defined in the AppCompat v21 library.
@@ -155,49 +158,60 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
         HandleKeepScreenOn();
 
-        mTag = sharedPref.getString(Const.PREF_KEY_TAG, getString(R.string.default_tag));
-        mSendTag = sharedPref.getBoolean(Const.PREF_KEY_SEND_TAG, false);
-        final int tagVisibility = mSendTag ? View.VISIBLE : View.GONE;
-        final TextView tagLabel = (TextView) findViewById(R.id.tag_label);
-        tagLabel.setVisibility(tagVisibility);
-        final Button tagButton = (Button) findViewById(R.id.tag_button);
-        if (tagButton != null) {
-            tagButton.setOnClickListener(new View.OnClickListener() {
+        mSelectedActivity = sharedPref.getString(Const.PREF_KEY_SELECTED_ACTIVITY, getString(R.string.default_activity));
+        mSendActivity = sharedPref.getBoolean(Const.PREF_KEY_SEND_ACTIVITY, true);
+        final int activityVisibility = mSendActivity ? View.VISIBLE : View.GONE;
+        final TextView activityLabel = (TextView) findViewById(R.id.activity_label);
+        activityLabel.setVisibility(activityVisibility);
+        final Button activityButton = (Button) findViewById(R.id.activity_button);
+        if (activityButton != null) {
+            activityButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     // custom dialog
                     mTrackTypeDialog = new Dialog(MainScreen.this);
-                    mTrackTypeDialog.setContentView(R.layout.select_track_type_dialog);
-                    mTrackTypeDialog.setTitle("Vyberte prosím typ trasy");
+                    mTrackTypeDialog.setContentView(R.layout.select_activity_dialog);
 
-                    final EditText editText = (EditText) mTrackTypeDialog.findViewById(R.id.selectTrackTypeDialogText);
+                    final EditText editText = (EditText) mTrackTypeDialog.findViewById(R.id.selectActivityDialogText);
 
-                    Button dialogButton = (Button) mTrackTypeDialog.findViewById(R.id.selectTrackTypeDialogButtonOK);
+                    Button dialogButton = (Button) mTrackTypeDialog.findViewById(R.id.selectActivityDialogButtonOK);
                     // if button is clicked, close the custom dialog
                     dialogButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if (editText.getText().toString() != null && !editText.getText().toString().isEmpty())
-                                updateTrackType(editText.getText().toString());
-                            else
-                                Toast.makeText(MainScreen.this, R.string.track_type_undefined, Toast.LENGTH_SHORT).show();
+                            //Add new track type to the list
+                            if (editText.getText().toString() != null && !editText.getText().toString().isEmpty()) {
+                                String newTag = editText.getText().toString().trim();
+                                Set<String> tags = sharedPref.getStringSet(Const.PREF_KEY_ACTIVITY_LIST, null);
+                                if (tags == null) tags = new HashSet<String>();
+                                if (!tags.contains(newTag)) {
+                                    tags.add(newTag);
+                                    sharedPref.edit().putStringSet(Const.PREF_KEY_ACTIVITY_LIST, tags).apply();
+                                }
+                                updateTrackType(newTag);
+                            } else
+                                Toast.makeText(MainScreen.this, R.string.activity_undefined, Toast.LENGTH_SHORT).show();
                         }
                     });
 
+                    //Load tags for listview
                     final ListView tagListView = (ListView) mTrackTypeDialog.findViewById(R.id.selectTrackTypeList);
-                    final ArrayList<String> tagList = new ArrayList<String>();
-                    tagList.add("výlet");
-                    tagList.add("výjezd");
-                    tagList.add("cesta do práce");
-
-                    final TrackTypeArrayAdapter adapter = new TrackTypeArrayAdapter(MainScreen.this, tagList);
+                    Set<String> tags = sharedPref.getStringSet(Const.PREF_KEY_ACTIVITY_LIST, null);
+                    if (tags == null || tags.isEmpty()) {
+                        tags = new HashSet<String>();
+                        tags.add(getString(R.string.default_activity)); //add default tag, when list is empty
+                        sharedPref.edit().putStringSet(Const.PREF_KEY_ACTIVITY_LIST, tags).apply();
+                    }
+                    ArrayList<String> tagArrayList = new ArrayList<String>(tags);
+                    Collections.sort(tagArrayList.subList(1, tagArrayList.size()));
+                    final ActivityArrayAdapter adapter = new ActivityArrayAdapter(MainScreen.this, tagArrayList);
                     tagListView.setAdapter(adapter);
 
                     mTrackTypeDialog.show();
                 }
             });
-            tagButton.setText(mTag);
-            tagButton.setVisibility(tagVisibility);
+            activityButton.setText(mSelectedActivity);
+            activityButton.setVisibility(activityVisibility);
         }
 
         final FloatingActionButton startButton = (FloatingActionButton) findViewById(R.id.start_button);
@@ -253,6 +267,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                                 UpdateGUI();
                                 mLocalizationIsRunning = true;
                                 mStartTime = System.currentTimeMillis();
+                                final Button tagButton = (Button) findViewById(R.id.activity_button);
+                                tagButton.setEnabled(false);
                                 return true;
                             }
 
@@ -295,6 +311,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             Toast.makeText(this, R.string.localiz_not_run, Toast.LENGTH_SHORT).show();
 
         mLocalizationIsRunning = false;
+        final Button tagButton = (Button) findViewById(R.id.activity_button);
+        tagButton.setEnabled(true);
     }
 
     /**
@@ -479,13 +497,13 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 mKeepScreenOn = prefs.getBoolean(key, false);
                 HandleKeepScreenOn();
                 break;
-            case Const.PREF_KEY_SEND_TAG:
-                mSendTag = prefs.getBoolean(key, false);
-                final int tagVisibility = mSendTag ? View.VISIBLE : View.GONE;
-                final TextView tagLabel = (TextView) findViewById(R.id.tag_label);
-                tagLabel.setVisibility(tagVisibility);
-                final Button tagButton = (Button) findViewById(R.id.tag_button);
-                tagButton.setVisibility(tagVisibility);
+            case Const.PREF_KEY_SEND_ACTIVITY:
+                mSendActivity = prefs.getBoolean(key, false);
+                final int activityVisibility = mSendActivity ? View.VISIBLE : View.GONE;
+                final TextView activityLabel = (TextView) findViewById(R.id.activity_label);
+                activityLabel.setVisibility(activityVisibility);
+                final Button activityButton = (Button) findViewById(R.id.activity_button);
+                activityButton.setVisibility(activityVisibility);
                 break;
         }
     }
@@ -572,7 +590,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             //if this is final broadcast
             if (intent.hasExtra(Const.LAST_LAT)) {
                 TrackDob trackDob = new TrackDob();
-                if (mSendTag) trackDob.setTag(mTag);
+                if (mSendActivity) trackDob.setTag(mSelectedActivity);
                 trackDob.setStartTime(intent.getLongExtra(Const.START_TIME, 0l));
                 trackDob.setFirstLat(intent.getDoubleExtra(Const.FIRST_LAT, 0d));
                 trackDob.setFirstLon(intent.getDoubleExtra(Const.FIRST_LON, 0d));
@@ -643,13 +661,13 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
      * @param trackType
      */
     public void updateTrackType(String trackType) {
-        final Button tagButton = (Button) findViewById(R.id.tag_button);
-        mTag = trackType;
-        tagButton.setText(mTag);
-        sharedPref.edit().putString(Const.PREF_KEY_TAG, mTag).apply();
+        final Button tagButton = (Button) findViewById(R.id.activity_button);
+        mSelectedActivity = trackType;
+        tagButton.setText(mSelectedActivity);
+        sharedPref.edit().putString(Const.PREF_KEY_SELECTED_ACTIVITY, mSelectedActivity).apply();
         if (mTrackTypeDialog != null && mTrackTypeDialog.isShowing())
             mTrackTypeDialog.dismiss();
-        Toast.makeText(MainScreen.this, getString(R.string.track_type_updated), Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainScreen.this, getString(R.string.activity_updated), Toast.LENGTH_SHORT).show();
     }
 
     /**

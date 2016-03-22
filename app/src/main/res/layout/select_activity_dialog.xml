@@ -7,13 +7,12 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
         android:paddingLeft="20dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
         android:background="@color/primary_dark"
         android:textColor="@color/primary_light"
-        android:text="@string/select_track_type_dialog_title"
+        android:text="@string/select_activity_dialog_title"
         android:textSize="24sp" />
 
     <LinearLayout
@@ -23,24 +22,27 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/selectTrackTypeFirstLine"
+            android:id="@+id/selectActivityFirstLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/selectTrackTypeDialogText"
+                android:id="@+id/selectActivityDialogText"
+                android:singleLine="true"
+                android:maxLength="20"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 
             <Button
-                android:id="@+id/selectTrackTypeDialogButtonOK"
+                android:id="@+id/selectActivityDialogButtonOK"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
-                android:text="Add" />
+                android:text="@string/selectActivityDialogButton" />
         </LinearLayout>
 
         <ListView

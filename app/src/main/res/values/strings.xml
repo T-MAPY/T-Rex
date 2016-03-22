@@ -89,11 +89,12 @@
     <string name="cannot_start_localization_due_airplane">Can\'t start localization - airplane mode enabled</string>
     <string name="cannot_start_localization_due_gps_settings">Can\'t start localization - GPS disabled</string>
     <string name="Ok">OK</string>
-    <string name="tag_label">Track type:</string>
-    <string name="default_tag">trip</string>
-    <string name="pref_send_tag">Track type</string>
-    <string name="pref_send_tag_summ">Send user defined type of track to server</string>
-    <string name="select_track_type_dialog_title">Track type</string>
-    <string name="track_type_updated">Track type updated</string>
-    <string name="track_type_undefined">Select o insert track type, please</string>
+    <string name="activity_label">Activity:</string>
+    <string name="default_activity">trip</string>
+    <string name="pref_send_activity">Type of activity</string>
+    <string name="pref_send_activity_summ">Send user defined type of activity to the server</string>
+    <string name="select_activity_dialog_title">Typ of activity</string>
+    <string name="activity_updated">Activity updated</string>
+    <string name="activity_undefined">Insert or select activity</string>
+    <string name="selectActivityDialogButton">Add</string>
 </resources>

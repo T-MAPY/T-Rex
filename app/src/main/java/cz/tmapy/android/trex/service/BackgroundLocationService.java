@@ -12,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.media.MediaDescription;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -21,7 +20,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -44,7 +42,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,7 +50,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.crypto.NullCipher;
 import javax.net.ssl.HttpsURLConnection;
 
 import cz.tmapy.android.trex.Const;
@@ -91,14 +87,14 @@ public class BackgroundLocationService extends Service implements
     private Integer mSendInterval;
     private Integer mKalmanMPS;
     private Boolean mGeocoding;
-    private Boolean mSendTag;
+    private Boolean mSendActivity;
     private LocationWrapper mFirstLocation; //first accepted location
     private LocationWrapper mLastAcceptedLocation; //last accepted location, filtered by Mr. Kalman
 
     //thread-safe cache of accepted locations to send
     ConcurrentLinkedQueue<LocationWrapper> mAcceptedLocations = new ConcurrentLinkedQueue<>();
 
-    private String mTag;
+    private String mActivity;
     private Long mStartTime = 0l;
     private Float mDistance = 0f;
     private Float mMaxSpeed = 0f;
@@ -129,8 +125,8 @@ public class BackgroundLocationService extends Service implements
         mSendInterval = Integer.valueOf(mSharedPref.getString(Const.PREF_SEND_INTERVAL, "120"));
         mKalmanMPS = Integer.valueOf(mSharedPref.getString(Const.PREF_KALMAN_MPS, "15"));
         mGeocoding = mSharedPref.getBoolean(Const.PREF_GEOCODING, false);
-        mSendTag = mSharedPref.getBoolean(Const.PREF_KEY_SEND_TAG, false);
-        mTag = mSharedPref.getString(Const.PREF_KEY_TAG, getString(R.string.default_tag));
+        mSendActivity = mSharedPref.getBoolean(Const.PREF_KEY_SEND_ACTIVITY, false);
+        mActivity = mSharedPref.getString(Const.PREF_KEY_SELECTED_ACTIVITY, getString(R.string.default_activity));
         // Kalman filters generally work better when the accuracy decays a bit quicker than one might expect,
         // so for walking around with an Android phone I find that Q=3 metres per second works fine,
         // even though I generally walk slower than that.
@@ -352,7 +348,7 @@ public class BackgroundLocationService extends Service implements
         }
 
         if (Const.LOG_ENHANCED)
-            Log.d(TAG, ((mSendTag && mTag != null) ? mTag + ": " : "New position at: ") + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(loc.getLocation().getTime()) + " (" + loc.getLocation().getLatitude() + ", " + loc.getLocation().getLongitude() + ")");
+            Log.d(TAG, ((mSendActivity && mActivity != null) ? mActivity + ": " : "New position at: ") + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(loc.getLocation().getTime()) + " (" + loc.getLocation().getLatitude() + ", " + loc.getLocation().getLongitude() + ")");
         //add location to list of accepted
         mAcceptedLocations.add(loc);
         sendPositionsToServer();
@@ -398,7 +394,7 @@ public class BackgroundLocationService extends Service implements
 //                    iterator.remove();
                 }
 
-                new NetworkTask(url, mDeviceIdentifier, mTag).execute(mAcceptedLocations);
+                new NetworkTask(url, mDeviceIdentifier, mActivity).execute(mAcceptedLocations);
 
             } else {
                 Toast.makeText(this, getResources().getString(R.string.perm_internet_for_send_location_not_granted), Toast.LENGTH_LONG).show();
@@ -536,12 +532,12 @@ public class BackgroundLocationService extends Service implements
 
         private URL mTargetUrl;
         private String mDeviceId;
-        private String mTag;
+        private String mActivity;
 
-        public NetworkTask(URL url, String deviceId, String tag) {
+        public NetworkTask(URL url, String deviceId, String activity) {
             mTargetUrl = url;
             mDeviceId = deviceId;
-            mTag = tag;
+            mActivity = activity;
         }
 
         @Override
@@ -566,8 +562,8 @@ public class BackgroundLocationService extends Service implements
                         postDataParams.put("l", Double.toString(wrapper.getLocation().getAltitude()));
                         postDataParams.put("s", Float.toString(wrapper.getLocation().getSpeed()));
                         postDataParams.put("b", Float.toString(wrapper.getLocation().getBearing()));
-                        if (mSendTag && mTag != null && !mTag.isEmpty())
-                            postDataParams.put("g", SecurityHelper.GetBase64FromUTF8String(mTag));
+                        if (mSendActivity && mActivity != null && !mActivity.isEmpty())
+                            postDataParams.put("g", SecurityHelper.GetBase64FromUTF8String(mActivity));
                         postDataParams.put("k", SecurityHelper.GetSecurityString(mDeviceIdentifier, new Date(wrapper.getLocation().getTime()), mAccessKey));
 
                         if (Const.LOG_ENHANCED)

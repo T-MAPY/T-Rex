@@ -89,11 +89,12 @@
     <string name="cannot_start_localization_due_airplane">Nelze spustit lokalizaci - zapnutý režim Letadlo</string>
     <string name="cannot_start_localization_due_gps_settings">Nelze spustit lokalizaci - GPS vypnuta</string>
     <string name="Ok">OK</string>
-    <string name="tag_label">Typ trasy:</string>
-    <string name="default_tag">výjezd</string>
-    <string name="pref_send_tag">Typ trasy</string>
-    <string name="pref_send_tag_summ">Umožnit zadat a odesílat na server typ trasy</string>
-    <string name="select_track_type_dialog_title">Typ trasy</string>
-    <string name="track_type_updated">Typ trasy aktualizován</string>
-    <string name="track_type_undefined">Vyberte, nebo vložte nový typ trasy</string>
+    <string name="activity_label">Aktivita:</string>
+    <string name="default_activity">jízda</string>
+    <string name="pref_send_activity">Typ aktivity</string>
+    <string name="pref_send_activity_summ">Umožnit zadat a odesílat na server typ aktivity</string>
+    <string name="select_activity_dialog_title">Aktivita</string>
+    <string name="activity_updated">Typ aktivity aktualizován</string>
+    <string name="activity_undefined">Vyberte, nebo vložte nový typ aktivity</string>
+    <string name="selectActivityDialogButton">Přidat</string>
 </resources>

@@ -29,8 +29,9 @@ public final class Const {
     public static final String PREF_GEOCODING = "pref_geocoding";
     public static final String PREF_KEY_KEEP_NUMBER_OF_TRACKS = "pref_keep_number_of_tracks";
     public static final String PREF_KEY_STARTONSTARTUP = "pref_startOnStartup";
-    public static final String PREF_KEY_TAG = "pref_tag";
-    public static final String PREF_KEY_SEND_TAG = "pref_send_tag";
+    public static final String PREF_KEY_SELECTED_ACTIVITY = "pref_activity";
+    public static final String PREF_KEY_SEND_ACTIVITY = "pref_send_activity";
+    public static final String PREF_KEY_ACTIVITY_LIST = "pref_activity_list";
 
     //STATE constants
     public static final String LOCATION_BROADCAST = "cz.tmapy.android.trex.LOCATION_BROADCAST";
