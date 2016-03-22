@@ -17,6 +17,7 @@ import cz.tmapy.android.trex.database.dobs.TrackDob;
 public class TrackDataSource {
     public static final String TABLE_NAME = "tracks";
     public static final String COL_ID = "_id"; //The database tables should use the identifier _id for the primary key of the table. Several Android functions rely on this standard.
+    public static final String COL_TAG = "tag";
     public static final String COL_START_TIME = "start_time";
     public static final String COL_FIRST_LAT = "first_lat";
     public static final String COL_FIRST_LON = "first_lon";
@@ -37,6 +38,7 @@ public class TrackDataSource {
     public static final String DROP_TABLE_SQL = "DROP TABLE IF EXISTS " + TABLE_NAME + ";";
     public static final String CREATE_TABLE_SQL = "CREATE TABLE " + TABLE_NAME + " (" +
             COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+            COL_TAG + " TEXT," +
             COL_START_TIME + " INTEGER," +
             COL_FIRST_LAT + " REAL," +
             COL_FIRST_LON + " REAL," +
@@ -60,7 +62,7 @@ public class TrackDataSource {
 
     // Database fields
     private DatabaseManager dbMan;
-    private String[] allColumns = {COL_ID, COL_START_TIME, COL_FIRST_LAT, COL_FIRST_LON, COL_FIRST_ADDRESS, COL_FINISH_TIME, COL_LAST_LAT, COL_LAST_LON, COL_LAST_ADDRESS, COL_DISTANCE, COL_MAX_SPEED, COL_AVE_SPEED, COL_MAX_ALT, COL_MIN_ALT, COL_ELEV_DIFF_UP, COL_ELEV_DIFF_DOWN, COL_NOTE, COL_UPDATE_TIME};
+    private String[] allColumns = {COL_ID, COL_TAG, COL_START_TIME, COL_FIRST_LAT, COL_FIRST_LON, COL_FIRST_ADDRESS, COL_FINISH_TIME, COL_LAST_LAT, COL_LAST_LON, COL_LAST_ADDRESS, COL_DISTANCE, COL_MAX_SPEED, COL_AVE_SPEED, COL_MAX_ALT, COL_MIN_ALT, COL_ELEV_DIFF_UP, COL_ELEV_DIFF_DOWN, COL_NOTE, COL_UPDATE_TIME};
 
     /**
      * Static method to create table
@@ -86,6 +88,7 @@ public class TrackDataSource {
         long insertId = -1;
         try {
             ContentValues values = new ContentValues();
+            values.put(COL_TAG, trackDob.getTag());
             values.put(COL_START_TIME, trackDob.getStartTime());
             values.put(COL_FIRST_LAT, trackDob.getFirstLat());
             values.put(COL_FIRST_LON, trackDob.getFirstLon());
@@ -156,23 +159,24 @@ public class TrackDataSource {
     private TrackDob cursorToLocation(Cursor cursor) {
         TrackDob trackDob = new TrackDob();
         trackDob.setId(cursor.getLong(0));
-        trackDob.setStartTime(cursor.getLong(1));
-        trackDob.setFirstLat(cursor.getDouble(2));
-        trackDob.setFirstLon(cursor.getDouble(3));
-        trackDob.setFirstAddress(cursor.getString(4));
-        trackDob.setFinishTime(cursor.getLong(5));
-        trackDob.setLastLat(cursor.getDouble(6));
-        trackDob.setLastLon(cursor.getDouble(7));
-        trackDob.setLastAddress(cursor.getString(8));
-        trackDob.setDistance(cursor.getFloat(9));
-        trackDob.setMaxSpeed(cursor.getFloat(10));
-        trackDob.setAveSpeed(cursor.getFloat(11));
-        trackDob.setMinAlt(cursor.getDouble(12));
-        trackDob.setMaxAlt(cursor.getDouble(13));
-        trackDob.setElevDiffUp(cursor.getDouble(14));
-        trackDob.setElevDiffDown(cursor.getDouble(15));
-        trackDob.setNote(cursor.getString(16));
-        trackDob.setUpdateTime(cursor.getLong(17));
+        trackDob.setTag(cursor.getString(1));
+        trackDob.setStartTime(cursor.getLong(2));
+        trackDob.setFirstLat(cursor.getDouble(3));
+        trackDob.setFirstLon(cursor.getDouble(4));
+        trackDob.setFirstAddress(cursor.getString(5));
+        trackDob.setFinishTime(cursor.getLong(6));
+        trackDob.setLastLat(cursor.getDouble(7));
+        trackDob.setLastLon(cursor.getDouble(8));
+        trackDob.setLastAddress(cursor.getString(9));
+        trackDob.setDistance(cursor.getFloat(10));
+        trackDob.setMaxSpeed(cursor.getFloat(11));
+        trackDob.setAveSpeed(cursor.getFloat(12));
+        trackDob.setMinAlt(cursor.getDouble(13));
+        trackDob.setMaxAlt(cursor.getDouble(14));
+        trackDob.setElevDiffUp(cursor.getDouble(15));
+        trackDob.setElevDiffDown(cursor.getDouble(16));
+        trackDob.setNote(cursor.getString(17));
+        trackDob.setUpdateTime(cursor.getLong(18));
         return trackDob;
     }
 

@@ -8,7 +8,7 @@ import android.text.StaticLayout;
 public final class Const {
 
     //http://stackoverflow.com/questions/2018263/how-do-i-enable-disable-log-levels-in-android
-    private static int LOGLEVEL = 1;
+    private static int LOGLEVEL = 2;
     public static boolean LOG_BASIC = LOGLEVEL >= 1;
     public static boolean LOG_ENHANCED = LOGLEVEL >= 2;
 
@@ -19,6 +19,7 @@ public final class Const {
     //Preferences keys
     public static final String PREF_KEY_DEVICE_ID = "pref_id";
     public static final String PREF_KEY_TARGET_SERVUER_URL = "pref_targetUrl";
+    public static final String PREF_KEY_ACCESS_KEY = "pref_accessKey";
     public static final String PREF_KEY_KEEP_SCREEN_ON = "pref_screen_on";
     public static final String PREF_LOC_STRATEGY = "pref_loc_strategy";
     public static final String PREF_LOC_FREQUENCY = "pref_loc_frequency";
@@ -27,6 +28,10 @@ public final class Const {
     public static final String PREF_KALMAN_MPS = "pref_kalman_mps";
     public static final String PREF_GEOCODING = "pref_geocoding";
     public static final String PREF_KEY_KEEP_NUMBER_OF_TRACKS = "pref_keep_number_of_tracks";
+    public static final String PREF_KEY_STARTONSTARTUP = "pref_startOnStartup";
+    public static final String PREF_KEY_SELECTED_ACTIVITY = "pref_activity";
+    public static final String PREF_KEY_SEND_ACTIVITY = "pref_send_activity";
+    public static final String PREF_KEY_ACTIVITY_LIST = "pref_activity_list";
 
     //STATE constants
     public static final String LOCATION_BROADCAST = "cz.tmapy.android.trex.LOCATION_BROADCAST";

@@ -2,14 +2,18 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:key="pref_basic_category"
         android:title="@string/pref_basic_category">
-        <EditTextPreference android:key="pref_targetUrl"
-            android:title="@string/pref_targetUrl"
-            android:inputType="textUri"
-            android:summary="@string/pref_targetUrl_summ" />
         <EditTextPreference android:key="pref_id"
             android:title="@string/pref_id"
             android:inputType="text"
             android:summary="@string/pref_id_summ"/>
+        <EditTextPreference android:key="pref_targetUrl"
+            android:title="@string/pref_targetUrl"
+            android:inputType="textUri"
+            android:summary="@string/pref_targetUrl_summ" />
+        <EditTextPreference android:key="pref_accessKey"
+            android:title="@string/pref_accessKey"
+            android:summary="@string/pref_accessKey_summ"
+            android:inputType="textPassword"/>
     </PreferenceCategory>
     <PreferenceCategory android:key="pref_location_category" android:title="@string/pref_location_category">
         <EditTextPreference
@@ -49,6 +53,11 @@
             android:title="@string/pref_count_of_stored_tracks"
             android:summary="@string/pref_count_of_stored_tracks_sum"/>
         <CheckBoxPreference
+            android:key="pref_send_activity"
+            android:title="@string/pref_send_activity"
+            android:summary="@string/pref_send_activity_summ"
+            android:defaultValue="true"/>
+        <CheckBoxPreference
             android:key="pref_geocoding"
             android:title="@string/pref_geocoding"
             android:summary="@string/pref_geocoding_summ"
@@ -58,6 +67,11 @@
             android:title="@string/pref_keep_screen_on"
             android:summary="@string/pref_keep_screen_on_summ"
             android:defaultValue="false"/>
+        <CheckBoxPreference
+            android:key="pref_startOnStartup"
+            android:defaultValue="false"
+            android:title="@string/pref_startOnStartup"
+            android:summary="@string/pref_startOnStartup_summ"/>
         <CheckBoxPreference
             android:key="pref_check4update"
             android:title="@string/pref_check4update"

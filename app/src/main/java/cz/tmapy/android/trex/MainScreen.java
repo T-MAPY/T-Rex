@@ -2,6 +2,8 @@ package cz.tmapy.android.trex;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,21 +16,27 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,13 +44,16 @@ import android.widget.Toast;
 import org.acra.ACRA;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import cz.tmapy.android.trex.database.DatabaseManager;
 import cz.tmapy.android.trex.database.TrackDataSource;
 import cz.tmapy.android.trex.database.dobs.TrackDob;
-import cz.tmapy.android.trex.drawer.DrawerItemCustomAdapter;
-import cz.tmapy.android.trex.drawer.ObjectDrawerItem;
 import cz.tmapy.android.trex.layout.TrackDataCursorAdapter;
+import cz.tmapy.android.trex.layout.ActivityArrayAdapter;
 import cz.tmapy.android.trex.service.BackgroundLocationService;
 import cz.tmapy.android.trex.service.ServiceHelper;
 import cz.tmapy.android.trex.update.Updater;
@@ -51,6 +62,12 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
     private static final String TAG = MainScreen.class.getName();
 
+    //https://guides.codepath.com/android/Fragment-Navigation-Drawer
+    private DrawerLayout mDrawer;
+    private Toolbar toolbar;
+    private NavigationView nvDrawer;
+    private ActionBarDrawerToggle drawerToggle;
+
     private IntentFilter mIntentFilter;
     private NewPositionReceiver mPositionReceiver;
 
@@ -58,17 +75,17 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private TrackDataCursorAdapter mTrackDataCursorAdapter;
     private ListView mTracksListView;
 
+    private Dialog mTrackTypeDialog;
+
     private SharedPreferences sharedPref;
-    private String[] mNavigationDrawerItemTitles;
-    private ListView mNavigationDrawerList;
-    private DrawerLayout mNavigationDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private String mActivityTitle;
+
     private String mTargetServerURL;
     private String mDeviceId;
     private Boolean mKeepScreenOn;
+    private Boolean mSendActivity;
     //members for state saving
     private Boolean mLocalizationIsRunning = false;
+    private String mSelectedActivity;
     private Long mStartTime;
     private Long mLastLocationTime;
     private String mLastLocationTimeString;
@@ -87,7 +104,25 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_screen);
+        setContentView(R.layout.main_screen);
+
+        // Set a Toolbar to replace the ActionBar. In order to slide our navigation drawer over the ActionBar,
+        // we need to use the new Toolbar widget as defined in the AppCompat v21 library.
+        // The Toolbar can be embedded into your view hierarchy
+        // which makes sure that the drawer slides over the ActionBar.
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // Find our drawer view
+        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        // Find our drawer view
+        nvDrawer = (NavigationView) findViewById(R.id.nvView);
+        // Setup drawer view
+        setupDrawerContent(nvDrawer);
+
+        drawerToggle = new ActionBarDrawerToggle(this, mDrawer, toolbar, R.string.drawer_open, R.string.drawer_close);
+        // Tie DrawerLayout events to the ActionBarToggle
+        mDrawer.setDrawerListener(drawerToggle);
 
         if (!ServiceHelper.checkPlayServices(MainScreen.this)) return;
 
@@ -123,13 +158,61 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         mKeepScreenOn = sharedPref.getBoolean(Const.PREF_KEY_KEEP_SCREEN_ON, false);
         HandleKeepScreenOn();
 
-        mNavigationDrawerItemTitles = getResources().getStringArray(R.array.drawer_menu);
-        mNavigationDrawerList = (ListView) findViewById(R.id.navList);
-        mNavigationDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mActivityTitle = getTitle().toString();
+        mSelectedActivity = sharedPref.getString(Const.PREF_KEY_SELECTED_ACTIVITY, getString(R.string.default_activity));
+        mSendActivity = sharedPref.getBoolean(Const.PREF_KEY_SEND_ACTIVITY, true);
+        final int activityVisibility = mSendActivity ? View.VISIBLE : View.GONE;
+        final TextView activityLabel = (TextView) findViewById(R.id.activity_label);
+        activityLabel.setVisibility(activityVisibility);
+        final Button activityButton = (Button) findViewById(R.id.activity_button);
+        if (activityButton != null) {
+            activityButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // custom dialog
+                    mTrackTypeDialog = new Dialog(MainScreen.this);
+                    mTrackTypeDialog.setContentView(R.layout.select_activity_dialog);
 
-        addDrawerItems();
-        setupDrawer();
+                    final EditText editText = (EditText) mTrackTypeDialog.findViewById(R.id.selectActivityDialogText);
+
+                    Button dialogButton = (Button) mTrackTypeDialog.findViewById(R.id.selectActivityDialogButtonOK);
+                    // if button is clicked, close the custom dialog
+                    dialogButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            //Add new track type to the list
+                            if (editText.getText().toString() != null && !editText.getText().toString().isEmpty()) {
+                                String newTag = editText.getText().toString().trim();
+                                Set<String> tags = sharedPref.getStringSet(Const.PREF_KEY_ACTIVITY_LIST, null);
+                                if (tags == null) tags = new HashSet<String>();
+                                if (!tags.contains(newTag)) {
+                                    tags.add(newTag);
+                                    sharedPref.edit().putStringSet(Const.PREF_KEY_ACTIVITY_LIST, tags).apply();
+                                }
+                                updateTrackType(newTag);
+                            } else
+                                Toast.makeText(MainScreen.this, R.string.activity_undefined, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    //Load tags for listview
+                    final ListView tagListView = (ListView) mTrackTypeDialog.findViewById(R.id.selectTrackTypeList);
+                    Set<String> tags = sharedPref.getStringSet(Const.PREF_KEY_ACTIVITY_LIST, null);
+                    if (tags == null || tags.isEmpty()) {
+                        tags = new HashSet<String>();
+                        tags.add(getString(R.string.default_activity)); //add default tag, when list is empty
+                        sharedPref.edit().putStringSet(Const.PREF_KEY_ACTIVITY_LIST, tags).apply();
+                    }
+                    ArrayList<String> tagArrayList = new ArrayList<String>(tags);
+                    Collections.sort(tagArrayList.subList(1, tagArrayList.size()));
+                    final ActivityArrayAdapter adapter = new ActivityArrayAdapter(MainScreen.this, tagArrayList);
+                    tagListView.setAdapter(adapter);
+
+                    mTrackTypeDialog.show();
+                }
+            });
+            activityButton.setText(mSelectedActivity);
+            activityButton.setVisibility(activityVisibility);
+        }
 
         final FloatingActionButton startButton = (FloatingActionButton) findViewById(R.id.start_button);
         startButton.setOnClickListener(new View.OnClickListener() {
@@ -173,23 +256,27 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         if (!mTargetServerURL.isEmpty()) {
             if (!mDeviceId.isEmpty()) {
                 if (!mLocalizationIsRunning) {
-                    if (ContextCompat.checkSelfPermission(MainScreen.this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        //Nastartovani sluzby
-                        ComponentName comp = new ComponentName(getApplicationContext().getPackageName(), BackgroundLocationService.class.getName());
-                        ComponentName service = getApplicationContext().startService(new Intent().setComponent(comp));
+                    if (ContextCompat.checkSelfPermission(MainScreen.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        if (CheckProviders()) {
+                            //Nastartovani sluzby
+                            ComponentName comp = new ComponentName(getApplicationContext().getPackageName(), BackgroundLocationService.class.getName());
+                            ComponentName service = getApplicationContext().startService(new Intent().setComponent(comp));
 
-                        if (null != service) {
-                            clearLastState();
-                            UpdateGUI();
-                            mLocalizationIsRunning = true;
-                            mStartTime = System.currentTimeMillis();
-                            return true;
+                            if (null != service) {
+                                clearLastState();
+                                UpdateGUI();
+                                mLocalizationIsRunning = true;
+                                mStartTime = System.currentTimeMillis();
+                                final Button tagButton = (Button) findViewById(R.id.activity_button);
+                                tagButton.setEnabled(false);
+                                return true;
+                            }
+
+                            // something really wrong here
+                            Toast.makeText(this, R.string.localiz_could_not_start, Toast.LENGTH_SHORT).show();
+                            if (Const.LOG_BASIC)
+                                Log.e(TAG, "Could not start localization service " + comp.toString());
                         }
-
-                        // something really wrong here
-                        Toast.makeText(this, R.string.localiz_could_not_start, Toast.LENGTH_SHORT).show();
-                        if (Const.LOG_BASIC)
-                            Log.e(TAG, "Could not start localization service " + comp.toString());
                     } else {
                         // Should we show an explanation?
                         if (ActivityCompat.shouldShowRequestPermissionRationale(MainScreen.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -224,6 +311,90 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             Toast.makeText(this, R.string.localiz_not_run, Toast.LENGTH_SHORT).show();
 
         mLocalizationIsRunning = false;
+        final Button tagButton = (Button) findViewById(R.id.activity_button);
+        tagButton.setEnabled(true);
+    }
+
+    /**
+     * Check the location provider is enabled and airplane mode disabled
+     *
+     * @return
+     */
+    protected boolean CheckProviders() {
+        boolean airplane_mode = true;
+        LocationManager lm = (LocationManager) MainScreen.this.getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            airplane_mode = android.provider.Settings.System.getInt(MainScreen.this.getContentResolver(),
+                    android.provider.Settings.System.AIRPLANE_MODE_ON, 0) != 0;
+        } else {
+            airplane_mode = android.provider.Settings.Global.getInt(MainScreen.this.getContentResolver(),
+                    android.provider.Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
+        }
+
+        if (airplane_mode) {
+            // notify user
+            AlertDialog.Builder dialog = new AlertDialog.Builder(MainScreen.this);
+            dialog.setTitle(getResources().getString(R.string.cannot_start_localization));
+            //dialog.setIcon(getResources().getDrawable(R.drawable.ic_info_outline_black_24dp));
+            dialog.setMessage(getResources().getString(R.string.airplane_mode_enabled));
+            dialog.setPositiveButton(getResources().getString(R.string.airplane_open_settings), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        try {
+                            Intent intentAirplaneMode = new Intent(android.provider.Settings.ACTION_AIRPLANE_MODE_SETTINGS);
+                            intentAirplaneMode.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intentAirplaneMode);
+                        } catch (ActivityNotFoundException e) {
+                            Log.e(TAG, "ActivityNotFoundException", e);
+                        }
+                    } else {
+                        Intent intent1 = new Intent("android.settings.WIRELESS_SETTINGS");
+                        intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent1);
+                    }
+                }
+            });
+            dialog.setNegativeButton(MainScreen.this.getString(R.string.Cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Toast.makeText(MainScreen.this, getResources().getString(R.string.cannot_start_localization), Toast.LENGTH_SHORT).show();
+                }
+            });
+            dialog.show();
+            return false;
+        }
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+            Log.e(TAG, "Get GPS status exception", ex);
+        }
+
+        if (!gps_enabled) {
+            // notify user
+            AlertDialog.Builder dialog = new AlertDialog.Builder(MainScreen.this);
+            dialog.setTitle(getResources().getString(R.string.cannot_start_localization));
+            dialog.setMessage(getResources().getString(R.string.gps_network_not_enabled));
+            dialog.setPositiveButton(getResources().getString(R.string.gps_open_location_settings), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Intent myIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    MainScreen.this.startActivity(myIntent);
+                }
+            });
+            dialog.setNegativeButton(MainScreen.this.getString(R.string.Cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Toast.makeText(MainScreen.this, getResources().getString(R.string.cannot_start_localization), Toast.LENGTH_SHORT).show();
+                }
+            });
+            dialog.show();
+            return false;
+        }
+        return true;
     }
 
     //region ************ TRACKS AND POSITIONS ***********
@@ -326,6 +497,14 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 mKeepScreenOn = prefs.getBoolean(key, false);
                 HandleKeepScreenOn();
                 break;
+            case Const.PREF_KEY_SEND_ACTIVITY:
+                mSendActivity = prefs.getBoolean(key, false);
+                final int activityVisibility = mSendActivity ? View.VISIBLE : View.GONE;
+                final TextView activityLabel = (TextView) findViewById(R.id.activity_label);
+                activityLabel.setVisibility(activityVisibility);
+                final Button activityButton = (Button) findViewById(R.id.activity_button);
+                activityButton.setVisibility(activityVisibility);
+                break;
         }
     }
 
@@ -411,6 +590,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
             //if this is final broadcast
             if (intent.hasExtra(Const.LAST_LAT)) {
                 TrackDob trackDob = new TrackDob();
+                if (mSendActivity) trackDob.setTag(mSelectedActivity);
                 trackDob.setStartTime(intent.getLongExtra(Const.START_TIME, 0l));
                 trackDob.setFirstLat(intent.getDoubleExtra(Const.FIRST_LAT, 0d));
                 trackDob.setFirstLon(intent.getDoubleExtra(Const.FIRST_LON, 0d));
@@ -438,56 +618,56 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
     //region *********** GUI ************
 
+    /**
+     * Nastavení reakcí na nabídky v navigation drawer
+     *
+     * @param navigationView
+     */
+    private void setupDrawerContent(NavigationView navigationView) {
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        switch (menuItem.getItemId()) {
+                            case R.id.settings_menu_item:
+                                Intent intent = new Intent(getApplicationContext(), Settings.class);
+                                startActivity(intent);
+                                break;
+                            case R.id.reload_menu_item:
+                                new Updater(MainScreen.this).execute();
+                                break;
+                            case R.id.help_item:
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Const.HELP_SITE_URL)));
+                                break;
+                            case R.id.about_item:
+                                showAbout();
+                                break;
+                            default:
+                                //Toast.makeText(MainActivity.this, "not implemented", Toast.LENGTH_SHORT).show();
+                        }
 
-    private void addDrawerItems() {
-
-        ObjectDrawerItem[] drawerItem = new ObjectDrawerItem[4];
-
-        drawerItem[0] = new ObjectDrawerItem(R.drawable.ic_settings_black_24dp, mNavigationDrawerItemTitles[0]);
-        drawerItem[1] = new ObjectDrawerItem(R.drawable.ic_autorenew_black_24dp, mNavigationDrawerItemTitles[1]);
-        drawerItem[2] = new ObjectDrawerItem(R.drawable.ic_help_outline_black_24dp, mNavigationDrawerItemTitles[2]);
-        drawerItem[3] = new ObjectDrawerItem(R.drawable.ic_info_outline_black_24dp, mNavigationDrawerItemTitles[3]);
-
-        DrawerItemCustomAdapter adapter = new DrawerItemCustomAdapter(this, R.layout.menu_listview_row, drawerItem);
-        mNavigationDrawerList.setAdapter(adapter);
-
-        mNavigationDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Highlight the selected item
-                mNavigationDrawerList.setItemChecked(position, true);
-                DrawerItemClick(position);
-                mNavigationDrawerList.setSelection(position);
-                //and close the drawer
-                mNavigationDrawerLayout.closeDrawer(mNavigationDrawerList);
-            }
-        });
+                        // Highlight the selected item, update the title, and close the drawer
+                        menuItem.setChecked(true);
+                        //setTitle(menuItem.getTitle());
+                        mDrawer.closeDrawers();
+                        return true;
+                    }
+                });
     }
 
     /**
-     * Handle clik on navigation drawer item
+     * Update track type based on given string
      *
-     * @param position
+     * @param trackType
      */
-    private void DrawerItemClick(int position) {
-        switch (position) {
-            case 0:
-                Intent intent = new Intent(getApplicationContext(), Settings.class);
-                startActivity(intent);
-                break;
-            case 1:
-                new Updater(MainScreen.this).execute();
-                break;
-            case 2:
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Const.HELP_SITE_URL)));
-                break;
-            case 3:
-                showAbout();
-                break;
-            default:
-                Toast.makeText(MainScreen.this, "I'm sorry - not implemented!", Toast.LENGTH_SHORT).show();
-                break;
-        }
+    public void updateTrackType(String trackType) {
+        final Button tagButton = (Button) findViewById(R.id.activity_button);
+        mSelectedActivity = trackType;
+        tagButton.setText(mSelectedActivity);
+        sharedPref.edit().putString(Const.PREF_KEY_SELECTED_ACTIVITY, mSelectedActivity).apply();
+        if (mTrackTypeDialog != null && mTrackTypeDialog.isShowing())
+            mTrackTypeDialog.dismiss();
+        Toast.makeText(MainScreen.this, getString(R.string.activity_updated), Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -528,28 +708,6 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
         }
     }
 
-    private void setupDrawer() {
-        mDrawerToggle = new ActionBarDrawerToggle(this, mNavigationDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
-
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                getSupportActionBar().setTitle(R.string.drawer_title);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-                getSupportActionBar().setTitle(mActivityTitle);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-        };
-
-        mDrawerToggle.setDrawerIndicatorEnabled(true);
-        mNavigationDrawerLayout.setDrawerListener(mDrawerToggle);
-    }
-
     /**
      * Handle "keep screen on" flag
      */
@@ -563,14 +721,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        // Pass the event to ActionBarDrawerToggle, if it returns
-        // true, then it has handled the app icon touch event
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
+        if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -579,14 +730,15 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        // Sync the drawer toggle state after onRestoreInstanceState has occurred.
-        mDrawerToggle.syncState();
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        drawerToggle.syncState();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
+        // Pass any configuration change to the drawer toggles
+        drawerToggle.onConfigurationChanged(newConfig);
     }
 
     private void UpdateGUI() {
