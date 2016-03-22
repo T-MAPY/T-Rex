@@ -35,7 +35,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -46,7 +45,6 @@ import org.acra.ACRA;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 import cz.tmapy.android.trex.database.DatabaseManager;
 import cz.tmapy.android.trex.database.TrackDataSource;
@@ -73,6 +71,8 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
     private TrackDataSource mTrackDataSource;
     private TrackDataCursorAdapter mTrackDataCursorAdapter;
     private ListView mTracksListView;
+
+    private Dialog mTrackTypeDialog;
 
     private SharedPreferences sharedPref;
 
@@ -166,45 +166,34 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                 @Override
                 public void onClick(View v) {
                     // custom dialog
-                    final Dialog dialog = new Dialog(MainScreen.this);
-                    dialog.setContentView(R.layout.select_track_type_dialog);
-                    dialog.setTitle("Vyberte prosím typ trasy");
+                    mTrackTypeDialog = new Dialog(MainScreen.this);
+                    mTrackTypeDialog.setContentView(R.layout.select_track_type_dialog);
+                    mTrackTypeDialog.setTitle("Vyberte prosím typ trasy");
 
-                    final EditText editText = (EditText) dialog.findViewById(R.id.selectTrackTypeDialogText);
+                    final EditText editText = (EditText) mTrackTypeDialog.findViewById(R.id.selectTrackTypeDialogText);
 
-                    Button dialogButton = (Button) dialog.findViewById(R.id.selectTrackTypeDialogButtonOK);
+                    Button dialogButton = (Button) mTrackTypeDialog.findViewById(R.id.selectTrackTypeDialogButtonOK);
                     // if button is clicked, close the custom dialog
                     dialogButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            mTag = editText.getText().toString();
-                            tagButton.setText(mTag);
-                            sharedPref.edit().putString(Const.PREF_KEY_TAG, mTag).apply();
-                            dialog.dismiss();
+                            if (editText.getText().toString() != null && !editText.getText().toString().isEmpty())
+                                updateTrackType(editText.getText().toString());
+                            else
+                                Toast.makeText(MainScreen.this, R.string.track_type_undefined, Toast.LENGTH_SHORT).show();
                         }
                     });
 
-                    final ListView tagListView = (ListView) dialog.findViewById(R.id.selectTrackTypeList);
+                    final ListView tagListView = (ListView) mTrackTypeDialog.findViewById(R.id.selectTrackTypeList);
                     final ArrayList<String> tagList = new ArrayList<String>();
                     tagList.add("výlet");
                     tagList.add("výjezd");
                     tagList.add("cesta do práce");
-                    String[] mStringArray = new String[tagList.size()];
-                    mStringArray = tagList.toArray(mStringArray);
 
-                    final TrackTypeArrayAdapter adapter = new TrackTypeArrayAdapter(MainScreen.this, mStringArray);
+                    final TrackTypeArrayAdapter adapter = new TrackTypeArrayAdapter(MainScreen.this, tagList);
                     tagListView.setAdapter(adapter);
-                    tagListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            mTag = tagList.get(position).toString();  //Selected item in listview
-                            tagButton.setText(mTag);
-                            sharedPref.edit().putString(Const.PREF_KEY_TAG, mTag).apply();
-                            dialog.dismiss();
-                        }
-                    });
 
-                    dialog.show();
+                    mTrackTypeDialog.show();
                 }
             });
             tagButton.setText(mTag);
@@ -646,6 +635,21 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
                         return true;
                     }
                 });
+    }
+
+    /**
+     * Update track type based on given string
+     *
+     * @param trackType
+     */
+    public void updateTrackType(String trackType) {
+        final Button tagButton = (Button) findViewById(R.id.tag_button);
+        mTag = trackType;
+        tagButton.setText(mTag);
+        sharedPref.edit().putString(Const.PREF_KEY_TAG, mTag).apply();
+        if (mTrackTypeDialog != null && mTrackTypeDialog.isShowing())
+            mTrackTypeDialog.dismiss();
+        Toast.makeText(MainScreen.this, getString(R.string.track_type_updated), Toast.LENGTH_SHORT).show();
     }
 
     /**
