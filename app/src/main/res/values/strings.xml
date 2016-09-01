@@ -93,7 +93,7 @@
     <string name="default_activity">trip</string>
     <string name="pref_send_activity">Type of activity</string>
     <string name="pref_send_activity_summ">Send user defined type of activity to the server</string>
-    <string name="select_activity_dialog_title">Typ of activity</string>
+    <string name="select_activity_dialog_title">Type of activity</string>
     <string name="activity_updated">Activity updated</string>
     <string name="activity_undefined">Insert or select activity</string>
     <string name="selectActivityDialogButton">Add</string>

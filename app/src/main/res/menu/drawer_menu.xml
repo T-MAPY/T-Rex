@@ -15,7 +15,7 @@
             android:id="@+id/help_item"
             android:checkable="false"
             android:title="@string/menu_help"
-            android:icon="@drawable/ic_info_outline_black_24dp"/>
+            android:icon="@drawable/ic_help_outline_black_24dp"/>
         <item
             android:id="@+id/about_item"
             android:checkable="false"

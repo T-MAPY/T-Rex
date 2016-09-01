@@ -126,7 +126,7 @@ public class MainScreen extends AppCompatActivity implements SharedPreferences.O
 
         if (!ServiceHelper.checkPlayServices(MainScreen.this)) return;
 
-        //google play services available, hooray
+        //google play services available, let's continue
         DatabaseManager.init(this);
         mTrackDataSource = new TrackDataSource();
         mTracksListView = (ListView) findViewById(R.id.list_view);
