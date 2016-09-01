@@ -20,7 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <android.support.design.widget.CoordinatorLayout
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -36,7 +37,7 @@
                     <LinearLayout
                         android:id="@+id/new_track"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:background="@color/primary"
                         android:orientation="vertical"
                         android:padding="20dp">
@@ -263,7 +264,7 @@
                 app:layout_anchor="@id/new_track"
                 app:layout_anchorGravity="bottom|right|end" />
 
-        </android.support.design.widget.CoordinatorLayout>
+        </LinearLayout>
     </LinearLayout>
 
     <!-- The navigation drawer that comes from the left -->
